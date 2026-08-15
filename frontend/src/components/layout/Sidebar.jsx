@@ -19,6 +19,7 @@ const navigation = [
     icon: GraduationCap,
     children: [
       { label: "Courses", to: "/academic/courses" },
+      { label: "Routine", to: "/academic/routine" },
       { label: "Assignments", to: "/academic/assignments" },
       { label: "Grades & GPA", to: "/academic/grades" },
       { label: "Exams", to: "/academic/exams" },
