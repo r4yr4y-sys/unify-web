@@ -370,11 +370,12 @@ button {
 .grades-card__empty { margin: 19px 0 0; color: #7f899e; font-size: .8rem; line-height: 1.5; }
 .grades-action, .grades-primary, .grades-secondary { display: inline-flex; width: fit-content; align-items: center; justify-content: center; gap: 5px; border: 0; border-radius: 9px; cursor: pointer; font: inherit; font-size: .74rem; font-weight: 700; }
 .grades-action { margin-top: auto; padding: 9px 11px; color: #5b6fd3; background: #edf0fc; }
-.grades-primary { width: 100%; min-height: 42px; padding: 10px 14px; color: #fff; background: #6478df; }
+.grades-primary { width: 100%; min-height: 42px; padding: 10px 14px; margin-top: 22px; color: #fff; background: #6478df; }
 .grades-secondary { min-height: 40px; padding: 9px 12px; color: #5d70d3; background: #edf0fc; }
 .grades-breakdown { display: grid; gap: 6px; padding: 12px 0 0; margin: 9px 0 0; border-top: 1px solid #e5e8f0; list-style: none; color: #5d6880; font-size: .71rem; }
 .grades-breakdown li { display: flex; justify-content: space-between; gap: 8px; }
 .grades-breakdown span { color: #8791a5; }
+.grades-bottom-right { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
 .grades-history { padding: 25px; border-radius: 21px; background: #f9faff; box-shadow: 7px 8px 19px rgba(164,175,201,.14), -5px -5px 13px rgba(255,255,255,.9); }
 .grades-history .eyebrow { margin-bottom: 5px; }
 .grades-history__scroll { margin-top: 22px; overflow-x: auto; }
@@ -1788,6 +1789,7 @@ button {
 @media (max-width: 900px) {
   .grades-grid { grid-template-columns: 1fr 1fr; }
   .grades-card--current { grid-column: span 2; }
+  .grades-bottom-right { grid-template-columns: 1fr 1fr; }
   .grades-form__setup { grid-template-columns: 1fr 1fr; }
   .grades-form__setup .grades-secondary { grid-column: span 2; width: 100%; }
   .login-page { grid-template-columns: 46fr 54fr; }
@@ -1839,6 +1841,7 @@ button {
 }
 @media (max-width: 680px) {
   .grades-grid { grid-template-columns: 1fr; }
+  .grades-bottom-right { grid-template-columns: 1fr; }
   .grades-card--current { grid-column: auto; }
   .grades-card { min-height: 215px; padding: 21px; }
   .grades-card--current { min-height: 245px; }
@@ -2066,3 +2069,7 @@ button {
     padding: 18px;
   }
 }
+
+
+
+
