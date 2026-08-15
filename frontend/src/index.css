@@ -347,6 +347,67 @@ button {
   font-size: 0.75rem;
   font-weight: 700;
 }
+.grades-page { max-width: 1180px; }
+.grades-tabs { display: inline-flex; gap: 4px; padding: 4px; margin: -8px 0 22px; border-radius: 11px; background: #edf0f6; }
+.grades-tabs button { padding: 8px 14px; border: 0; border-radius: 8px; color: #7a859c; background: transparent; cursor: pointer; font-size: .76rem; font-weight: 700; }
+.grades-tabs button.is-active { color: #5366ce; background: #fff; box-shadow: 1px 2px 5px rgba(137, 150, 186, .16); }
+.grades-grid { display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(280px, .78fr); gap: 17px; }
+.grades-card { display: flex; min-height: 238px; flex-direction: column; padding: 24px; border-radius: 21px; background: #f9faff; box-shadow: 7px 8px 19px rgba(164, 175, 201, .14), -5px -5px 13px rgba(255,255,255,.9); }
+.grades-card--current { min-height: 282px; color: #fff; background: linear-gradient(125deg, #566bd1, #805ed3); box-shadow: 8px 10px 22px rgba(89,96,185,.2); }
+.grades-card--current .eyebrow { color: #dce2ff; }
+.grades-card--current h2 { color: #fff; }
+.grades-card__icon { display: grid; width: 43px; height: 43px; place-items: center; margin-bottom: 21px; border-radius: 13px; color: #6176dd; background: #edf0fc; }
+.grades-card--current .grades-card__icon { color: #fff; background: rgba(255,255,255,.14); }
+.grades-card .eyebrow { margin-bottom: 5px; }
+.grades-card h2, .grades-history h2, .grades-modal h2 { margin: 0; color: #303c5a; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.12rem; letter-spacing: -.045em; }
+.grades-card--current h2 { font-size: 1.22rem; }
+.grades-card > p:not(.eyebrow):not(.grades-card__change):not(.grades-card__empty) { margin: 9px 0 18px; color: #78839a; font-size: .8rem; line-height: 1.52; }
+.grades-card__number { margin-top: 18px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(3rem, 6vw, 4.2rem); letter-spacing: -.08em; line-height: .95; }
+.grades-card__compact-number { display: block; margin-top: 16px; color: #5367d0; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.25rem; letter-spacing: -.07em; }
+.grades-card__change { margin: 10px 0 18px; color: #e2e6ff; font-size: .78rem; font-weight: 700; }
+.grades-card__change.is-negative { color: #ffe0e5; }
+.grades-card footer { display: flex; gap: 16px; margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,.2); color: #e4e8ff; font-size: .7rem; }
+.grades-card__empty { margin: 19px 0 0; color: #7f899e; font-size: .8rem; line-height: 1.5; }
+.grades-action, .grades-primary, .grades-secondary { display: inline-flex; width: fit-content; align-items: center; justify-content: center; gap: 5px; border: 0; border-radius: 9px; cursor: pointer; font: inherit; font-size: .74rem; font-weight: 700; }
+.grades-action { margin-top: auto; padding: 9px 11px; color: #5b6fd3; background: #edf0fc; }
+.grades-primary { width: 100%; min-height: 42px; padding: 10px 14px; color: #fff; background: #6478df; }
+.grades-secondary { min-height: 40px; padding: 9px 12px; color: #5d70d3; background: #edf0fc; }
+.grades-breakdown { display: grid; gap: 6px; padding: 12px 0 0; margin: 9px 0 0; border-top: 1px solid #e5e8f0; list-style: none; color: #5d6880; font-size: .71rem; }
+.grades-breakdown li { display: flex; justify-content: space-between; gap: 8px; }
+.grades-breakdown span { color: #8791a5; }
+.grades-history { padding: 25px; border-radius: 21px; background: #f9faff; box-shadow: 7px 8px 19px rgba(164,175,201,.14), -5px -5px 13px rgba(255,255,255,.9); }
+.grades-history .eyebrow { margin-bottom: 5px; }
+.grades-history__scroll { margin-top: 22px; overflow-x: auto; }
+.grades-history table { width: 100%; min-width: 620px; border-collapse: collapse; text-align: left; }
+.grades-history th { padding: 0 14px 10px; color: #8b95a9; font-size: .67rem; letter-spacing: .06em; text-transform: uppercase; }
+.grades-history td { padding: 13px 14px; border-top: 1px solid #e8ebf2; color: #59657e; font-size: .78rem; }
+.grades-history td:first-child { color: #36425e; font-weight: 700; }
+.grades-grade { padding: 4px 7px; border-radius: 6px; color: #5c70d3; background: #edf0fc; font-size: .69rem; font-weight: 700; }
+.grades-history__empty { margin: 26px 0 0; padding: 30px; border: 1px dashed #d9dfec; border-radius: 14px; color: #8290a7; text-align: center; font-size: .8rem; }
+.grades-modal-backdrop { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 22px; background: rgba(29, 39, 66, .28); }
+.grades-modal { position: relative; width: min(100%, 760px); max-height: min(790px, calc(100vh - 44px)); padding: 28px; overflow: auto; border-radius: 22px; background: #f9faff; box-shadow: 16px 19px 42px rgba(45,55,85,.22); }
+.grades-modal--small { width: min(100%, 420px); }
+.grades-modal .eyebrow { margin-bottom: 5px; }
+.grades-modal__close { position: absolute; top: 18px; right: 18px; display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 9px; color: #68748c; background: #edf0f6; cursor: pointer; }
+.grades-form__setup { display: grid; grid-template-columns: 1fr 1fr auto; gap: 11px; align-items: end; margin: 23px 0 19px; }
+.grades-form__setup label, .grades-stacked-label { display: grid; gap: 6px; color: #647087; font-size: .7rem; font-weight: 700; }
+.grades-form__setup input, .grades-course-row input, .grades-course-row select, .grades-stacked-label input { min-width: 0; height: 40px; padding: 0 10px; border: 1px solid #dce2ee; border-radius: 9px; outline: 0; color: #3e4b67; background: #fff; font: inherit; font-size: .78rem; }
+.grades-form__setup input:focus, .grades-course-row input:focus, .grades-course-row select:focus, .grades-stacked-label input:focus { border-color: #8797e3; box-shadow: 0 0 0 3px rgba(111,128,222,.12); }
+.grades-course-list { display: grid; gap: 8px; margin-bottom: 15px; }
+.grades-course-list__head, .grades-course-row { display: grid; grid-template-columns: minmax(0, 1.6fr) .65fr .7fr; gap: 9px; }
+.grades-course-list__head { padding: 0 3px; color: #8b95a8; font-size: .67rem; font-weight: 700; }
+.grades-form__error { margin: 0 0 13px; color: #bd6270; font-size: .75rem; }
+.grades-result { display: grid; justify-items: center; padding: 31px 12px 8px; text-align: center; }
+.grades-result p { margin: 0; color: #69758d; font-size: .8rem; font-weight: 700; }
+.grades-result strong { margin: 8px 0; color: #5569d2; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 3.3rem; letter-spacing: -.08em; line-height: 1; }
+.grades-result span { margin-bottom: 22px; color: #8791a4; font-size: .75rem; }
+.grades-result .grades-secondary { margin-top: 9px; }
+.grades-stacked-label { margin-top: 17px; font-size: .73rem; }
+.grades-modal--small .grades-primary { margin-top: 18px; }
+.grades-target-current { margin: 17px 0 0; color: #768198; font-size: .78rem; }
+.grades-target-current strong { color: #5669d1; }
+.grades-target-result { margin-top: 16px; padding: 13px; border-radius: 10px; color: #5d6880; background: #edf0fc; font-size: .78rem; line-height: 1.45; }
+.grades-target-result strong { color: #5164cd; }
 .page {
   max-width: 1500px;
   padding: 30px 10px 40px;
@@ -1725,6 +1786,10 @@ button {
 }
 
 @media (max-width: 900px) {
+  .grades-grid { grid-template-columns: 1fr 1fr; }
+  .grades-card--current { grid-column: span 2; }
+  .grades-form__setup { grid-template-columns: 1fr 1fr; }
+  .grades-form__setup .grades-secondary { grid-column: span 2; width: 100%; }
   .login-page { grid-template-columns: 46fr 54fr; }
   .login-page__form-panel { padding: 34px 24px; }
   .login-form__logo { margin-bottom: 44px; }
@@ -1773,6 +1838,16 @@ button {
   .study-overview__grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 680px) {
+  .grades-grid { grid-template-columns: 1fr; }
+  .grades-card--current { grid-column: auto; }
+  .grades-card { min-height: 215px; padding: 21px; }
+  .grades-card--current { min-height: 245px; }
+  .grades-card footer { flex-direction: column; gap: 5px; }
+  .grades-modal { padding: 24px 17px; }
+  .grades-form__setup, .grades-form__setup .grades-secondary { grid-template-columns: 1fr; grid-column: auto; }
+  .grades-course-list__head { display: none; }
+  .grades-course-row { grid-template-columns: 1fr 70px 76px; gap: 7px; }
+  .grades-course-row input, .grades-course-row select { padding: 0 7px; }
   .login-page { display: block; }
   .login-page__form-panel { min-height: 100vh; padding: 34px 24px; }
   .login-form__logo { margin-bottom: 48px; }
