@@ -18,6 +18,7 @@ import {
 } from "./pages";
 import LoginPage from "./pages/LoginPage";
 import GradesPage from "./pages/GradesPage";
+import StudyTimerPage from "./pages/StudyTimerPage";
 import {
   academicRoutes,
   campusLifeRoutes,
@@ -60,6 +61,7 @@ function App() {
         <Route path="/academic/routine" element={<RoutinePage />} />
         <Route path="/academic/grades" element={<GradesPage />} />
         <Route path="/study" element={<StudyPage />} />
+        <Route path="/study/timer" element={<StudyTimerPage />} />
         <Route path="/study/notes" element={<NotesPage />} />
         <Route path="/study/resources" element={<ResourcesPage />} />
         <Route path="/study/plans" element={<StudyPlansPage />} />
@@ -80,6 +82,7 @@ function App() {
                 "/academic/routine",
                 "/academic/grades",
                 "/study/notes",
+                "/study/timer",
                 "/study/resources",
                 "/study/plans",
                 "/campus-life/announcements",

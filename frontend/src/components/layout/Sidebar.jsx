@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BookOpen,
   CalendarDays,
@@ -8,7 +8,7 @@ import {
   Home,
   Settings,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import unifyLogo from "../../assets/unify official logo.png";
 
 const navigation = [
@@ -30,6 +30,7 @@ const navigation = [
     to: "/study",
     icon: BookOpen,
     children: [
+      { label: "Study Timer", to: "/study/timer" },
       { label: "Notes", to: "/study/notes" },
       { label: "Resources", to: "/study/resources" },
       { label: "Study plans", to: "/study/plans" },
@@ -52,8 +53,18 @@ const lowerNavigation = [
   { label: "Settings", to: "/settings", icon: Settings },
 ];
 function NavigationGroup({ item }) {
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const Icon = item.icon;
+  const isActiveGroup =
+    item.children?.some((child) =>
+      location.pathname === child.to || location.pathname.startsWith(`${child.to}/`),
+    ) || location.pathname === item.to;
+
+  useEffect(() => {
+    if (isActiveGroup) setOpen(true);
+  }, [isActiveGroup]);
+
   if (!item.children)
     return (
       <NavLink className="nav-link" to={item.to}>
