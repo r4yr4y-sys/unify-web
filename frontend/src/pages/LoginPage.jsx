@@ -9,7 +9,7 @@ export default function LoginPage() {
   const headingRef = useRef(null);
   const navigate = useNavigate();
   const isSignUp = mode === "sign-up";
-  const heading = isSignUp ? "Welcome Abord" : "Welcome Back";
+  const heading = isSignUp ? "Welcome Aboard" : "Welcome Back";
   const subheading = isSignUp
     ? "Ready to make your life 10x simpler using Unify?"
     : "we missed you";

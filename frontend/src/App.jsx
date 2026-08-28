@@ -8,14 +8,14 @@ import {
   EventsPage,
   LostFoundPage,
   MarketplacePage,
-  NotesPage,
   ProfilePage,
-  ResourcesPage,
-  RoutinePage,
   SettingsPage,
-  StudyPage,
-  StudyPlansPage,
 } from "./pages";
+import NotesPage from "./pages/NotesPage";
+import ResourcesPage from "./pages/ResourcesPage";
+import RoutinePage from "./pages/RoutinePage";
+import StudyPage from "./pages/StudyPage";
+import StudyPlansPage from "./pages/StudyPlansPage";
 import LoginPage from "./pages/LoginPage";
 import GradesPage from "./pages/GradesPage";
 import StudyTimerPage from "./pages/StudyTimerPage";
