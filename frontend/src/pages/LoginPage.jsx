@@ -14,6 +14,8 @@ export default function LoginPage() {
     ? "Ready to make your life 10x simpler using Unify?"
     : "we missed you";
   const [hasCredentialMismatch, setHasCredentialMismatch] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const element = headingRef.current;
@@ -38,7 +40,7 @@ export default function LoginPage() {
     };
   }, [mode]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
@@ -46,14 +48,32 @@ export default function LoginPage() {
     const password = formData.get("password");
     const confirmPassword = formData.get("confirmPassword");
 
-    const mismatch = isSignUp
-      ? email !== password || password !== confirmPassword
-      : email !== password;
+    const mismatch = isSignUp && password !== confirmPassword;
 
     setHasCredentialMismatch(mismatch);
+    setErrorMessage(mismatch ? "Passwords do not match." : "");
 
-    if (!mismatch) {
+    if (mismatch) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/auth/${isSignUp ? "signup" : "signin"}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to continue.");
+      localStorage.setItem("authToken", result.token);
+      localStorage.setItem("user", JSON.stringify(result.user));
       navigate("/dashboard");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to continue. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -74,7 +94,7 @@ export default function LoginPage() {
               type="button"
               role="tab"
               aria-selected={!isSignUp}
-              onClick={() => setMode("sign-in")}
+              onClick={() => { setMode("sign-in"); setErrorMessage(""); setHasCredentialMismatch(false); }}
             >
               Sign In
             </button>
@@ -83,7 +103,7 @@ export default function LoginPage() {
               type="button"
               role="tab"
               aria-selected={isSignUp}
-              onClick={() => setMode("sign-up")}
+              onClick={() => { setMode("sign-up"); setErrorMessage(""); setHasCredentialMismatch(false); }}
             >
               Sign Up
             </button>
@@ -97,6 +117,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 inputMode="email"
                 placeholder="you@example.com"
+                required
               />
             </label>
             <label>
@@ -106,6 +127,8 @@ export default function LoginPage() {
                 name="password"
                 autoComplete={isSignUp ? "new-password" : "current-password"}
                 placeholder="Enter your password"
+                required
+                minLength={isSignUp ? 8 : undefined}
               />
             </label>
             {isSignUp && (
@@ -115,16 +138,19 @@ export default function LoginPage() {
                   type="password"
                   name="confirmPassword"
                   autoComplete="new-password"
-                  placeholder="Confirm your password"
+                placeholder="Confirm your password"
+                required
                 />
               </label>
             )}
             <button
               className={`login-form__continue ${hasCredentialMismatch ? "is-error" : ""}`}
               type="submit"
+              disabled={isSubmitting}
             >
-              Continue
+              {isSubmitting ? "Please wait..." : "Continue"}
             </button>
+            {errorMessage && <p className="login-form__error" role="alert">{errorMessage}</p>}
           </form>
           <div className="login-form__divider">
             <span>Or Continue With</span>
