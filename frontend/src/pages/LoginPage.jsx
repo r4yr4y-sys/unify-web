@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { animate, stagger, splitText } from "animejs";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AntigravityBackground from "../components/AntigravityBackground";
 import unifyLogo from "../assets/unify official logo.png";
 
@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [mode, setMode] = useState("sign-in");
   const headingRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const isSignUp = mode === "sign-up";
   const heading = isSignUp ? "Welcome Aboard" : "Welcome Back";
   const subheading = isSignUp
@@ -88,6 +89,11 @@ export default function LoginPage() {
             </h1>
             <p>{subheading}</p>
           </div>
+          {location.state?.signedOut && (
+            <p className="login-form__notice" role="status">
+              You have been logged out successfully.
+            </p>
+          )}
           <div className="login-tabs" role="tablist" aria-label="Account type">
             <button
               className={`login-tabs__button ${!isSignUp ? "is-active" : ""}`}

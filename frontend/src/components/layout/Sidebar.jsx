@@ -6,6 +6,7 @@ import {
   CircleUserRound,
   GraduationCap,
   Home,
+  LogOut,
   Settings,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
@@ -119,6 +120,10 @@ export default function Sidebar() {
         {lowerNavigation.map((item) => (
           <NavigationGroup key={item.to} item={item} />
         ))}
+        <NavLink className="nav-link nav-link--logout" to="/logout">
+          <LogOut size={19} />
+          <span>Log out</span>
+        </NavLink>
       </nav>
     </aside>
   );
