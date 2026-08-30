@@ -1,5 +1,5 @@
 export const academicRoutes = [{ path: '/academic/courses', title: 'Courses' },{ path: '/academic/routine', title: 'Routine' }, { path: '/academic/assignments', title: 'Assignments' }, { path: '/academic/grades', title: 'Grades & GPA' }, { path: '/academic/exams', title: 'Exams' }]
-export const studyRoutes = [{ path: '/study/timer', title: 'Study Timer' }, { path: '/study/notes', title: 'Notes' }, { path: '/study/resources', title: 'Study Resources' }, { path: '/study/plans', title: 'Study Plans' }]
+export const studyRoutes = [{ path: '/study/timer', title: 'Study Timer' }, { path: '/study/notes', title: 'Notes' }, { path: '/study/resources', title: 'Study Resources' }, { path: '/study/plans', title: 'Study Plans' }, { path: '/study/flashcards', title: 'Flashcards' }]
 export const campusLifeRoutes = [{ path: '/campus-life/announcements', title: 'Announcements' }, { path: '/campus-life/events', title: 'Events' }, { path: '/campus-life/lost-found', title: 'Lost & Found' }, { path: '/campus-life/marketplace', title: 'Marketplace' }]
 export const profileRoutes = [{ path: '/profile/details', title: 'Profile Details' }]
 export const settingsRoutes = [{ path: '/settings/preferences', title: 'Preferences' }]

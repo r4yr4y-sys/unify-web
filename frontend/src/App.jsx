@@ -17,6 +17,7 @@ import RoutinePage from "./pages/RoutinePage";
 import EditRoutinePage from "./pages/EditRoutinePage";
 import StudyPage from "./pages/StudyPage";
 import StudyPlansPage from "./pages/StudyPlansPage";
+import FlashcardsPage from "./pages/FlashcardsPage";
 import LoginPage from "./pages/LoginPage";
 import LogoutPage from "./pages/LogoutPage";
 import GradesPage from "./pages/GradesPage";
@@ -74,6 +75,7 @@ function App() {
           <Route path="/study/notes" element={<NotesPage />} />
           <Route path="/study/resources" element={<ResourcesPage />} />
           <Route path="/study/plans" element={<StudyPlansPage />} />
+          <Route path="/study/flashcards" element={<FlashcardsPage />} />
           <Route path="/campus-life" element={<CampusLifePage />} />
           <Route
             path="/campus-life/announcements"
@@ -94,6 +96,7 @@ function App() {
                   "/study/timer",
                   "/study/resources",
                   "/study/plans",
+                  "/study/flashcards",
                   "/campus-life/announcements",
                   "/campus-life/events",
                   "/campus-life/lost-found",

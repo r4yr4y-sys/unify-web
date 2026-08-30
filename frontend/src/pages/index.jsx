@@ -78,10 +78,26 @@ const emergencyContacts = [
   ["Khalif, Farhana Saleh", "Mother", "+880 1712 345 678"],
 ];
 const socialLinks = [
-  ["GitHub", "https://github.com/jayedraihan", "https://img.icons8.com/?size=48&id=12599&format=png"],
-  ["Instagram", "https://www.instagram.com/", "https://img.icons8.com/?size=48&id=32292&format=png"],
-  ["LinkedIn", "https://www.linkedin.com/", "https://img.icons8.com/?size=48&id=13930&format=png"],
-  ["Facebook", "https://www.facebook.com/", "https://img.icons8.com/?size=48&id=118497&format=png"],
+  [
+    "GitHub",
+    "https://github.com/jayedraihan",
+    "https://img.icons8.com/?size=48&id=12599&format=png",
+  ],
+  [
+    "Instagram",
+    "https://www.instagram.com/",
+    "https://img.icons8.com/?size=48&id=32292&format=png",
+  ],
+  [
+    "LinkedIn",
+    "https://www.linkedin.com/",
+    "https://img.icons8.com/?size=48&id=13930&format=png",
+  ],
+  [
+    "Facebook",
+    "https://www.facebook.com/",
+    "https://img.icons8.com/?size=48&id=118497&format=png",
+  ],
 ];
 function ProfileInfoList({ items, withIcons = false }) {
   return (
@@ -137,55 +153,150 @@ export function ProfilePage() {
             <img src={profilePicture} alt="Jayed Raihan" />
             <div>
               <p className="eyebrow">Student profile</p>
-              <h2>Jayed Raihan</h2>
+              <h2>Jayed Raihan123</h2>
               <p>Computer Science &amp; Engineering</p>
               <span>4th Semester</span>
             </div>
           </div>
-          <p className="profile-hero__bio">“Building things, breaking things, and learning along the way.”</p>
-          <div className="profile-hero__tag"><span /> Open to new ideas</div>
+          <p className="profile-hero__bio">
+            “Building things, breaking things, and learning along the way.”
+          </p>
+          <div className="profile-hero__tag">
+            <span /> Open to new ideas
+          </div>
         </BentoCard>
 
         <BentoCard className="profile-panel profile-panel--basic">
-          <div className="profile-card-heading"><span className="profile-card-heading__icon"><School size={18} /></span><div><p className="eyebrow">The essentials</p><h2>Basic information</h2></div></div>
+          <div className="profile-card-heading">
+            <span className="profile-card-heading__icon">
+              <School size={18} />
+            </span>
+            <div>
+              <p className="eyebrow">The essentials</p>
+              <h2>Basic information</h2>
+            </div>
+          </div>
           <ProfileInfoList items={profileDetails} />
         </BentoCard>
 
         <BentoCard className="profile-panel profile-panel--personal">
-          <div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--mint"><UserRound size={18} /></span><div><p className="eyebrow">A little more</p><h2>Personal information</h2></div></div>
+          <div className="profile-card-heading">
+            <span className="profile-card-heading__icon profile-card-heading__icon--mint">
+              <UserRound size={18} />
+            </span>
+            <div>
+              <p className="eyebrow">A little more</p>
+              <h2>Personal information</h2>
+            </div>
+          </div>
           <ProfileInfoList items={personalDetails} withIcons />
         </BentoCard>
 
         <BentoCard className="profile-panel profile-panel--journey">
-          <div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--gold"><GraduationCap size={18} /></span><div><p className="eyebrow">The road so far</p><h2>Academic journey</h2></div></div>
+          <div className="profile-card-heading">
+            <span className="profile-card-heading__icon profile-card-heading__icon--gold">
+              <GraduationCap size={18} />
+            </span>
+            <div>
+              <p className="eyebrow">The road so far</p>
+              <h2>Academic journey</h2>
+            </div>
+          </div>
           <div className="profile-timeline">
-            <div><span className="profile-timeline__dot" /><div><strong>School</strong><p>Dhaka Residential Model College</p><small>2010 – 2019</small></div></div>
-            <div><span className="profile-timeline__dot" /><div><strong>College</strong><p>Notre Dame College, Dhaka</p><small>2019 – 2021</small></div></div>
-            <div><span className="profile-timeline__dot profile-timeline__dot--current" /><div><strong>University</strong><p>AUST University</p><small>2022 – Present</small></div></div>
+            <div>
+              <span className="profile-timeline__dot" />
+              <div>
+                <strong>School</strong>
+                <p>Dhaka Residential Model College</p>
+                <small>2010 – 2019</small>
+              </div>
+            </div>
+            <div>
+              <span className="profile-timeline__dot" />
+              <div>
+                <strong>College</strong>
+                <p>Notre Dame College, Dhaka</p>
+                <small>2019 – 2021</small>
+              </div>
+            </div>
+            <div>
+              <span className="profile-timeline__dot profile-timeline__dot--current" />
+              <div>
+                <strong>University</strong>
+                <p>AUST University</p>
+                <small>2022 – Present</small>
+              </div>
+            </div>
           </div>
         </BentoCard>
 
         <BentoCard className="profile-panel profile-panel--emergency">
-          <div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--coral"><Phone size={18} /></span><div><p className="eyebrow">There when it matters</p><h2>Emergency contact</h2></div></div>
+          <div className="profile-card-heading">
+            <span className="profile-card-heading__icon profile-card-heading__icon--coral">
+              <Phone size={18} />
+            </span>
+            <div>
+              <p className="eyebrow">There when it matters</p>
+              <h2>Emergency contact</h2>
+            </div>
+          </div>
           <div className="profile-emergency-contacts">
             {emergencyContacts.map(([name, relationship, phone]) => (
               <dl className="profile-emergency-grid" key={name}>
-                <div><dt>Name</dt><dd>{name}</dd></div>
-                <div><dt>Relationship</dt><dd>{relationship}</dd></div>
-                <div><dt>Phone Number</dt><dd>{phone}</dd></div>
+                <div>
+                  <dt>Name</dt>
+                  <dd>{name}</dd>
+                </div>
+                <div>
+                  <dt>Relationship</dt>
+                  <dd>{relationship}</dd>
+                </div>
+                <div>
+                  <dt>Phone Number</dt>
+                  <dd>{phone}</dd>
+                </div>
               </dl>
             ))}
           </div>
         </BentoCard>
 
-        <a className="profile-listen" href="https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M" target="_blank" rel="noreferrer">
-          <span className="profile-listen__icon"><Music2 size={23} /></span>
-          <div><p className="eyebrow">A little soundtrack</p><h2>Listen With Me</h2><p>What I’m listening to lately <span aria-hidden="true">→</span></p></div>
+        <a
+          className="profile-listen"
+          href="https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <span className="profile-listen__icon">
+            <Music2 size={23} />
+          </span>
+          <div>
+            <p className="eyebrow">A little soundtrack</p>
+            <h2>Listen With Me</h2>
+            <p>
+              What I’m listening to lately <span aria-hidden="true">→</span>
+            </p>
+          </div>
         </a>
 
         <BentoCard className="profile-connect">
-          <div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--blue"><span aria-hidden="true">↗</span></span><div><p className="eyebrow">Find me around</p><h2>Connect</h2></div></div>
-          <div className="profile-social-links">{socialLinks.map(([label, href, iconUrl]) => <a href={href} key={label} target="_blank" rel="noreferrer"><img src={iconUrl} alt="" /><span>{label}</span><span aria-hidden="true">↗</span></a>)}</div>
+          <div className="profile-card-heading">
+            <span className="profile-card-heading__icon profile-card-heading__icon--blue">
+              <span aria-hidden="true">↗</span>
+            </span>
+            <div>
+              <p className="eyebrow">Find me around</p>
+              <h2>Connect</h2>
+            </div>
+          </div>
+          <div className="profile-social-links">
+            {socialLinks.map(([label, href, iconUrl]) => (
+              <a href={href} key={label} target="_blank" rel="noreferrer">
+                <img src={iconUrl} alt="" />
+                <span>{label}</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </div>
         </BentoCard>
       </BentoGrid>
     </section>

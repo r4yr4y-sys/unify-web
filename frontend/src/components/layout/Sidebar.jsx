@@ -6,6 +6,7 @@ import {
   CircleUserRound,
   GraduationCap,
   Home,
+  Layers,
   LogOut,
   Settings,
 } from "lucide-react";
@@ -35,6 +36,7 @@ const navigation = [
       { label: "Notes", to: "/study/notes" },
       { label: "Resources", to: "/study/resources" },
       { label: "Study plans", to: "/study/plans" },
+      { label: "Flashcards", to: "/study/flashcards", icon: Layers },
     ],
   },
   {

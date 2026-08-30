@@ -3,6 +3,7 @@ import {
   Clock3,
   FileText,
   FolderOpen,
+  Layers,
   Target,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -41,6 +42,14 @@ export default function StudyPage() {
       to: "/study/timer",
       icon: Clock3,
       hue: "green",
+    },
+    {
+      title: "Flashcards",
+      copy: "Memorize key concepts with spaced repetition.",
+      stat: "Review cards",
+      to: "/study/flashcards",
+      icon: Layers,
+      hue: "pink",
     },
   ];
 
