@@ -3,9 +3,9 @@ import AppLayout from "./components/layout/AppLayout";
 import {
   AcademicPage,
   DashboardPage,
-  ProfilePage,
   SettingsPage,
 } from "./pages";
+import ProfilePage from "./pages/Profile";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
 import CampusLifePage from "./pages/CampusLifePage";
 import EventsPage from "./pages/EventsPage";

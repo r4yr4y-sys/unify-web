@@ -422,7 +422,7 @@ button {
   border-radius: inherit;
   object-fit: cover;
 }
-<<<<<<< Updated upstream
+/* Merged upstream styles */
 .grades-page {
   max-width: 1180px;
 }
@@ -818,7 +818,7 @@ button {
 .grades-target-result strong {
   color: #5164cd;
 }
-=======
+/* Merged stashed styles */
 .user-avatar img {
   width: 100%;
   height: 100%;
@@ -886,7 +886,7 @@ button {
 .grades-target-current strong { color: #5669d1; }
 .grades-target-result { margin-top: 16px; padding: 13px; border-radius: 10px; color: #5d6880; background: #edf0fc; font-size: .78rem; line-height: 1.45; }
 .grades-target-result strong { color: #5164cd; }
->>>>>>> Stashed changes
+/* End merged styles */
 .page {
   max-width: 1500px;
   padding: 30px 10px 40px;
@@ -2114,6 +2114,80 @@ button {
 .plan-card footer {
   color: #6073d4;
   font-weight: 700;
+}
+.study-plan-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.study-plan-card:hover,
+.study-plan-card:focus-visible {
+  transform: translateY(-3px);
+  outline: 0;
+  box-shadow: 9px 11px 22px rgba(139, 151, 191, .18), -5px -5px 14px rgba(255, 255, 255, .9);
+}
+.study-plan-card.is-complete { border: 1px solid #d7eee2; }
+.study-plan-card .plan-card__top svg { color: #54a780; }
+.study-plan-card__details { display: grid; gap: 5px; margin-top: 12px; color: #7d879b; font-size: .7rem; }
+.study-plan-card__details span { display: flex; align-items: center; gap: 5px; }
+.study-plan-card__details span:first-child { color: #5d6d91; font-weight: 700; }
+.study-plan-card footer { margin-top: auto; }
+.study-plan-modal-backdrop { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; padding: 22px; background: rgba(29, 39, 66, .28); backdrop-filter: blur(2px); }
+.study-plan-modal { position: relative; width: min(100%, 620px); max-height: calc(100vh - 44px); padding: 28px; overflow: auto; border-radius: 22px; background: #f9faff; box-shadow: 16px 19px 42px rgba(45, 55, 85, .22); }
+.study-plan-modal__close { position: absolute; top: 18px; right: 18px; display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 9px; color: #68748c; background: #edf0f6; cursor: pointer; }
+.study-plan-modal__header { padding-right: 38px; }
+.study-plan-modal__header h2 { margin: 0; color: #1e2944; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.4rem; letter-spacing: -.05em; }
+.study-plan-modal__header > p:not(.eyebrow) { margin: 8px 0 0; color: #737e94; font-size: .85rem; line-height: 1.5; }
+.study-plan-form { display: grid; gap: 22px; }
+.study-plan-form__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.study-plan-form__fields label:last-child { grid-column: 1 / -1; }
+.study-plan-form label { display: grid; gap: 7px; color: #536079; font-size: .76rem; font-weight: 700; }
+.study-plan-form label em { margin-left: 4px; color: #919aab; font-size: .68rem; font-style: normal; font-weight: 500; }
+.study-plan-form input,
+.study-plan-add-inline input { width: 100%; height: 43px; padding: 0 12px; border: 1px solid #dfe4ef; border-radius: 10px; outline: none; color: #34415e; background: #fff; font: inherit; font-size: .83rem; }
+.study-plan-form input:focus,
+.study-plan-add-inline input:focus { border-color: #9dabeb; box-shadow: 0 0 0 3px rgba(114, 132, 224, .12); }
+.study-plan-checkpoints { display: grid; gap: 11px; }
+.study-plan-checkpoints__heading h3,
+.study-plan-detail-checkpoints h3 { margin: 0; color: #34415e; font-family: 'Plus Jakarta Sans', sans-serif; font-size: .94rem; }
+.study-plan-checkpoints__heading p { margin: 4px 0 0; color: #8490a6; font-size: .75rem; }
+.study-plan-checkpoints__list { display: grid; gap: 8px; }
+.study-plan-checkpoint-input { display: grid; grid-template-columns: 26px 1fr 34px; gap: 8px; align-items: center; }
+.study-plan-checkpoint-input > span { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 8px; color: #6377d9; background: #edf0fc; font-size: .69rem; font-weight: 700; }
+.study-plan-checkpoint-input button,
+.study-plan-detail-checkpoint button { display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 8px; color: #8390a7; background: transparent; cursor: pointer; }
+.study-plan-checkpoint-input button:hover,
+.study-plan-detail-checkpoint button:hover { color: #c36778; background: #fff0f3; }
+.study-plan-checkpoint-input button:disabled,
+.study-plan-detail-checkpoint button:disabled { visibility: hidden; }
+.study-plan-add-checkpoint { display: inline-flex; width: fit-content; align-items: center; gap: 6px; border: 0; color: #5c70d4; background: transparent; cursor: pointer; font: inherit; font-size: .76rem; font-weight: 700; }
+.study-plan-form__error { margin: -10px 0 0; color: #c25267; font-size: .75rem; font-weight: 700; }
+.study-plan-modal__footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+.study-plan-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 11px; color: #7b879c; font-size: .74rem; }
+.study-plan-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.study-plan-detail-progress { display: grid; gap: 10px; margin: 23px 0; padding: 15px; border-radius: 14px; background: #f0f3fe; }
+.study-plan-detail-progress > div:first-child { display: flex; justify-content: space-between; gap: 12px; color: #5e70d1; font-size: .78rem; }
+.study-plan-detail-progress span { color: #7c88a0; }
+.study-plan-detail-checkpoints { display: grid; gap: 12px; }
+.study-plan-detail-checkpoints__list { display: grid; gap: 8px; }
+.study-plan-detail-checkpoint { display: grid; grid-template-columns: 21px 1fr 32px; gap: 10px; align-items: center; padding: 10px 8px; border-radius: 11px; color: #43506b; cursor: pointer; font-size: .83rem; }
+.study-plan-detail-checkpoint:hover { background: #f1f4fc; }
+.study-plan-detail-checkpoint input { position: absolute; opacity: 0; pointer-events: none; }
+.study-plan-detail-checkpoint__box { display: grid; width: 19px; height: 19px; place-items: center; border: 1px solid #cbd3e3; border-radius: 6px; color: transparent; }
+.study-plan-detail-checkpoint.is-complete { color: #8590a2; text-decoration: line-through; }
+.study-plan-detail-checkpoint.is-complete .study-plan-detail-checkpoint__box { border-color: #6579dc; color: #fff; background: #6579dc; }
+.study-plan-add-inline { display: flex; gap: 8px; margin-top: 3px; }
+.study-plan-add-inline .button { flex: 0 0 auto; min-height: 43px; }
+@media (max-width: 680px) {
+  .study-plan-modal-backdrop { align-items: end; padding: 12px; }
+  .study-plan-modal { max-height: calc(100vh - 24px); padding: 23px 17px; border-radius: 19px; }
+  .study-plan-form__fields { grid-template-columns: 1fr; }
+  .study-plan-form__fields label:last-child { grid-column: auto; }
+  .study-plan-modal__footer { flex-direction: column-reverse; }
+  .study-plan-modal__footer .button { width: 100%; }
+  .study-plan-add-inline { align-items: stretch; flex-direction: column; }
+  .study-plan-add-inline .button { width: 100%; }
 }
 .bento-grid {
   display: grid;
