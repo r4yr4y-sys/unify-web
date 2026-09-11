@@ -1,256 +1,52 @@
-import {
-  CalendarDays,
-  Droplets,
-  GraduationCap,
-  MapPin,
-  Music2,
-  Phone,
-  School,
-  UserRound,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CalendarDays, Droplets, GraduationCap, MapPin, Music2, Phone, School, UserRound } from "lucide-react";
 import { BentoCard, BentoGrid, PageHeader } from "../components/ui";
 import profilePicture from "../assets/Profile_pic.jpg";
 
-const profileDetails = [
-  ["Student ID", "CSE-22-041"],
-  ["Department", "Computer Science & Engineering"],
-  ["Program", "B.Sc. in Engineering"],
-  ["Semester", "4th Semester"],
-  ["Batch", "2022–2026"],
-  ["University Email", "jayed.raihan@unify.edu"],
-];
-const personalDetails = [
-  ["Phone Number", "+880 1712 345 678", Phone],
-  ["Date of Birth", "14 February 2003", CalendarDays],
-  ["Gender", "Male", UserRound],
-  ["Blood Group", "O+", Droplets],
-  ["Address", "Dhanmondi, Dhaka", MapPin],
-];
-const emergencyContacts = [
-  ["B.M. Adnan Saleh", "Father", "+880 1812 987 654"],
-  ["Khalif, Farhana Saleh", "Mother", "+880 1712 345 678"],
-];
-const socialLinks = [
-  [
-    "GitHub",
-    "https://github.com/jayedraihan",
-    "https://img.icons8.com/?size=48&id=12599&format=png",
-  ],
-  [
-    "Instagram",
-    "https://www.instagram.com/",
-    "https://img.icons8.com/?size=48&id=32292&format=png",
-  ],
-  [
-    "LinkedIn",
-    "https://www.linkedin.com/",
-    "https://img.icons8.com/?size=48&id=13930&format=png",
-  ],
-  [
-    "Facebook",
-    "https://www.facebook.com/",
-    "https://img.icons8.com/?size=48&id=118497&format=png",
-  ],
-];
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const blankProfile = () => ({ name:"", department:"", semester:"", status:"", bio:"", studentId:"", program:"", batch:"", universityEmail:"", phone:"", dateOfBirth:"", gender:"", bloodGroup:"", address:"", academicJourney:{ school:{institution:"",years:""}, college:{institution:"",years:""}, university:{institution:"",years:""} }, emergencyContacts:[], socialLinks:{spotify:"",github:"",instagram:"",linkedin:"",facebook:""} });
+const asForm = (profile = {}) => ({ ...blankProfile(), ...profile, dateOfBirth: profile.dateOfBirth ? String(profile.dateOfBirth).slice(0, 10) : "", academicJourney:{...blankProfile().academicJourney,...profile.academicJourney}, socialLinks:{...blankProfile().socialLinks,...profile.socialLinks}, emergencyContacts:profile.emergencyContacts || [] });
+const value = (item) => item || "Not provided";
 
-function ProfileInfoList({ items, withIcons = false }) {
-  return (
-    <dl className="profile-info-list">
-      {items.map(([label, value, Icon]) => (
-        <div className="profile-info-list__item" key={label}>
-          {withIcons && Icon && <Icon size={16} aria-hidden="true" />}
-          <dt>{label}</dt>
-          <dd>{value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
+function InfoList({ items, icons = false }) { return <dl className="profile-info-list">{items.map(([label, item, Icon]) => <div className="profile-info-list__item" key={label}>{icons && Icon && <Icon size={16}/>}<dt>{label}</dt><dd>{value(item)}</dd></div>)}</dl>; }
+
+function Editor({ initial, setup, saving, error, onSave, onCancel }) {
+  const [form, setForm] = useState(() => asForm(initial));
+  const field = (name) => ({ value:form[name], onChange:(e) => setForm((f) => ({...f,[name]:e.target.value})) });
+  const journey = (stage, name) => ({ value:form.academicJourney[stage][name], onChange:(e) => setForm((f) => ({...f,academicJourney:{...f.academicJourney,[stage]:{...f.academicJourney[stage],[name]:e.target.value}}})) });
+  const social = (name) => ({ value:form.socialLinks[name], onChange:(e) => setForm((f) => ({...f,socialLinks:{...f.socialLinks,[name]:e.target.value}})) });
+  const setContact = (index, name, item) => setForm((f) => ({...f,emergencyContacts:f.emergencyContacts.map((contact,i) => i === index ? {...contact,[name]:item} : contact)}));
+  return <BentoCard className="profile-editor"><div className="profile-editor__heading"><div><p className="eyebrow">{setup ? "First-time setup" : "Keep it current"}</p><h2>{setup ? "Complete your profile" : "Edit profile"}</h2></div>{!setup && <button className="profile-button secondary" type="button" onClick={onCancel}>Cancel</button>}</div><p>Name, department, and semester are required. All other fields are optional.</p><form className="profile-form" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
+    <fieldset><legend>Identity</legend><div className="profile-form__grid"><label>Name *<input required {...field("name")}/></label><label>Department *<input required {...field("department")}/></label><label>Semester *<input required {...field("semester")}/></label><label>Status<input placeholder="e.g. Open to new ideas" {...field("status")}/></label><label className="wide">Bio<textarea maxLength="500" {...field("bio")}/></label></div></fieldset>
+    <fieldset><legend>Academic information</legend><div className="profile-form__grid"><label>Student ID<input {...field("studentId")}/></label><label>Program<input {...field("program")}/></label><label>Batch<input {...field("batch")}/></label><label>University email<input type="email" {...field("universityEmail")}/></label></div></fieldset>
+    <fieldset><legend>Personal information</legend><div className="profile-form__grid"><label>Phone<input {...field("phone")}/></label><label>Date of birth<input type="date" {...field("dateOfBirth")}/></label><label>Gender<input {...field("gender")}/></label><label>Blood group<input {...field("bloodGroup")}/></label><label className="wide">Address<input {...field("address")}/></label></div></fieldset>
+    <fieldset><legend>Academic journey</legend>{["school","college","university"].map((stage) => <div className="profile-form__grid journey" key={stage}><label>{stage[0].toUpperCase()+stage.slice(1)} institution<input {...journey(stage,"institution")}/></label><label>Years<input placeholder="e.g. 2022 – Present" {...journey(stage,"years")}/></label></div>)}</fieldset>
+    <fieldset><legend>Emergency contacts</legend>{form.emergencyContacts.map((contact,index) => <div className="profile-contact" key={index}><input aria-label="Contact name" placeholder="Name" value={contact.name || ""} onChange={(e) => setContact(index,"name",e.target.value)}/><input aria-label="Relationship" placeholder="Relationship" value={contact.relationship || ""} onChange={(e) => setContact(index,"relationship",e.target.value)}/><input aria-label="Phone" placeholder="Phone" value={contact.phone || ""} onChange={(e) => setContact(index,"phone",e.target.value)}/><button type="button" className="profile-text-button" onClick={() => setForm((f) => ({...f,emergencyContacts:f.emergencyContacts.filter((_,i) => i !== index)}))}>Remove</button></div>)}{form.emergencyContacts.length < 5 && <button type="button" className="profile-text-button" onClick={() => setForm((f) => ({...f,emergencyContacts:[...f.emergencyContacts,{name:"",relationship:"",phone:""}]}))}>+ Add contact</button>}</fieldset>
+    <fieldset><legend>Social links</legend><div className="profile-form__grid">{["spotify","github","instagram","linkedin","facebook"].map((link) => <label key={link}>{link[0].toUpperCase()+link.slice(1)} URL<input type="url" placeholder="https://" {...social(link)}/></label>)}</div></fieldset>
+    {error && <p className="profile-error" role="alert">{error}</p>}<button className="profile-button" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>
+  </form></BentoCard>;
 }
 
-const profileInlineStyles = `
-.profile-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px; }
-.profile-page { font-family: "Plus Jakarta Sans", "DM Sans", sans-serif; }
-.profile-grid > * { min-width: 0; }
-.profile-hero { grid-column: span 7; min-height: 265px; overflow: hidden; }
-.profile-hero__identity { display: flex; align-items: center; gap: 22px; }
-.profile-hero__identity img { width: 112px; height: 112px; flex: 0 0 112px; border: 5px solid #fff; border-radius: 50%; object-fit: cover; }
-.profile-panel--basic { grid-column: span 5; }
-.profile-panel--personal { grid-column: span 5; }
-.profile-panel--journey { grid-column: span 7; }
-.profile-panel--emergency { grid-column: 1 / -1; }
-.profile-listen { grid-column: span 3; display: flex; min-height: 148px; color: inherit; text-decoration: none; border: 1px solid rgba(255, 255, 255, 0.75); border-radius: 20px; background: #f9faff; box-shadow: 8px 8px 20px rgba(164, 175, 201, 0.18), -6px -6px 16px rgba(255, 255, 255, 0.92); transition: transform 0.22s ease, box-shadow 0.22s ease; }
-.profile-listen:hover { transform: translateY(-4px); box-shadow: 10px 12px 22px rgba(164, 175, 201, 0.22), -6px -6px 16px rgba(255, 255, 255, 0.95); }
-.profile-panel--personal .profile-info-list { gap: 8px; }
-.profile-panel--personal .profile-info-list__item { padding: 9px 10px; border: 1px solid #edf0f6; border-radius: 11px; background: rgba(255, 255, 255, 0.48); }
-.profile-emergency-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.profile-emergency-contacts { display: grid; gap: 14px; }
-.profile-emergency-grid > div { display: grid; gap: 5px; padding: 10px 12px; border-left: 2px solid #f0c9ca; }
-.profile-emergency-grid dt { color: #929bad; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-.profile-emergency-grid dd { margin: 0; color: #35415e; font-size: 0.84rem; font-weight: 700; }
-.profile-connect { grid-column: span 9; min-height: 148px; }
-.profile-social-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.profile-social-links img { width: 20px; height: 20px; flex: 0 0 20px; object-fit: contain; display: block; }
-@media (max-width: 900px) { .profile-hero { grid-column: 1 / -1; } .profile-panel--basic, .profile-panel--personal, .profile-panel--journey { grid-column: span 6; } .profile-listen { grid-column: span 4; } .profile-connect { grid-column: span 8; } }
-@media (max-width: 680px) { .profile-grid { grid-template-columns: 1fr; } .profile-hero, .profile-panel--basic, .profile-panel--personal, .profile-panel--journey, .profile-panel--emergency, .profile-listen, .profile-connect { grid-column: 1 / -1; } .profile-hero__identity img { width: 88px; height: 88px; flex-basis: 88px; } .profile-social-links, .profile-emergency-grid { grid-template-columns: 1fr; } }
+const styles = `
+.profile-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}.profile-grid>*{min-width:0}.profile-hero{grid-column:span 7;min-height:265px}.profile-hero__identity{display:flex;align-items:center;gap:22px}.profile-hero__identity img{width:112px;height:112px;flex:0 0 112px;border:5px solid #fff;border-radius:50%;object-fit:cover}.profile-panel--basic,.profile-panel--personal{grid-column:span 5}.profile-panel--journey{grid-column:span 7}.profile-panel--emergency,.profile-editor{grid-column:1/-1}.profile-connect{grid-column:span 9;min-height:148px}.profile-listen{grid-column:span 3;display:flex;min-height:148px;color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.75);border-radius:20px;background:#f9faff}.profile-panel--personal .profile-info-list{gap:8px}.profile-panel--personal .profile-info-list__item{padding:9px 10px;border:1px solid #edf0f6;border-radius:11px}.profile-emergency-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.profile-emergency-contacts{display:grid;gap:14px}.profile-emergency-grid>div{display:grid;gap:5px;padding:10px 12px;border-left:2px solid #f0c9ca}.profile-emergency-grid dt{color:#929bad;font-size:.68rem;font-weight:700;text-transform:uppercase}.profile-emergency-grid dd{margin:0;color:#35415e;font-size:.84rem;font-weight:700}.profile-social-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.profile-actions{display:flex;justify-content:flex-end;margin:-8px 0 14px}.profile-button,.profile-text-button{border:0;border-radius:10px;background:#35415e;color:#fff;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}.profile-button:disabled{opacity:.65;cursor:wait}.secondary,.profile-text-button{background:#eef1f7;color:#35415e}.profile-editor__heading{display:flex;justify-content:space-between;gap:12px}.profile-form{display:grid;gap:18px}.profile-form fieldset{border:1px solid #e6eaf1;border-radius:14px;padding:14px;margin:0}.profile-form legend{color:#35415e;font-weight:800;padding:0 6px}.profile-form__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}.profile-form label{color:#58647c;display:grid;gap:6px;font-size:.84rem;font-weight:700}.profile-form input,.profile-form textarea{border:1px solid #dce2ec;border-radius:9px;padding:9px 10px;background:#fff;color:#35415e;font:inherit}.profile-form textarea{min-height:75px;resize:vertical}.wide{grid-column:1/-1}.journey{margin-top:8px}.profile-contact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;margin:10px 0}.profile-error{color:#b42318;font-weight:700;margin:0}@media(max-width:900px){.profile-hero{grid-column:1/-1}.profile-panel--basic,.profile-panel--personal,.profile-panel--journey{grid-column:span 6}.profile-listen{grid-column:span 4}.profile-connect{grid-column:span 8}}@media(max-width:680px){.profile-grid{grid-template-columns:1fr}.profile-hero,.profile-panel--basic,.profile-panel--personal,.profile-panel--journey,.profile-panel--emergency,.profile-listen,.profile-connect{grid-column:1/-1}.profile-form__grid,.profile-contact,.profile-emergency-grid,.profile-social-links{grid-template-columns:1fr}}
 `;
 
 export function ProfilePage() {
-  return (
-    <section className="page profile-page">
-      <style>{profileInlineStyles}</style>
-      <PageHeader
-        eyebrow="Student identity"
-        title="Profile"
-        description="A quick view of your university life, journey, and the things that make you you."
-      />
-      <BentoGrid className="profile-grid">
-        <BentoCard className="profile-hero">
-          <div className="profile-hero__identity">
-            <img src={profilePicture} alt="Jayed Raihan" />
-            <div>
-              <p className="eyebrow">Student profile</p>
-              <h2>Jayed Raihan123</h2>
-              <p>Computer Science &amp; Engineering</p>
-              <span>4th Semester</span>
-            </div>
-          </div>
-          <p className="profile-hero__bio">
-            “Building things, breaking things, and learning along the way.”
-          </p>
-          <div className="profile-hero__tag">
-            <span /> Open to new ideas
-          </div>
-        </BentoCard>
-        <BentoCard className="profile-panel profile-panel--basic">
-          <div className="profile-card-heading">
-            <span className="profile-card-heading__icon">
-              <School size={18} />
-            </span>
-            <div>
-              <p className="eyebrow">The essentials</p>
-              <h2>Basic information</h2>
-            </div>
-          </div>
-          <ProfileInfoList items={profileDetails} />
-        </BentoCard>
-        <BentoCard className="profile-panel profile-panel--personal">
-          <div className="profile-card-heading">
-            <span className="profile-card-heading__icon profile-card-heading__icon--mint">
-              <UserRound size={18} />
-            </span>
-            <div>
-              <p className="eyebrow">A little more</p>
-              <h2>Personal information</h2>
-            </div>
-          </div>
-          <ProfileInfoList items={personalDetails} withIcons />
-        </BentoCard>
-        <BentoCard className="profile-panel profile-panel--journey">
-          <div className="profile-card-heading">
-            <span className="profile-card-heading__icon profile-card-heading__icon--gold">
-              <GraduationCap size={18} />
-            </span>
-            <div>
-              <p className="eyebrow">The road so far</p>
-              <h2>Academic journey</h2>
-            </div>
-          </div>
-          <div className="profile-timeline">
-            <div>
-              <span className="profile-timeline__dot" />
-              <div>
-                <strong>School</strong>
-                <p>Dhaka Residential Model College</p>
-                <small>2010 – 2019</small>
-              </div>
-            </div>
-            <div>
-              <span className="profile-timeline__dot" />
-              <div>
-                <strong>College</strong>
-                <p>Notre Dame College, Dhaka</p>
-                <small>2019 – 2021</small>
-              </div>
-            </div>
-            <div>
-              <span className="profile-timeline__dot profile-timeline__dot--current" />
-              <div>
-                <strong>University</strong>
-                <p>AUST University</p>
-                <small>2022 – Present</small>
-              </div>
-            </div>
-          </div>
-        </BentoCard>
-        <BentoCard className="profile-panel profile-panel--emergency">
-          <div className="profile-card-heading">
-            <span className="profile-card-heading__icon profile-card-heading__icon--coral">
-              <Phone size={18} />
-            </span>
-            <div>
-              <p className="eyebrow">There when it matters</p>
-              <h2>Emergency contact</h2>
-            </div>
-          </div>
-          <div className="profile-emergency-contacts">
-            {emergencyContacts.map(([name, relationship, phone]) => (
-              <dl className="profile-emergency-grid" key={name}>
-                <div>
-                  <dt>Name</dt>
-                  <dd>{name}</dd>
-                </div>
-                <div>
-                  <dt>Relationship</dt>
-                  <dd>{relationship}</dd>
-                </div>
-                <div>
-                  <dt>Phone Number</dt>
-                  <dd>{phone}</dd>
-                </div>
-              </dl>
-            ))}
-          </div>
-        </BentoCard>
-        <a
-          className="profile-listen"
-          href="https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <span className="profile-listen__icon">
-            <Music2 size={23} />
-          </span>
-          <div>
-            <p className="eyebrow">A little soundtrack</p>
-            <h2>Listen With Me</h2>
-            <p>
-              What I’m listening to lately <span aria-hidden="true">→</span>
-            </p>
-          </div>
-        </a>
-        <BentoCard className="profile-connect">
-          <div className="profile-card-heading">
-            <span className="profile-card-heading__icon profile-card-heading__icon--blue">
-              <span aria-hidden="true">↗</span>
-            </span>
-            <div>
-              <p className="eyebrow">Find me around</p>
-              <h2>Connect</h2>
-            </div>
-          </div>
-          <div className="profile-social-links">
-            {socialLinks.map(([label, href, iconUrl]) => (
-              <a href={href} key={label} target="_blank" rel="noreferrer">
-                <img src={iconUrl} alt="" />
-                <span>{label}</span>
-                <span aria-hidden="true">↗</span>
-              </a>
-            ))}
-          </div>
-        </BentoCard>
-      </BentoGrid>
-    </section>
-  );
+  const navigate = useNavigate(); const token = localStorage.getItem("authToken");
+  const [user,setUser] = useState(null); const [loading,setLoading] = useState(true); const [error,setError] = useState(""); const [editing,setEditing] = useState(false); const [saving,setSaving] = useState(false);
+  useEffect(() => { let mounted=true; (async () => { try { const response=await fetch(`${apiUrl}/api/profile`,{headers:{Authorization:`Bearer ${token}`}}); const result=await response.json(); if(!response.ok) throw new Error(result.message||"Unable to load your profile."); if(mounted){setUser(result.user);setEditing(!result.user.profileCompleted);} } catch(e){if(mounted)setError(e.message);} finally{if(mounted)setLoading(false);} })(); return () => {mounted=false;}; },[token]);
+  const save = async (profile) => { setSaving(true);setError("");try { const response=await fetch(`${apiUrl}/api/profile`,{method:"PUT",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({profile})});const result=await response.json();if(!response.ok)throw new Error(result.message||"Unable to save your profile.");const wasSetup=!user.profileCompleted;setUser(result.user);setEditing(false);localStorage.setItem("user",JSON.stringify(result.user));window.dispatchEvent(new CustomEvent("unify-profile-updated",{detail:result.user}));if(wasSetup)navigate("/dashboard",{replace:true});}catch(e){setError(e.message);}finally{setSaving(false);}};
+  if(loading)return <section className="page"><p>Loading your profile…</p></section>; if(!user)return <section className="page"><p className="profile-error">{error||"Unable to load your profile."}</p></section>;
+  const p=asForm(user.profile);const basic=[["Student ID",p.studentId],["Department",p.department],["Program",p.program],["Semester",p.semester],["Batch",p.batch],["University Email",p.universityEmail]];const personal=[["Phone Number",p.phone,Phone],["Date of Birth",p.dateOfBirth,CalendarDays],["Gender",p.gender,UserRound],["Blood Group",p.bloodGroup,Droplets],["Address",p.address,MapPin]];const links=[["GitHub",p.socialLinks.github],["Instagram",p.socialLinks.instagram],["LinkedIn",p.socialLinks.linkedin],["Facebook",p.socialLinks.facebook]].filter(([,url])=>url);
+  return <section className="page profile-page"><style>{styles}</style><PageHeader eyebrow="Student identity" title="Profile" description="A quick view of your university life, journey, and the things that make you you."/>{!editing&&<div className="profile-actions"><button className="profile-button" onClick={()=>setEditing(true)}>Edit profile</button></div>}<BentoGrid className="profile-grid">{editing?<Editor initial={p} setup={!user.profileCompleted} saving={saving} error={error} onSave={save} onCancel={()=>setEditing(false)}/>:<>
+    <BentoCard className="profile-hero"><div className="profile-hero__identity"><img src={profilePicture} alt="Default profile"/><div><p className="eyebrow">Student profile</p><h2>{value(p.name)}</h2><p>{value(p.department)}</p><span>{value(p.semester)}</span></div></div><p className="profile-hero__bio">{value(p.bio)}</p><div className="profile-hero__tag">{value(p.status)}</div></BentoCard>
+    <BentoCard className="profile-panel profile-panel--basic"><div className="profile-card-heading"><span className="profile-card-heading__icon"><School size={18}/></span><div><p className="eyebrow">The essentials</p><h2>Basic information</h2></div></div><InfoList items={basic}/></BentoCard>
+    <BentoCard className="profile-panel profile-panel--personal"><div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--mint"><UserRound size={18}/></span><div><p className="eyebrow">A little more</p><h2>Personal information</h2></div></div><InfoList items={personal} icons/></BentoCard>
+    <BentoCard className="profile-panel profile-panel--journey"><div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--gold"><GraduationCap size={18}/></span><div><p className="eyebrow">The road so far</p><h2>Academic journey</h2></div></div><div className="profile-timeline">{["school","college","university"].map((stage)=><div key={stage}><span className={`profile-timeline__dot ${stage==="university"?"profile-timeline__dot--current":""}`}/><div><strong>{stage[0].toUpperCase()+stage.slice(1)}</strong><p>{value(p.academicJourney[stage].institution)}</p><small>{value(p.academicJourney[stage].years)}</small></div></div>)}</div></BentoCard>
+    <BentoCard className="profile-panel profile-panel--emergency"><div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--coral"><Phone size={18}/></span><div><p className="eyebrow">There when it matters</p><h2>Emergency contact</h2></div></div><div className="profile-emergency-contacts">{p.emergencyContacts.length?p.emergencyContacts.map((contact,index)=><dl className="profile-emergency-grid" key={`${contact.name}-${index}`}><div><dt>Name</dt><dd>{value(contact.name)}</dd></div><div><dt>Relationship</dt><dd>{value(contact.relationship)}</dd></div><div><dt>Phone Number</dt><dd>{value(contact.phone)}</dd></div></dl>):<p>Not provided</p>}</div></BentoCard>
+    {p.socialLinks.spotify&&<a className="profile-listen" href={p.socialLinks.spotify} target="_blank" rel="noreferrer"><span className="profile-listen__icon"><Music2 size={23}/></span><div><p className="eyebrow">A little soundtrack</p><h2>Listen With Me</h2><p>What I’m listening to lately →</p></div></a>}
+    <BentoCard className="profile-connect"><div className="profile-card-heading"><span className="profile-card-heading__icon profile-card-heading__icon--blue"><span>↗</span></span><div><p className="eyebrow">Find me around</p><h2>Connect</h2></div></div>{links.length?<div className="profile-social-links">{links.map(([label,url])=><a href={url} key={label} target="_blank" rel="noreferrer"><span>{label}</span><span>↗</span></a>)}</div>:<p>Not provided</p>}</BentoCard>
+  </>}</BentoGrid></section>;
 }
-
 export default ProfilePage;

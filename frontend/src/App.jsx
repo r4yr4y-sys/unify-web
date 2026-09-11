@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import {
   AcademicPage,
@@ -49,7 +50,45 @@ function PlaceholderPage({ title }) {
 }
 
 function RequireAuth({ children }) {
-  return localStorage.getItem("authToken") ? children : <Navigate to="/login" replace />;
+  const token = localStorage.getItem("authToken");
+  const location = useLocation();
+  const [status, setStatus] = useState("loading");
+
+  useEffect(() => {
+    if (!token) {
+      setStatus("signed-out");
+      return undefined;
+    }
+    let active = true;
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        if (active) setStatus(result.user.profileCompleted ? "complete" : "incomplete");
+      })
+      .catch(() => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("user");
+        if (active) setStatus("signed-out");
+      });
+    return () => { active = false; };
+  }, [token]);
+
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      if (event.detail?.profileCompleted) setStatus("complete");
+    };
+    window.addEventListener("unify-profile-updated", handleProfileUpdate);
+    return () => window.removeEventListener("unify-profile-updated", handleProfileUpdate);
+  }, []);
+
+  if (status === "loading") return <main className="logout-page">Loading your account…</main>;
+  if (status === "signed-out") return <Navigate to="/login" replace />;
+  if (status === "incomplete" && location.pathname !== "/profile")
+    return <Navigate to="/profile" replace />;
+  return children;
 }
 
 function App() {
