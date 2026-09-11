@@ -8,6 +8,7 @@ export default function StudyTimerPage() {
   const [dailyTotals, setDailyTotals] = useState([]);
   const [historyError, setHistoryError] = useState("");
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const headers = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("authToken")}` });
   const loadHistory = async () => {
@@ -25,11 +26,11 @@ export default function StudyTimerPage() {
         title="Study Timer"
         description="Start a focused session with a countdown or an open-ended study flow."
       />
-      <StudyTimer onExit={() => navigate("/study")} onSessionComplete={saveSession} />
-      <section className="study-history" aria-labelledby="study-history-title">
+      <StudyTimer onExit={() => navigate("/study")} onSessionComplete={saveSession} onViewHistory={() => { setHistoryOpen(true); loadHistory(); }} />
+      {historyOpen && <div className="study-plan-modal-backdrop" role="presentation"><section className="study-plan-modal study-history" role="dialog" aria-modal="true" aria-labelledby="study-history-title"><button type="button" className="study-plan-modal__close" onClick={() => setHistoryOpen(false)} aria-label="Close study history">×</button>
         <p className="eyebrow">Your consistency</p><h2 id="study-history-title">Study time history</h2>
-        {historyLoading ? <p>Loading study history…</p> : historyError ? <p className="study-timer-error" role="alert">{historyError}</p> : dailyTotals.length ? <div className="study-history__chart">{dailyTotals.slice(-14).map((item) => <div className="study-history__day" key={item.date}><span className="study-history__bar" style={{ height: `${Math.max(6, (item.durationMs / max) * 100)}%` }} title={`${item.date}: ${formatDuration(item.durationMs)}`} /><strong>{formatDuration(item.durationMs)}</strong><small>{new Date(`${item.date}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</small></div>)}</div> : <p>No completed study sessions yet. Finish a session to see your study time here.</p>}
-      </section>
+        {historyLoading ? <p>Loading study history…</p> : historyError ? <p className="study-timer-error" role="alert">{historyError}</p> : dailyTotals.length ? <><div className="study-history__chart">{dailyTotals.slice(-14).map((item) => <div className="study-history__day" key={item.date}><span className="study-history__bar" style={{ height: `${Math.max(6, (item.durationMs / max) * 100)}%` }} title={`${item.date}: ${formatDuration(item.durationMs)}`} /><strong>{formatDuration(item.durationMs)}</strong><small>{new Date(`${item.date}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</small></div>)}</div><div className="study-history__sessions">{dailyTotals.slice(-7).reverse().map((item) => <p key={item.date}>{item.date}: <strong>{formatDuration(item.durationMs)}</strong></p>)}</div></> : <p>No completed study sessions yet. Finish a session to see your study time here.</p>}
+      </section></div>}
     </section>
   );
 }

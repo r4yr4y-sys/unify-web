@@ -233,6 +233,7 @@ function SetupModal({
   onHoursChange,
   onMinutesChange,
   onBackgroundChange,
+  onViewHistory,
 }) {
   return (
     <div
@@ -336,6 +337,7 @@ function SetupModal({
           </section>
         </div>
         <div className="study-timer-modal__footer">
+          <Button variant="secondary" type="button" onClick={onViewHistory}>View Study History</Button>
           <Button variant="secondary" type="button" onClick={onClose}>
             Cancel
           </Button>
@@ -348,7 +350,7 @@ function SetupModal({
   );
 }
 
-export default function StudyTimer({ onExit, onSessionComplete }) {
+export default function StudyTimer({ onExit, onSessionComplete, onViewHistory }) {
   const [phase, setPhase] = useState("setup");
   const [mode, setMode] = useState("countdown");
   const [hours, setHours] = useState("2");
@@ -588,6 +590,7 @@ export default function StudyTimer({ onExit, onSessionComplete }) {
           onHoursChange={setHours}
           onMinutesChange={setMinutes}
           onBackgroundChange={setBackgroundId}
+          onViewHistory={onViewHistory}
         />
       )}
 

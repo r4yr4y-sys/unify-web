@@ -23,6 +23,7 @@ import LoginPage from "./pages/LoginPage";
 import LogoutPage from "./pages/LogoutPage";
 import GradesPage from "./pages/GradesPage";
 import StudyTimerPage from "./pages/StudyTimerPage";
+import CoursesPage from "./pages/CoursesPage";
 import {
   academicRoutes,
   campusLifeRoutes,
@@ -106,6 +107,7 @@ function App() {
       <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/academic" element={<AcademicPage />} />
+          <Route path="/academic/courses" element={<CoursesPage />} />
           <Route path="/academic/routine" element={<RoutinePage />} />
           <Route path="/academic/routine/edit" element={<EditRoutinePage />} />
           <Route path="/academic/grades" element={<GradesPage />} />
