@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { PageHeader } from "../components/ui";
 
-const STORAGE_KEY = "unify-grade-history";
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("authToken")}` });
 const GRADE_POINTS = {
   "A+": 4,
   A: 3.75,
@@ -27,14 +28,6 @@ const emptyCourse = () => ({
 });
 const format = (value) => Number(value).toFixed(2);
 
-function getStoredSemesters() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-}
 
 function coursesFor(semesters) {
   return semesters.flatMap(({ semester, courses }) =>
@@ -61,7 +54,7 @@ function summary(courses) {
 }
 
 export default function GradesPage() {
-  const [semesters, setSemesters] = useState(getStoredSemesters);
+  const [semesters, setSemesters] = useState([]);
   const [tab, setTab] = useState("overview");
   const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [targetOpen, setTargetOpen] = useState(false);
@@ -79,6 +72,8 @@ export default function GradesPage() {
   const [estimatorNextCredits, setEstimatorNextCredits] = useState("");
   const [estimatorAssumedGpa, setEstimatorAssumedGpa] = useState("");
   const [estimatorResult, setEstimatorResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [requestError, setRequestError] = useState("");
   const allCourses = useMemo(() => coursesFor(semesters), [semesters]);
   const cumulative = useMemo(() => summary(allCourses), [allCourses]);
   const orderedSemesters = useMemo(
@@ -86,9 +81,7 @@ export default function GradesPage() {
     [semesters],
   );
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(semesters));
-  }, [semesters]);
+  useEffect(() => { let active = true; fetch(`${apiUrl}/api/cgpa`, { headers: authHeaders() }).then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to load CGPA data."); return result.semesters; }).then((savedSemesters) => { if (active) setSemesters(savedSemesters); }).catch((error) => { if (active) setRequestError(error.message); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);
 
   const latestSemester = semesters.length
     ? Math.max(...semesters.map((item) => Number(item.semester)))
@@ -154,19 +147,12 @@ export default function GradesPage() {
     });
     setFormError("");
   };
-  const saveSemester = () => {
+  const saveSemester = async () => {
     if (!calculated) return;
-    setSemesters((current) =>
-      [
-        ...current.filter(
-          (item) => Number(item.semester) !== calculated.semester,
-        ),
-        { semester: calculated.semester, courses: calculated.courses },
-      ].sort((a, b) => a.semester - b.semester),
-    );
-    setCalculatorOpen(false);
-    setCalculated(null);
+    const next = [...semesters.filter((item) => Number(item.semester) !== calculated.semester), { semester: calculated.semester, courses: calculated.courses }].sort((a, b) => a.semester - b.semester);
+    try { const response = await fetch(`${apiUrl}/api/cgpa`, { method: "PUT", headers: authHeaders(), body: JSON.stringify({ semesters: next }) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to save semester."); setSemesters(result.semesters); setCalculatorOpen(false); setCalculated(null); setRequestError(""); } catch (error) { setRequestError(error.message); }
   };
+  const clearAll = async () => { if (!window.confirm("Clear all saved CGPA data and semester history? This cannot be undone.")) return; try { const response = await fetch(`${apiUrl}/api/cgpa`, { method: "DELETE", headers: authHeaders() }); if (!response.ok) throw new Error("Unable to clear CGPA data."); setSemesters([]); setCalculated(null); setRequestError(""); } catch (error) { setRequestError(error.message); } };
   const calculateTarget = () => {
     const target = Number(targetGpa);
     const credits = Number(nextCredits);
@@ -218,7 +204,10 @@ export default function GradesPage() {
         eyebrow="Unify workspace"
         title="Grades & GPA"
         description="Track your academic progress, calculate your GPA, and plan your next semester."
+        actions={semesters.length ? <button type="button" className="grades-secondary" onClick={clearAll}>Clear all</button> : null}
       />
+      {loading && <p>Loading saved CGPA data…</p>}
+      {requestError && <p className="grades-card__empty" role="alert">{requestError}</p>}
       <div className="grades-tabs" role="tablist" aria-label="Grades views">
         <button
           type="button"

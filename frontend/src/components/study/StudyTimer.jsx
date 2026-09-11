@@ -348,7 +348,7 @@ function SetupModal({
   );
 }
 
-export default function StudyTimer({ onExit }) {
+export default function StudyTimer({ onExit, onSessionComplete }) {
   const [phase, setPhase] = useState("setup");
   const [mode, setMode] = useState("countdown");
   const [hours, setHours] = useState("2");
@@ -356,6 +356,7 @@ export default function StudyTimer({ onExit }) {
   const [backgroundId, setBackgroundId] = useState(backgrounds[0].id);
   const [error, setError] = useState("");
   const [session, setSession] = useState(null);
+  const [saveError, setSaveError] = useState("");
   const now = useSecondTicker(phase === "active" || phase === "break");
 
   useEffect(() => {
@@ -392,18 +393,7 @@ export default function StudyTimer({ onExit }) {
       return undefined;
     }
 
-    setPhase("finished");
-    setSession((current) =>
-      current
-        ? {
-            ...current,
-            finishedAt: Date.now(),
-            pauseStartedAt: null,
-            breakEndsAt: null,
-            breakLabel: null,
-          }
-        : current,
-    );
+    finishSession();
     return undefined;
   }, [phase, remainingMs, session?.mode]);
 
@@ -464,6 +454,7 @@ export default function StudyTimer({ onExit }) {
     });
     setPhase("active");
     setError("");
+    setSaveError("");
   }
 
   function pauseSession() {
@@ -523,11 +514,17 @@ export default function StudyTimer({ onExit }) {
 
   function finishSession() {
     if (!session) return;
+    const finishedAt = Date.now();
+    const pausedMs = session.pausedMs + (session.pauseStartedAt ? finishedAt - session.pauseStartedAt : 0);
+    const durationMs = Math.max(0, finishedAt - session.startedAt - pausedMs);
+    if (durationMs >= 1000 && onSessionComplete) {
+      onSessionComplete({ startedAt: new Date(session.startedAt).toISOString(), endedAt: new Date(finishedAt).toISOString(), durationMs, mode: session.mode, backgroundId: session.backgroundId }).catch((requestError) => setSaveError(requestError.message || "Unable to save this study session."));
+    }
     setSession((current) =>
       current
         ? {
             ...current,
-            finishedAt: Date.now(),
+            finishedAt,
             pauseStartedAt: null,
             breakEndsAt: null,
             breakLabel: null,
@@ -541,6 +538,7 @@ export default function StudyTimer({ onExit }) {
     setSession(null);
     setPhase("setup");
     setError("");
+    setSaveError("");
   }
 
   const content =
@@ -626,6 +624,7 @@ export default function StudyTimer({ onExit }) {
             </div>
 
             {content}
+            {saveError && <p className="study-timer-error" role="alert">{saveError}</p>}
 
             {phase === "active" && (
               <div className="study-timer-actions">

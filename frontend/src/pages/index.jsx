@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowUpRight,
@@ -42,10 +42,19 @@ const makePage = (title, description) =>
       </section>
     );
   };
-export const DashboardPage = makePage(
-  "Dashboard",
-  "A central overview of your university life will appear here.",
-);
+export function DashboardPage() {
+  const [name, setName] = useState("there");
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return undefined;
+    let active = true;
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/profile`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (response) => { const result = await response.json(); if (response.ok && active) setName(result.user.profile?.name || "there"); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  return <section className="page"><PageHeader eyebrow="Unify workspace" title={`Hello, ${name}`} description="A central overview of your university life will appear here."/><SectionCard title="Coming soon"><p className="empty-state">This section is ready for its feature-specific experience.</p></SectionCard></section>;
+}
 export const AcademicPage = makePage(
   "Academic",
   "Manage your courses, assignments, grades, and exams in one place.",

@@ -12,42 +12,8 @@ import {
   StudyPlanModal,
 } from "../components/study/StudyPlanModals";
 
-const STORAGE_KEY = "unify-study-plans";
-const starterPlans = [
-  {
-    id: "starter-midterm",
-    subject: "CSE 2201",
-    topic: "Midterm preparation",
-    createdAt: "2026-08-18T00:00:00.000Z",
-    deadline: null,
-    checkpoints: Array.from({ length: 20 }, (_, index) => ({
-      id: `midterm-${index + 1}`,
-      text: `Midterm revision task ${index + 1}`,
-      completed: index < 13,
-    })),
-  },
-  {
-    id: "starter-calculus",
-    subject: "MAT 1203",
-    topic: "Calculus revision",
-    createdAt: "2026-08-20T00:00:00.000Z",
-    deadline: null,
-    checkpoints: Array.from({ length: 20 }, (_, index) => ({
-      id: `calculus-${index + 1}`,
-      text: `Calculus revision task ${index + 1}`,
-      completed: index < 7,
-    })),
-  },
-];
-
-function loadPlans() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : starterPlans;
-  } catch {
-    return starterPlans;
-  }
-}
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("authToken")}` });
 function formatDate(value) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -121,29 +87,19 @@ function StudyPlanCard({ plan, onOpen }) {
 }
 
 export default function StudyPlansPage() {
-  const [plans, setPlans] = useState(loadPlans);
+  const [plans, setPlans] = useState([]);
   const [showCreate, setShowCreate] = useState(false);
   const [activePlanId, setActivePlanId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const activePlan = plans.find((plan) => plan.id === activePlanId) || null;
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
-  }, [plans]);
+  useEffect(() => { let active = true; fetch(`${apiUrl}/api/study-plans`, { headers: authHeaders() }).then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to load study plans."); return result.plans; }).then((savedPlans) => { if (active) setPlans(savedPlans); }).catch((requestError) => { if (active) setError(requestError.message); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);
 
-  function createPlan(values) {
-    setPlans((current) => [
-      {
-        id: `plan-${Date.now()}`,
-        ...values,
-        createdAt: new Date().toISOString(),
-      },
-      ...current,
-    ]);
-    setShowCreate(false);
+  async function createPlan(values) {
+    setError(""); try { const response = await fetch(`${apiUrl}/api/study-plans`, { method: "POST", headers: authHeaders(), body: JSON.stringify(values) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to create study plan."); setPlans((current) => [result.plan, ...current]); setShowCreate(false); } catch (requestError) { setError(requestError.message); }
   }
-  function updatePlan(updatedPlan) {
-    setPlans((current) =>
-      current.map((plan) => (plan.id === updatedPlan.id ? updatedPlan : plan)),
-    );
+  async function updatePlan(updatedPlan) {
+    setError(""); try { const response = await fetch(`${apiUrl}/api/study-plans/${updatedPlan.id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(updatedPlan) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to save study plan."); setPlans((current) => current.map((plan) => plan.id === result.plan.id ? result.plan : plan)); } catch (requestError) { setError(requestError.message); }
   }
   return (
     <section className="page study-page">
@@ -157,6 +113,7 @@ export default function StudyPlansPage() {
           </Button>
         }
       />
+      {error && <p className="grades-card__empty" role="alert">{error}</p>}
       <section className="study-plan-hero">
         <span>
           <Target size={28} />
@@ -170,7 +127,7 @@ export default function StudyPlansPage() {
           </p>
         </div>
       </section>
-      <div className="plans-grid">
+      {loading ? <p>Loading study plans…</p> : <div className="plans-grid">
         {plans.map((plan) => (
           <StudyPlanCard
             key={plan.id}
@@ -178,7 +135,7 @@ export default function StudyPlansPage() {
             onOpen={() => setActivePlanId(plan.id)}
           />
         ))}
-      </div>
+      </div>}
       {showCreate && (
         <CreateStudyPlanModal
           onClose={() => setShowCreate(false)}

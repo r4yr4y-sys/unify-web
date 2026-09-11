@@ -78,13 +78,81 @@ const userSchema = new mongoose.Schema(
 );
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
+const flashcardPackSchema = new mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    topic: { type: String, required: true, trim: true, maxlength: 150 },
+    colorScheme: {
+      primary: { type: String, required: true, trim: true },
+      secondary: { type: String, required: true, trim: true },
+    },
+    cards: [{
+      _id: false,
+      id: { type: String, required: true },
+      question: { type: String, required: true, trim: true, maxlength: 2000 },
+      answer: { type: String, required: true, trim: true, maxlength: 2000 },
+    }],
+  },
+  { timestamps: true },
+);
+const FlashcardPack = mongoose.models.FlashcardPack || mongoose.model('FlashcardPack', flashcardPackSchema);
+
+const cgpaRecordSchema = new mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    semesters: [{
+      _id: false,
+      semester: { type: Number, required: true },
+      courses: [{
+        _id: false,
+        id: { type: String, required: true },
+        name: { type: String, required: true, trim: true, maxlength: 150 },
+        credits: { type: Number, required: true, min: 0 },
+        grade: { type: String, required: true, trim: true, maxlength: 10 },
+      }],
+    }],
+  },
+  { timestamps: true },
+);
+const CgpaRecord = mongoose.models.CgpaRecord || mongoose.model('CgpaRecord', cgpaRecordSchema);
+
+const studyPlanSchema = new mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    subject: { type: String, required: true, trim: true, maxlength: 150 },
+    topic: { type: String, required: true, trim: true, maxlength: 200 },
+    deadline: { type: String, default: null },
+    checkpoints: [{
+      _id: false,
+      id: { type: String, required: true },
+      text: { type: String, required: true, trim: true, maxlength: 500 },
+      completed: { type: Boolean, default: false },
+    }],
+  },
+  { timestamps: true },
+);
+const StudyPlan = mongoose.models.StudyPlan || mongoose.model('StudyPlan', studyPlanSchema);
+
+const studySessionSchema = new mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    startedAt: { type: Date, required: true },
+    endedAt: { type: Date, required: true },
+    durationMs: { type: Number, required: true, min: 1 },
+    mode: { type: String, enum: ['countdown', 'open'], required: true },
+    backgroundId: { type: String, trim: true, default: '' },
+  },
+  { timestamps: true },
+);
+const StudySession = mongoose.models.StudySession || mongoose.model('StudySession', studySessionSchema);
+
 app.use(express.json());
 app.use((request, response, next) => {
   response.setHeader(
     'Access-Control-Allow-Origin',
     process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   );
-  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.setHeader(
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization',
@@ -279,6 +347,87 @@ app.put('/api/profile', requireAuth, async (request, response, next) => {
     if (error.status) return response.status(error.status).json({ message: error.message });
     next(error);
   }
+});
+
+const clientDocument = (document) => ({ id: document.id, ...document.toObject({ versionKey: false, transform: (_doc, value) => { delete value._id; delete value.user; return value; } }) });
+const badRequest = (message) => Object.assign(new Error(message), { status: 400 });
+
+const flashcardPackFromRequest = (input) => {
+  if (!input || typeof input !== 'object') throw badRequest('Flashcard pack data is required.');
+  const topic = text(input.topic).slice(0, 150);
+  const cards = Array.isArray(input.cards) ? input.cards : [];
+  if (!topic || !cards.length || cards.length > 50) throw badRequest('A topic and between 1 and 50 cards are required.');
+  if (!text(input.colorScheme?.primary) || !text(input.colorScheme?.secondary)) throw badRequest('A color scheme is required.');
+  return {
+    topic,
+    colorScheme: { primary: text(input.colorScheme.primary).slice(0, 100), secondary: text(input.colorScheme.secondary).slice(0, 100) },
+    cards: cards.map((card, index) => {
+      const question = text(card?.question).slice(0, 2000); const answer = text(card?.answer).slice(0, 2000);
+      if (!question || !answer) throw badRequest(`Card ${index + 1} needs a question and answer.`);
+      return { id: text(card?.id) || `card-${Date.now()}-${index}`, question, answer };
+    }),
+  };
+};
+const planFromRequest = (input) => {
+  const subject = text(input?.subject).slice(0, 150); const topic = text(input?.topic).slice(0, 200);
+  const checkpoints = Array.isArray(input?.checkpoints) ? input.checkpoints : [];
+  if (!subject || !topic || !checkpoints.length || checkpoints.length > 100) throw badRequest('A subject, topic, and at least one checkpoint are required.');
+  return { subject, topic, deadline: text(input.deadline) || null, checkpoints: checkpoints.map((item, index) => {
+    const checkpointText = text(item?.text).slice(0, 500); if (!checkpointText) throw badRequest(`Checkpoint ${index + 1} needs text.`);
+    return { id: text(item?.id) || `checkpoint-${Date.now()}-${index}`, text: checkpointText, completed: item?.completed === true };
+  }) };
+};
+const semestersFromRequest = (semesters) => {
+  if (!Array.isArray(semesters)) throw badRequest('Semester data must be a list.');
+  return semesters.slice(0, 30).map((item) => {
+    const semester = Number(item?.semester); const courses = Array.isArray(item?.courses) ? item.courses : [];
+    if (!Number.isInteger(semester) || semester < 1 || !courses.length || courses.length > 15) throw badRequest('Each semester needs a number and between 1 and 15 courses.');
+    return { semester, courses: courses.map((course, index) => {
+      const name = text(course?.name).slice(0, 150); const credits = Number(course?.credits); const grade = text(course?.grade).slice(0, 10);
+      if (!name || !Number.isFinite(credits) || credits <= 0 || !grade) throw badRequest(`Course ${index + 1} is incomplete.`);
+      return { id: text(course?.id) || `course-${Date.now()}-${index}`, name, credits, grade };
+    }) };
+  });
+};
+
+app.get('/api/flashcard-packs', requireAuth, async (request, response, next) => {
+  try { const packs = await FlashcardPack.find({ user: request.user._id }).sort({ createdAt: -1 }); response.json({ packs: packs.map(clientDocument) }); } catch (error) { next(error); }
+});
+app.post('/api/flashcard-packs', requireAuth, async (request, response, next) => {
+  try { const pack = await FlashcardPack.create({ user: request.user._id, ...flashcardPackFromRequest(request.body) }); response.status(201).json({ pack: clientDocument(pack) }); } catch (error) { if (error.status) return response.status(error.status).json({ message: error.message }); next(error); }
+});
+app.put('/api/flashcard-packs/:id', requireAuth, async (request, response, next) => {
+  try { const pack = await FlashcardPack.findOneAndUpdate({ _id: request.params.id, user: request.user._id }, flashcardPackFromRequest(request.body), { new: true, runValidators: true }); if (!pack) return response.status(404).json({ message: 'Flashcard pack not found.' }); response.json({ pack: clientDocument(pack) }); } catch (error) { if (error.status) return response.status(error.status).json({ message: error.message }); next(error); }
+});
+app.delete('/api/flashcard-packs/:id', requireAuth, async (request, response, next) => {
+  try { const pack = await FlashcardPack.findOneAndDelete({ _id: request.params.id, user: request.user._id }); if (!pack) return response.status(404).json({ message: 'Flashcard pack not found.' }); response.sendStatus(204); } catch (error) { next(error); }
+});
+
+app.get('/api/cgpa', requireAuth, async (request, response, next) => {
+  try { const record = await CgpaRecord.findOne({ user: request.user._id }); response.json({ semesters: record?.semesters || [] }); } catch (error) { next(error); }
+});
+app.put('/api/cgpa', requireAuth, async (request, response, next) => {
+  try { const semesters = semestersFromRequest(request.body.semesters); const record = await CgpaRecord.findOneAndUpdate({ user: request.user._id }, { semesters }, { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }); response.json({ semesters: record.semesters }); } catch (error) { if (error.status) return response.status(error.status).json({ message: error.message }); next(error); }
+});
+app.delete('/api/cgpa', requireAuth, async (request, response, next) => {
+  try { await CgpaRecord.deleteOne({ user: request.user._id }); response.sendStatus(204); } catch (error) { next(error); }
+});
+
+app.get('/api/study-plans', requireAuth, async (request, response, next) => {
+  try { const plans = await StudyPlan.find({ user: request.user._id }).sort({ createdAt: -1 }); response.json({ plans: plans.map(clientDocument) }); } catch (error) { next(error); }
+});
+app.post('/api/study-plans', requireAuth, async (request, response, next) => {
+  try { const plan = await StudyPlan.create({ user: request.user._id, ...planFromRequest(request.body) }); response.status(201).json({ plan: clientDocument(plan) }); } catch (error) { if (error.status) return response.status(error.status).json({ message: error.message }); next(error); }
+});
+app.put('/api/study-plans/:id', requireAuth, async (request, response, next) => {
+  try { const plan = await StudyPlan.findOneAndUpdate({ _id: request.params.id, user: request.user._id }, planFromRequest(request.body), { new: true, runValidators: true }); if (!plan) return response.status(404).json({ message: 'Study plan not found.' }); response.json({ plan: clientDocument(plan) }); } catch (error) { if (error.status) return response.status(error.status).json({ message: error.message }); next(error); }
+});
+
+app.get('/api/study-sessions', requireAuth, async (request, response, next) => {
+  try { const sessions = await StudySession.find({ user: request.user._id }).sort({ startedAt: -1 }).limit(365); const totals = new Map(); sessions.forEach((session) => { const day = session.startedAt.toISOString().slice(0, 10); totals.set(day, (totals.get(day) || 0) + session.durationMs); }); response.json({ sessions: sessions.map(clientDocument), dailyTotals: [...totals].map(([date, durationMs]) => ({ date, durationMs })).sort((a, b) => a.date.localeCompare(b.date)) }); } catch (error) { next(error); }
+});
+app.post('/api/study-sessions', requireAuth, async (request, response, next) => {
+  try { const startedAt = new Date(request.body.startedAt); const endedAt = new Date(request.body.endedAt); const durationMs = Number(request.body.durationMs); if (Number.isNaN(startedAt.getTime()) || Number.isNaN(endedAt.getTime()) || !Number.isFinite(durationMs) || durationMs < 1000 || !['countdown', 'open'].includes(request.body.mode)) throw badRequest('A completed study session is required.'); const session = await StudySession.create({ user: request.user._id, startedAt, endedAt, durationMs: Math.floor(durationMs), mode: request.body.mode, backgroundId: text(request.body.backgroundId).slice(0, 100) }); response.status(201).json({ session: clientDocument(session) }); } catch (error) { if (error.status) return response.status(error.status).json({ message: error.message }); next(error); }
 });
 
 app.use((error, _request, response, _next) => {
