@@ -118,7 +118,7 @@ export default function LoginPage() {
             <label>
               Email
               <input
-                type="text"
+                type="email"
                 name="email"
                 autoComplete="email"
                 inputMode="email"
