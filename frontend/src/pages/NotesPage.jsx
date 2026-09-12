@@ -1,36 +1,81 @@
-import { useState } from "react";
-import { ArrowUpRight, FileText, FolderOpen, Plus, Search } from "lucide-react";
-import { Button, PageHeader } from "../components/ui";
+import { useEffect, useState } from "react";
+import { Download, FileText, FolderOpen, Plus, Search, Upload } from "lucide-react";
+import { PageHeader } from "../components/ui";
 
-const initialNotes = [
-  {
-    id: 1,
-    title: "Web development",
-    course: "CSE 2200",
-    updated: "Edited today",
-    hue: "blue",
-  },
-  {
-    id: 2,
-    title: "Numerical methods",
-    course: "CSE 2202",
-    updated: "Edited yesterday",
-    hue: "violet",
-  },
-  {
-    id: 3,
-    title: "Fourier transforms",
-    course: "MATH 2203",
-    updated: "Edited Aug 12",
-    hue: "amber",
-  },
-];
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const hues = ["blue", "violet", "amber", "green"];
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
+});
+const formatDate = (value) => new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
 
 export default function NotesPage() {
-  const [items, setItems] = useState(initialNotes);
+  const [items, setItems] = useState([]);
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    fetch(`${apiUrl}/api/notes`, { headers: authHeaders() })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Unable to load notes.");
+        return result.notes;
+      })
+      .then((notes) => active && setItems(notes))
+      .catch((requestError) => active && setError(requestError.message))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, []);
+
+  const uploadNote = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.type !== "application/pdf" || !/\.pdf$/i.test(file.name)) {
+      setError("Please choose a PDF file.");
+      return;
+    }
+    setUploading(true);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(`${apiUrl}/api/notes`, { method: "POST", headers: authHeaders(), body: formData });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to upload the PDF.");
+      setItems((current) => [result.note, ...current]);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const downloadNote = async (note) => {
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/api/notes/${note.id}/download`, { headers: authHeaders() });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Unable to download the PDF.");
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = note.originalName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  };
   const visible = items.filter((note) =>
-    `${note.title} ${note.course}`.toLowerCase().includes(query.toLowerCase()),
+    `${note.title} ${note.originalName}`.toLowerCase().includes(query.toLowerCase()),
   );
   return (
     <section className="page study-page">
@@ -39,22 +84,11 @@ export default function NotesPage() {
         title="Notes"
         description="Keep every lecture thought, formula, and revision note in one calm place."
         actions={
-          <Button
-            onClick={() =>
-              setItems((current) => [
-                {
-                  id: Date.now(),
-                  title: "Algorithms",
-                  course: "2207",
-                  updated: "Just now",
-                  hue: "green",
-                },
-                ...current,
-              ])
-            }
-          >
-            <Plus size={17} /> New note
-          </Button>
+          <label className="button button--primary resource-upload">
+            {uploading ? <Upload size={17} /> : <Plus size={17} />}
+            {uploading ? "Uploading…" : "Upload PDF"}
+            <input type="file" accept="application/pdf,.pdf" onChange={uploadNote} disabled={uploading} />
+          </label>
         }
       />
       <div className="study-toolbar">
@@ -67,28 +101,29 @@ export default function NotesPage() {
           />
         </label>
         <button className="filter-control" type="button">
-          <FolderOpen size={17} /> All courses
+          <FolderOpen size={17} /> All PDFs
         </button>
       </div>
-      <div className="notes-grid">
-        {visible.map((note) => (
-          <article className={`note-card note-card--${note.hue}`} key={note.id}>
+      {error && <p className="notes-message notes-message--error">{error}</p>}
+      {loading ? <p className="study-empty">Loading your PDFs…</p> : <div className="notes-grid">
+        {visible.map((note, index) => (
+          <article className={`note-card note-card--${hues[index % hues.length]}`} key={note.id}>
             <span className="note-card__icon">
               <FileText size={20} />
             </span>
-            <p>{note.course}</p>
-            <h2>{note.title}</h2>
+            <p>PDF note</p>
+            <h2 title={note.originalName}>{note.title}</h2>
             <footer>
-              <span>{note.updated}</span>
-              <button type="button" aria-label={`Open ${note.title}`}>
-                <ArrowUpRight size={17} />
+              <span>{formatDate(note.createdAt)}</span>
+              <button type="button" aria-label={`Download ${note.title}`} title="Download PDF" onClick={() => downloadNote(note)}>
+                <Download size={17} />
               </button>
             </footer>
           </article>
         ))}
-      </div>
-      {!visible.length && (
-        <p className="study-empty">No notes match that search.</p>
+      </div>}
+      {!loading && !visible.length && (
+        <p className="study-empty">No PDFs match that search.</p>
       )}
     </section>
   );
