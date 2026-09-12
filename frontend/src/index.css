@@ -3766,6 +3766,123 @@ button {
   color: #7d879c;
   font-size: 0.75rem;
 }
+.lost-item__description {
+  display: block !important;
+  margin-top: 6px !important;
+  line-height: 1.45;
+}
+.lost-page-empty,
+.lost-page-error {
+  margin: 18px 0;
+  color: #758099;
+  font-size: 0.85rem;
+}
+.lost-page-error,
+.lost-report-form__error {
+  color: #b94d5d;
+}
+.lost-report-backdrop {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(29, 39, 66, 0.28);
+  backdrop-filter: blur(2px);
+}
+.lost-report-modal {
+  position: relative;
+  width: min(100%, 520px);
+  max-height: calc(100vh - 44px);
+  padding: 28px;
+  overflow: auto;
+  border-radius: 22px;
+  background: #f9faff;
+  box-shadow: 16px 19px 42px rgba(45, 55, 85, 0.22);
+}
+.lost-report-modal__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  color: #68748c;
+  background: #edf0f6;
+  cursor: pointer;
+}
+.lost-report-form {
+  display: grid;
+  gap: 15px;
+}
+.lost-report-form header {
+  padding-right: 36px;
+}
+.lost-report-form h2 {
+  margin: 0;
+  color: #1e2944;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.4rem;
+}
+.lost-report-form header > p:not(.eyebrow) {
+  margin: 8px 0 4px;
+  color: #737e94;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.lost-report-form label {
+  display: grid;
+  gap: 7px;
+  color: #536079;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.lost-report-form label em {
+  color: #919aab;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 500;
+}
+.lost-report-form input,
+.lost-report-form select,
+.lost-report-form textarea {
+  width: 100%;
+  border: 1px solid #dfe4ef;
+  border-radius: 10px;
+  outline: none;
+  color: #34415e;
+  background: #fff;
+  font: inherit;
+  font-size: 0.83rem;
+}
+.lost-report-form input,
+.lost-report-form select {
+  height: 43px;
+  padding: 0 12px;
+}
+.lost-report-form textarea {
+  padding: 10px 12px;
+  resize: vertical;
+}
+.lost-report-form input:focus,
+.lost-report-form select:focus,
+.lost-report-form textarea:focus {
+  border-color: #9dabeb;
+}
+.lost-report-form__error {
+  margin: 0;
+  font-size: 0.78rem;
+}
+.lost-report-form footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
 .claim-button {
   display: inline-flex;
   align-items: center;

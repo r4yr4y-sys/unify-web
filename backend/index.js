@@ -220,6 +220,47 @@ const noteSchema = new mongoose.Schema(
 );
 const Note = mongoose.models.Note || mongoose.model('Note', noteSchema);
 
+const lostFoundItemSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+    status: { type: String, enum: ['Lost', 'Found'], required: true },
+    title: { type: String, required: true, trim: true, maxlength: 150 },
+    location: { type: String, required: true, trim: true, maxlength: 250 },
+    description: { type: String, trim: true, default: '', maxlength: 1000 },
+    reporterName: { type: String, trim: true, maxlength: 100 },
+  },
+  { timestamps: true },
+);
+const LostFoundItem =
+  mongoose.models.LostFoundItem ||
+  mongoose.model('LostFoundItem', lostFoundItemSchema);
+
+const marketplaceListingSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+    title: { type: String, required: true, trim: true, maxlength: 150 },
+    price: { type: Number, required: true, min: 0, max: 10000000 },
+    category: { type: String, required: true, trim: true, maxlength: 50 },
+    condition: { type: String, trim: true, default: '', maxlength: 100 },
+    description: { type: String, trim: true, default: '', maxlength: 1000 },
+    sellerName: { type: String, trim: true, maxlength: 100 },
+  },
+  { timestamps: true },
+);
+const MarketplaceListing =
+  mongoose.models.MarketplaceListing ||
+  mongoose.model('MarketplaceListing', marketplaceListingSchema);
+
 const semesterSchema = new mongoose.Schema(
   {
     user: {
@@ -707,6 +748,25 @@ const planFromRequest = (input) => {
     }),
   };
 };
+const lostFoundItemFromRequest = (input) => {
+  const status = text(input?.status);
+  const title = text(input?.title).slice(0, 150);
+  const location = text(input?.location).slice(0, 250);
+  const description = text(input?.description).slice(0, 1000);
+  if (!['Lost', 'Found'].includes(status) || !title || !location)
+    throw badRequest('Item type, title, and location are required.');
+  return { status, title, location, description };
+};
+const marketplaceListingFromRequest = (input) => {
+  const title = text(input?.title).slice(0, 150);
+  const category = text(input?.category).slice(0, 50);
+  const condition = text(input?.condition).slice(0, 100);
+  const description = text(input?.description).slice(0, 1000);
+  const price = Number(input?.price);
+  if (!title || !category || !Number.isFinite(price) || price < 0 || price > 10000000)
+    throw badRequest('Title, category, and a valid price are required.');
+  return { title, category, price, condition, description };
+};
 const semestersFromRequest = (semesters) => {
   if (!Array.isArray(semesters))
     throw badRequest('Semester data must be a list.');
@@ -813,6 +873,52 @@ app.delete(
     }
   },
 );
+
+app.get('/api/lost-found-items', requireAuth, async (_request, response, next) => {
+  try {
+    const items = await LostFoundItem.find().sort({ createdAt: -1 }).limit(200);
+    response.json({ items: items.map(clientDocument) });
+  } catch (error) {
+    next(error);
+  }
+});
+app.post('/api/lost-found-items', requireAuth, async (request, response, next) => {
+  try {
+    const item = await LostFoundItem.create({
+      user: request.user._id,
+      reporterName: text(request.user.profile?.name).slice(0, 100) || request.user.email,
+      ...lostFoundItemFromRequest(request.body),
+    });
+    response.status(201).json({ item: clientDocument(item) });
+  } catch (error) {
+    if (error.status)
+      return response.status(error.status).json({ message: error.message });
+    next(error);
+  }
+});
+
+app.get('/api/marketplace-listings', requireAuth, async (_request, response, next) => {
+  try {
+    const listings = await MarketplaceListing.find().sort({ createdAt: -1 }).limit(200);
+    response.json({ listings: listings.map(clientDocument) });
+  } catch (error) {
+    next(error);
+  }
+});
+app.post('/api/marketplace-listings', requireAuth, async (request, response, next) => {
+  try {
+    const listing = await MarketplaceListing.create({
+      user: request.user._id,
+      sellerName: text(request.user.profile?.name).slice(0, 100) || request.user.email,
+      ...marketplaceListingFromRequest(request.body),
+    });
+    response.status(201).json({ listing: clientDocument(listing) });
+  } catch (error) {
+    if (error.status)
+      return response.status(error.status).json({ message: error.message });
+    next(error);
+  }
+});
 
 app.get('/api/cgpa', requireAuth, async (request, response, next) => {
   try {
