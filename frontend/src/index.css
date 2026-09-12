@@ -2269,6 +2269,18 @@ button {
   background: #edf0fc;
   cursor: pointer;
 }
+.note-card__actions {
+  display: flex;
+  gap: 7px;
+}
+.note-card footer .note-card__delete {
+  color: #bd5e68;
+  background: #fff0f1;
+}
+.note-card footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 .study-empty {
   padding: 38px;
   border-radius: 18px;

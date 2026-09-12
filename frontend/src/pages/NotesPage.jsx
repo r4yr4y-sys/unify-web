@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, FileText, FolderOpen, Plus, Search, Upload } from "lucide-react";
+import { Download, FileText, FolderOpen, Plus, Search, Trash2, Upload } from "lucide-react";
 import { PageHeader } from "../components/ui";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -14,6 +14,7 @@ export default function NotesPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -74,6 +75,27 @@ export default function NotesPage() {
       setError(requestError.message);
     }
   };
+
+  const deleteNote = async (note) => {
+    if (!window.confirm(`Delete ${note.originalName}? This cannot be undone.`)) return;
+    setDeletingId(note.id);
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/api/notes/${note.id}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Unable to delete the PDF.");
+      }
+      setItems((current) => current.filter((item) => item.id !== note.id));
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setDeletingId("");
+    }
+  };
   const visible = items.filter((note) =>
     `${note.title} ${note.originalName}`.toLowerCase().includes(query.toLowerCase()),
   );
@@ -115,9 +137,14 @@ export default function NotesPage() {
             <h2 title={note.originalName}>{note.title}</h2>
             <footer>
               <span>{formatDate(note.createdAt)}</span>
-              <button type="button" aria-label={`Download ${note.title}`} title="Download PDF" onClick={() => downloadNote(note)}>
-                <Download size={17} />
-              </button>
+              <span className="note-card__actions">
+                <button type="button" aria-label={`Download ${note.title}`} title="Download PDF" onClick={() => downloadNote(note)}>
+                  <Download size={17} />
+                </button>
+                <button type="button" className="note-card__delete" aria-label={`Delete ${note.title}`} title="Delete PDF" onClick={() => deleteNote(note)} disabled={deletingId === note.id}>
+                  <Trash2 size={16} />
+                </button>
+              </span>
             </footer>
           </article>
         ))}

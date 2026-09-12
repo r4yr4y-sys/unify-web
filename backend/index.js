@@ -608,6 +608,37 @@ app.get(
   },
 );
 
+app.delete('/api/notes/:id', requireAuth, async (request, response, next) => {
+  try {
+    const note = await Note.findOne({
+      _id: request.params.id,
+      user: request.user._id,
+    });
+    if (!note) return response.status(404).json({ message: 'Note not found.' });
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      return response.status(503).json({
+        message:
+          'PDF uploads are not configured. Add the Cloudinary credentials to backend/.env.',
+      });
+    }
+    const result = await cloudinary.uploader.destroy(note.publicId, {
+      resource_type: 'raw',
+      invalidate: true,
+    });
+    if (!['ok', 'not found'].includes(result.result)) {
+      throw new Error('The uploaded PDF could not be deleted.');
+    }
+    await note.deleteOne();
+    response.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
+
 const clientDocument = (document) => ({
   id: document.id,
   ...document.toObject({
