@@ -81,6 +81,7 @@ function CourseForm({ semester, onClose, onSaved }) {
                     : "text"
                 }
                 min="0"
+                step={key === "credits" ? "0.25" : "1"}
                 value={form[key]}
                 onChange={(e) => change(key, e.target.value)}
               />
