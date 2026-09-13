@@ -24,13 +24,15 @@ app.use('/api/auth', signinRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api', apiRouter);
 
-app.use((error, _request, response, _next) => {
+app.use((error, request, response, _next) => {
   console.error(error);
   if (error instanceof multer.MulterError) {
     return response.status(400).json({
       message: error.code === 'LIMIT_FILE_SIZE'
-        ? 'PDF files must be 10 MB or smaller.'
-        : 'Unable to process the uploaded PDF.',
+        ? request.originalUrl.startsWith('/api/profile/avatar')
+          ? 'Profile pictures must be 5 MB or smaller.'
+          : 'PDF files must be 10 MB or smaller.'
+        : 'Unable to process the uploaded file.',
     });
   }
   if (error.status) return response.status(error.status).json({ message: error.message });

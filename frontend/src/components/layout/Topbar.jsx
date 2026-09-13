@@ -8,6 +8,7 @@ import profilePicture from "../../assets/Profile_pic.jpg";
 export default function Topbar() {
   const greetingRef = useRef(null);
   const [name, setName] = useState("there");
+  const [avatarUrl, setAvatarUrl] = useState(profilePicture);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -22,14 +23,18 @@ export default function Topbar() {
           },
         );
         const result = await response.json();
-        if (response.ok && active)
+        if (response.ok && active) {
           setName(result.user.profile?.name?.trim().split(/\s+/)[0] || "there");
+          setAvatarUrl(result.user.profile?.avatarUrl || profilePicture);
+        }
       } catch (_error) {
         // The profile page will show a request error if the API remains unavailable.
       }
     };
-    const handleProfileUpdate = (event) =>
+    const handleProfileUpdate = (event) => {
       setName(event.detail?.profile?.name?.trim().split(/\s+/)[0] || "there");
+      setAvatarUrl(event.detail?.profile?.avatarUrl || profilePicture);
+    };
     loadProfile();
     window.addEventListener("unify-profile-updated", handleProfileUpdate);
     return () => {
@@ -77,7 +82,7 @@ export default function Topbar() {
           Hello, {name}!
         </span>
         <Link className="user-avatar" to="/profile" aria-label="Open profile">
-          <img src={profilePicture} alt="Default profile" />
+          <img src={avatarUrl} alt="Your profile" />
         </Link>
       </div>
     </header>

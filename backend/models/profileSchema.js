@@ -5,6 +5,8 @@ const profileSchema = new mongoose.Schema({
   department: { type: String, trim: true, default: '', maxlength: 150 },
   semester: { type: String, trim: true, default: '', maxlength: 50 },
   status: { type: String, trim: true, default: '', maxlength: 100 },
+  avatarUrl: { type: String, trim: true, default: '', maxlength: 1000 },
+  avatarPublicId: { type: String, trim: true, default: '', maxlength: 500 },
   bio: { type: String, trim: true, default: '', maxlength: 500 },
   studentId: { type: String, trim: true, default: '', maxlength: 100 },
   program: { type: String, trim: true, default: '', maxlength: 150 },

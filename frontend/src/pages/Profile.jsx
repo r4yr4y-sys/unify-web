@@ -74,6 +74,22 @@ function InfoList({ items, icons = false }) {
 
 function Editor({ initial, setup, saving, error, onSave, onCancel }) {
   const [form, setForm] = useState(() => asForm(initial));
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(
+    initial.avatarUrl || profilePicture,
+  );
+  const chooseAvatar = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+  useEffect(
+    () => () => {
+      if (avatarPreview.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+    },
+    [avatarPreview],
+  );
   const field = (name) => ({
     value: form[name],
     onChange: (e) => setForm((f) => ({ ...f, [name]: e.target.value })),
@@ -131,9 +147,24 @@ function Editor({ initial, setup, saving, error, onSave, onCancel }) {
         className="profile-form"
         onSubmit={(e) => {
           e.preventDefault();
-          onSave(form);
+          onSave(form, avatarFile);
         }}
       >
+        <fieldset>
+          <legend>Profile picture</legend>
+          <div className="profile-picture-input">
+            <img src={avatarPreview} alt="Profile picture preview" />
+            <label>
+              Choose picture
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={chooseAvatar}
+              />
+              <small>JPEG, PNG, or WebP up to 5 MB.</small>
+            </label>
+          </div>
+        </fieldset>
         <fieldset>
           <legend>Identity</legend>
           <div className="profile-form__grid">
@@ -308,7 +339,7 @@ function Editor({ initial, setup, saving, error, onSave, onCancel }) {
 }
 
 const styles = `
-.profile-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}.profile-grid>*{min-width:0}.profile-hero{grid-column:span 7;min-height:265px}.profile-hero__identity{display:flex;align-items:center;gap:22px}.profile-hero__identity img{width:112px;height:112px;flex:0 0 112px;border:5px solid #fff;border-radius:50%;object-fit:cover}.profile-panel--basic,.profile-panel--personal{grid-column:span 5}.profile-panel--journey{grid-column:span 7}.profile-panel--emergency,.profile-editor{grid-column:1/-1}.profile-connect{grid-column:span 9;min-height:148px}.profile-listen{grid-column:span 3;display:flex;min-height:148px;color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.75);border-radius:20px;background:#f9faff}.profile-panel--personal .profile-info-list{gap:8px}.profile-panel--personal .profile-info-list__item{padding:9px 10px;border:1px solid #edf0f6;border-radius:11px}.profile-emergency-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.profile-emergency-contacts{display:grid;gap:14px}.profile-emergency-grid>div{display:grid;gap:5px;padding:10px 12px;border-left:2px solid #f0c9ca}.profile-emergency-grid dt{color:#929bad;font-size:.68rem;font-weight:700;text-transform:uppercase}.profile-emergency-grid dd{margin:0;color:#35415e;font-size:.84rem;font-weight:700}.profile-social-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.profile-actions{display:flex;justify-content:flex-end;margin:-8px 0 14px}.profile-button,.profile-text-button{border:0;border-radius:10px;background:#35415e;color:#fff;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}.profile-button:disabled{opacity:.65;cursor:wait}.secondary,.profile-text-button{background:#eef1f7;color:#35415e}.profile-editor__heading{display:flex;justify-content:space-between;gap:12px}.profile-form{display:grid;gap:18px}.profile-form fieldset{border:1px solid #e6eaf1;border-radius:14px;padding:14px;margin:0}.profile-form legend{color:#35415e;font-weight:800;padding:0 6px}.profile-form__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}.profile-form label{color:#58647c;display:grid;gap:6px;font-size:.84rem;font-weight:700}.profile-form input,.profile-form textarea{border:1px solid #dce2ec;border-radius:9px;padding:9px 10px;background:#fff;color:#35415e;font:inherit}.profile-form textarea{min-height:75px;resize:vertical}.wide{grid-column:1/-1}.journey{margin-top:8px}.profile-contact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;margin:10px 0}.profile-error{color:#b42318;font-weight:700;margin:0}@media(max-width:900px){.profile-hero{grid-column:1/-1}.profile-panel--basic,.profile-panel--personal,.profile-panel--journey{grid-column:span 6}.profile-listen{grid-column:span 4}.profile-connect{grid-column:span 8}}@media(max-width:680px){.profile-grid{grid-template-columns:1fr}.profile-hero,.profile-panel--basic,.profile-panel--personal,.profile-panel--journey,.profile-panel--emergency,.profile-listen,.profile-connect{grid-column:1/-1}.profile-form__grid,.profile-contact,.profile-emergency-grid,.profile-social-links{grid-template-columns:1fr}}
+.profile-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}.profile-grid>*{min-width:0}.profile-hero{grid-column:span 7;min-height:265px}.profile-hero__identity{display:flex;align-items:center;gap:22px}.profile-hero__identity img{width:112px;height:112px;flex:0 0 112px;border:5px solid #fff;border-radius:50%;object-fit:cover}.profile-panel--basic,.profile-panel--personal{grid-column:span 5}.profile-panel--journey{grid-column:span 7}.profile-panel--emergency,.profile-editor{grid-column:1/-1}.profile-connect{grid-column:span 9;min-height:148px}.profile-listen{grid-column:span 3;display:flex;min-height:148px;color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.75);border-radius:20px;background:#f9faff}.profile-panel--personal .profile-info-list{gap:8px}.profile-panel--personal .profile-info-list__item{padding:9px 10px;border:1px solid #edf0f6;border-radius:11px}.profile-emergency-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.profile-emergency-contacts{display:grid;gap:14px}.profile-emergency-grid>div{display:grid;gap:5px;padding:10px 12px;border-left:2px solid #f0c9ca}.profile-emergency-grid dt{color:#929bad;font-size:.68rem;font-weight:700;text-transform:uppercase}.profile-emergency-grid dd{margin:0;color:#35415e;font-size:.84rem;font-weight:700}.profile-social-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.profile-actions{display:flex;justify-content:flex-end;margin:-8px 0 14px}.profile-button,.profile-text-button{border:0;border-radius:10px;background:#35415e;color:#fff;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}.profile-button:disabled{opacity:.65;cursor:wait}.secondary,.profile-text-button{background:#eef1f7;color:#35415e}.profile-editor__heading{display:flex;justify-content:space-between;gap:12px}.profile-form{display:grid;gap:18px}.profile-form fieldset{border:1px solid #e6eaf1;border-radius:14px;padding:14px;margin:0}.profile-form legend{color:#35415e;font-weight:800;padding:0 6px}.profile-form__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}.profile-form label{color:#58647c;display:grid;gap:6px;font-size:.84rem;font-weight:700}.profile-form input,.profile-form textarea{border:1px solid #dce2ec;border-radius:9px;padding:9px 10px;background:#fff;color:#35415e;font:inherit}.profile-form textarea{min-height:75px;resize:vertical}.profile-picture-input{display:flex;align-items:center;gap:14px}.profile-picture-input img{width:76px;height:76px;border-radius:50%;object-fit:cover}.profile-picture-input input{padding:6px}.profile-picture-input small{font-weight:400}.wide{grid-column:1/-1}.journey{margin-top:8px}.profile-contact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;margin:10px 0}.profile-error{color:#b42318;font-weight:700;margin:0}@media(max-width:900px){.profile-hero{grid-column:1/-1}.profile-panel--basic,.profile-panel--personal,.profile-panel--journey{grid-column:span 6}.profile-listen{grid-column:span 4}.profile-connect{grid-column:span 8}}@media(max-width:680px){.profile-grid{grid-template-columns:1fr}.profile-hero,.profile-panel--basic,.profile-panel--personal,.profile-panel--journey,.profile-panel--emergency,.profile-listen,.profile-connect{grid-column:1/-1}.profile-form__grid,.profile-contact,.profile-emergency-grid,.profile-social-links{grid-template-columns:1fr}}
 `;
 
 export function ProfilePage() {
@@ -343,7 +374,7 @@ export function ProfilePage() {
       mounted = false;
     };
   }, [token]);
-  const save = async (profile) => {
+  const save = async (profile, avatarFile) => {
     setSaving(true);
     setError("");
     try {
@@ -358,12 +389,28 @@ export function ProfilePage() {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.message || "Unable to save your profile.");
+      let updatedUser = result.user;
+      if (avatarFile) {
+        const image = new FormData();
+        image.append("avatar", avatarFile);
+        const avatarResponse = await fetch(`${apiUrl}/api/profile/avatar`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: image,
+        });
+        const avatarResult = await avatarResponse.json();
+        if (!avatarResponse.ok)
+          throw new Error(
+            avatarResult.message || "Unable to upload your profile picture.",
+          );
+        updatedUser = avatarResult.user;
+      }
       const wasSetup = !user.profileCompleted;
-      setUser(result.user);
+      setUser(updatedUser);
       setEditing(false);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
       window.dispatchEvent(
-        new CustomEvent("unify-profile-updated", { detail: result.user }),
+        new CustomEvent("unify-profile-updated", { detail: updatedUser }),
       );
       if (wasSetup) navigate("/dashboard", { replace: true });
     } catch (e) {
@@ -437,7 +484,10 @@ export function ProfilePage() {
           <>
             <BentoCard className="profile-hero">
               <div className="profile-hero__identity">
-                <img src={profilePicture} alt="Default profile" />
+                <img
+                  src={p.avatarUrl || profilePicture}
+                  alt={`${value(p.name)} profile picture`}
+                />
                 <div>
                   <p className="eyebrow">Student profile</p>
                   <h2>{value(p.name)}</h2>
