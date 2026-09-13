@@ -67,7 +67,8 @@ export default function LoginPage() {
         },
       );
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Unable to continue.");
+      if (!response.ok)
+        throw new Error(result.message || "Unable to continue.");
       localStorage.setItem("authToken", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
       navigate("/dashboard");
@@ -100,7 +101,11 @@ export default function LoginPage() {
               type="button"
               role="tab"
               aria-selected={!isSignUp}
-              onClick={() => { setMode("sign-in"); setErrorMessage(""); setHasCredentialMismatch(false); }}
+              onClick={() => {
+                setMode("sign-in");
+                setErrorMessage("");
+                setHasCredentialMismatch(false);
+              }}
             >
               Sign In
             </button>
@@ -109,7 +114,11 @@ export default function LoginPage() {
               type="button"
               role="tab"
               aria-selected={isSignUp}
-              onClick={() => { setMode("sign-up"); setErrorMessage(""); setHasCredentialMismatch(false); }}
+              onClick={() => {
+                setMode("sign-up");
+                setErrorMessage("");
+                setHasCredentialMismatch(false);
+              }}
             >
               Sign Up
             </button>
@@ -144,8 +153,8 @@ export default function LoginPage() {
                   type="password"
                   name="confirmPassword"
                   autoComplete="new-password"
-                placeholder="Confirm your password"
-                required
+                  placeholder="Confirm your password"
+                  required
                 />
               </label>
             )}
@@ -156,7 +165,11 @@ export default function LoginPage() {
             >
               {isSubmitting ? "Please wait..." : "Continue"}
             </button>
-            {errorMessage && <p className="login-form__error" role="alert">{errorMessage}</p>}
+            {errorMessage && (
+              <p className="login-form__error" role="alert">
+                {errorMessage}
+              </p>
+            )}
           </form>
           <div className="login-form__divider">
             <span>Or Continue With</span>

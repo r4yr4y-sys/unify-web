@@ -13,7 +13,10 @@ import {
 } from "../components/study/StudyPlanModals";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("authToken")}` });
+const authHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+});
 function formatDate(value) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -93,13 +96,68 @@ export default function StudyPlansPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const activePlan = plans.find((plan) => plan.id === activePlanId) || null;
-  useEffect(() => { let active = true; fetch(`${apiUrl}/api/study-plans`, { headers: authHeaders() }).then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to load study plans."); return result.plans; }).then((savedPlans) => { if (active) setPlans(savedPlans); }).catch((requestError) => { if (active) setError(requestError.message); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);
+  useEffect(() => {
+    let active = true;
+    fetch(`${apiUrl}/api/study-plans`, { headers: authHeaders() })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(result.message || "Unable to load study plans.");
+        return result.plans;
+      })
+      .then((savedPlans) => {
+        if (active) setPlans(savedPlans);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function createPlan(values) {
-    setError(""); try { const response = await fetch(`${apiUrl}/api/study-plans`, { method: "POST", headers: authHeaders(), body: JSON.stringify(values) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to create study plan."); setPlans((current) => [result.plan, ...current]); setShowCreate(false); } catch (requestError) { setError(requestError.message); }
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/api/study-plans`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(values),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Unable to create study plan.");
+      setPlans((current) => [result.plan, ...current]);
+      setShowCreate(false);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
   async function updatePlan(updatedPlan) {
-    setError(""); try { const response = await fetch(`${apiUrl}/api/study-plans/${updatedPlan.id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(updatedPlan) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to save study plan."); setPlans((current) => current.map((plan) => plan.id === result.plan.id ? result.plan : plan)); } catch (requestError) { setError(requestError.message); }
+    setError("");
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/study-plans/${updatedPlan.id}`,
+        {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify(updatedPlan),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Unable to save study plan.");
+      setPlans((current) =>
+        current.map((plan) =>
+          plan.id === result.plan.id ? result.plan : plan,
+        ),
+      );
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
   return (
     <section className="page study-page">
@@ -113,7 +171,11 @@ export default function StudyPlansPage() {
           </Button>
         }
       />
-      {error && <p className="grades-card__empty" role="alert">{error}</p>}
+      {error && (
+        <p className="grades-card__empty" role="alert">
+          {error}
+        </p>
+      )}
       <section className="study-plan-hero">
         <span>
           <Target size={28} />
@@ -127,15 +189,19 @@ export default function StudyPlansPage() {
           </p>
         </div>
       </section>
-      {loading ? <p>Loading study plans…</p> : <div className="plans-grid">
-        {plans.map((plan) => (
-          <StudyPlanCard
-            key={plan.id}
-            plan={plan}
-            onOpen={() => setActivePlanId(plan.id)}
-          />
-        ))}
-      </div>}
+      {loading ? (
+        <p>Loading study plans…</p>
+      ) : (
+        <div className="plans-grid">
+          {plans.map((plan) => (
+            <StudyPlanCard
+              key={plan.id}
+              plan={plan}
+              onOpen={() => setActivePlanId(plan.id)}
+            />
+          ))}
+        </div>
+      )}
       {showCreate && (
         <CreateStudyPlanModal
           onClose={() => setShowCreate(false)}

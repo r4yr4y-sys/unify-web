@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Download, FileText, FolderOpen, Plus, Search, Trash2, Upload } from "lucide-react";
+import {
+  Download,
+  FileText,
+  FolderOpen,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { PageHeader } from "../components/ui";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -7,7 +15,12 @@ const hues = ["blue", "violet", "amber", "green"];
 const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
 });
-const formatDate = (value) => new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
+const formatDate = (value) =>
+  new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
 
 export default function NotesPage() {
   const [items, setItems] = useState([]);
@@ -22,13 +35,16 @@ export default function NotesPage() {
     fetch(`${apiUrl}/api/notes`, { headers: authHeaders() })
       .then(async (response) => {
         const result = await response.json();
-        if (!response.ok) throw new Error(result.message || "Unable to load notes.");
+        if (!response.ok)
+          throw new Error(result.message || "Unable to load notes.");
         return result.notes;
       })
       .then((notes) => active && setItems(notes))
       .catch((requestError) => active && setError(requestError.message))
       .finally(() => active && setLoading(false));
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const uploadNote = async (event) => {
@@ -44,9 +60,14 @@ export default function NotesPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(`${apiUrl}/api/notes`, { method: "POST", headers: authHeaders(), body: formData });
+      const response = await fetch(`${apiUrl}/api/notes`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: formData,
+      });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Unable to upload the PDF.");
+      if (!response.ok)
+        throw new Error(result.message || "Unable to upload the PDF.");
       setItems((current) => [result.note, ...current]);
     } catch (requestError) {
       setError(requestError.message);
@@ -58,7 +79,9 @@ export default function NotesPage() {
   const downloadNote = async (note) => {
     setError("");
     try {
-      const response = await fetch(`${apiUrl}/api/notes/${note.id}/download`, { headers: authHeaders() });
+      const response = await fetch(`${apiUrl}/api/notes/${note.id}/download`, {
+        headers: authHeaders(),
+      });
       if (!response.ok) {
         const result = await response.json();
         throw new Error(result.message || "Unable to download the PDF.");
@@ -77,7 +100,8 @@ export default function NotesPage() {
   };
 
   const deleteNote = async (note) => {
-    if (!window.confirm(`Delete ${note.originalName}? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete ${note.originalName}? This cannot be undone.`))
+      return;
     setDeletingId(note.id);
     setError("");
     try {
@@ -97,7 +121,9 @@ export default function NotesPage() {
     }
   };
   const visible = items.filter((note) =>
-    `${note.title} ${note.originalName}`.toLowerCase().includes(query.toLowerCase()),
+    `${note.title} ${note.originalName}`
+      .toLowerCase()
+      .includes(query.toLowerCase()),
   );
   return (
     <section className="page study-page">
@@ -109,7 +135,12 @@ export default function NotesPage() {
           <label className="button button--primary resource-upload">
             {uploading ? <Upload size={17} /> : <Plus size={17} />}
             {uploading ? "Uploading…" : "Upload PDF"}
-            <input type="file" accept="application/pdf,.pdf" onChange={uploadNote} disabled={uploading} />
+            <input
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={uploadNote}
+              disabled={uploading}
+            />
           </label>
         }
       />
@@ -127,28 +158,47 @@ export default function NotesPage() {
         </button>
       </div>
       {error && <p className="notes-message notes-message--error">{error}</p>}
-      {loading ? <p className="study-empty">Loading your PDFs…</p> : <div className="notes-grid">
-        {visible.map((note, index) => (
-          <article className={`note-card note-card--${hues[index % hues.length]}`} key={note.id}>
-            <span className="note-card__icon">
-              <FileText size={20} />
-            </span>
-            <p>PDF note</p>
-            <h2 title={note.originalName}>{note.title}</h2>
-            <footer>
-              <span>{formatDate(note.createdAt)}</span>
-              <span className="note-card__actions">
-                <button type="button" aria-label={`Download ${note.title}`} title="Download PDF" onClick={() => downloadNote(note)}>
-                  <Download size={17} />
-                </button>
-                <button type="button" className="note-card__delete" aria-label={`Delete ${note.title}`} title="Delete PDF" onClick={() => deleteNote(note)} disabled={deletingId === note.id}>
-                  <Trash2 size={16} />
-                </button>
+      {loading ? (
+        <p className="study-empty">Loading your PDFs…</p>
+      ) : (
+        <div className="notes-grid">
+          {visible.map((note, index) => (
+            <article
+              className={`note-card note-card--${hues[index % hues.length]}`}
+              key={note.id}
+            >
+              <span className="note-card__icon">
+                <FileText size={20} />
               </span>
-            </footer>
-          </article>
-        ))}
-      </div>}
+              <p>PDF note</p>
+              <h2 title={note.originalName}>{note.title}</h2>
+              <footer>
+                <span>{formatDate(note.createdAt)}</span>
+                <span className="note-card__actions">
+                  <button
+                    type="button"
+                    aria-label={`Download ${note.title}`}
+                    title="Download PDF"
+                    onClick={() => downloadNote(note)}
+                  >
+                    <Download size={17} />
+                  </button>
+                  <button
+                    type="button"
+                    className="note-card__delete"
+                    aria-label={`Delete ${note.title}`}
+                    title="Delete PDF"
+                    onClick={() => deleteNote(note)}
+                    disabled={deletingId === note.id}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </span>
+              </footer>
+            </article>
+          ))}
+        </div>
+      )}
       {!loading && !visible.length && (
         <p className="study-empty">No PDFs match that search.</p>
       )}

@@ -35,8 +35,7 @@ export default function FlashcardCreator({ cardCount, onComplete, onCancel }) {
     onComplete(cards);
   }
 
-  const canProceed =
-    currentCard.question.trim() && currentCard.answer.trim();
+  const canProceed = currentCard.question.trim() && currentCard.answer.trim();
 
   return (
     <div className="flashcard-creator">

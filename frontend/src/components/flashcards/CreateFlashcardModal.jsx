@@ -114,7 +114,10 @@ export default function CreateFlashcardModal({ onClose, onCreate }) {
               </div>
             </label>
 
-            <ColorSchemePicker selected={colorScheme} onSelect={setColorScheme} />
+            <ColorSchemePicker
+              selected={colorScheme}
+              onSelect={setColorScheme}
+            />
 
             <div className="flashcard-setup__footer">
               <button
@@ -139,9 +142,15 @@ export default function CreateFlashcardModal({ onClose, onCreate }) {
 
         {confirmLeave && (
           <div className="flashcard-confirm-backdrop">
-            <div className="flashcard-confirm" role="alertdialog" aria-modal="true">
+            <div
+              className="flashcard-confirm"
+              role="alertdialog"
+              aria-modal="true"
+            >
               <h3>Unsaved flashcards</h3>
-              <p>You have unsaved flashcards. Are you sure you want to leave?</p>
+              <p>
+                You have unsaved flashcards. Are you sure you want to leave?
+              </p>
               <div className="flashcard-confirm__actions">
                 <button
                   type="button"

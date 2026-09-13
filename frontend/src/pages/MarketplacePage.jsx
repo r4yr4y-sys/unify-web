@@ -4,24 +4,328 @@ import { Button, PageHeader } from "../components/ui";
 import { ItemArtwork } from "./campusLifeData";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("authToken")}` });
-const categories = ["Books", "Tech", "Furniture", "Fashion", "Academic", "Other"];
-const formatPrice = (price) => `৳${new Intl.NumberFormat("en-BD", { maximumFractionDigits: 0 }).format(price)}`;
+const authHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+});
+const categories = [
+  "Books",
+  "Tech",
+  "Furniture",
+  "Fashion",
+  "Academic",
+  "Other",
+];
+const formatPrice = (price) =>
+  `৳${new Intl.NumberFormat("en-BD", { maximumFractionDigits: 0 }).format(price)}`;
 
 function ListingModal({ onClose, onCreate, saving }) {
-  const [values, setValues] = useState({ title: "", price: "", category: "Books", condition: "", description: "" });
+  const [values, setValues] = useState({
+    title: "",
+    price: "",
+    category: "Books",
+    condition: "",
+    description: "",
+  });
   const [error, setError] = useState("");
-  useEffect(() => { const escape = (event) => event.key === "Escape" && onClose(); window.addEventListener("keydown", escape); return () => window.removeEventListener("keydown", escape); }, [onClose]);
-  const change = (field) => (event) => setValues((current) => ({ ...current, [field]: event.target.value }));
-  function submit(event) { event.preventDefault(); if (!values.title.trim() || values.price === "" || Number(values.price) < 0) return setError("Enter an item title and a valid price."); onCreate({ ...values, title: values.title.trim(), price: Number(values.price), condition: values.condition.trim(), description: values.description.trim() }); }
-  return <div className="lost-report-backdrop" role="presentation" onClick={onClose}><section className="lost-report-modal" role="dialog" aria-modal="true" aria-labelledby="listing-title" onClick={(event) => event.stopPropagation()}><button type="button" className="lost-report-modal__close" onClick={onClose} aria-label="Close listing form"><X size={18} /></button><form className="lost-report-form" onSubmit={submit}><header><p className="eyebrow">Marketplace</p><h2 id="listing-title">Post a listing</h2><p>Give other students the details they need to buy your item.</p></header><label><span>Item name</span><input autoFocus value={values.title} onChange={change("title")} maxLength="150" placeholder="e.g. Scientific calculator" /></label><label><span>Price (৳)</span><input type="number" min="0" max="10000000" value={values.price} onChange={change("price")} placeholder="e.g. 1800" /></label><label><span>Category</span><select value={values.category} onChange={change("category")}>{categories.map((category) => <option key={category}>{category}</option>)}</select></label><label><span>Condition <em>Optional</em></span><input value={values.condition} onChange={change("condition")} maxLength="100" placeholder="e.g. Like new" /></label><label><span>Description <em>Optional</em></span><textarea value={values.description} onChange={change("description")} maxLength="1000" rows="4" placeholder="Add brand, edition, size, or other useful details" /></label>{error && <p className="lost-report-form__error" role="alert">{error}</p>}<footer><Button type="button" variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button><Button type="submit" disabled={saving}>{saving ? "Posting…" : "Post listing"}</Button></footer></form></section></div>;
+  useEffect(() => {
+    const escape = (event) => event.key === "Escape" && onClose();
+    window.addEventListener("keydown", escape);
+    return () => window.removeEventListener("keydown", escape);
+  }, [onClose]);
+  const change = (field) => (event) =>
+    setValues((current) => ({ ...current, [field]: event.target.value }));
+  function submit(event) {
+    event.preventDefault();
+    if (!values.title.trim() || values.price === "" || Number(values.price) < 0)
+      return setError("Enter an item title and a valid price.");
+    onCreate({
+      ...values,
+      title: values.title.trim(),
+      price: Number(values.price),
+      condition: values.condition.trim(),
+      description: values.description.trim(),
+    });
+  }
+  return (
+    <div className="lost-report-backdrop" role="presentation" onClick={onClose}>
+      <section
+        className="lost-report-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="listing-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="lost-report-modal__close"
+          onClick={onClose}
+          aria-label="Close listing form"
+        >
+          <X size={18} />
+        </button>
+        <form className="lost-report-form" onSubmit={submit}>
+          <header>
+            <p className="eyebrow">Marketplace</p>
+            <h2 id="listing-title">Post a listing</h2>
+            <p>Give other students the details they need to buy your item.</p>
+          </header>
+          <label>
+            <span>Item name</span>
+            <input
+              autoFocus
+              value={values.title}
+              onChange={change("title")}
+              maxLength="150"
+              placeholder="e.g. Scientific calculator"
+            />
+          </label>
+          <label>
+            <span>Price (৳)</span>
+            <input
+              type="number"
+              min="0"
+              max="10000000"
+              value={values.price}
+              onChange={change("price")}
+              placeholder="e.g. 1800"
+            />
+          </label>
+          <label>
+            <span>Category</span>
+            <select value={values.category} onChange={change("category")}>
+              {categories.map((category) => (
+                <option key={category}>{category}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>
+              Condition <em>Optional</em>
+            </span>
+            <input
+              value={values.condition}
+              onChange={change("condition")}
+              maxLength="100"
+              placeholder="e.g. Like new"
+            />
+          </label>
+          <label>
+            <span>
+              Description <em>Optional</em>
+            </span>
+            <textarea
+              value={values.description}
+              onChange={change("description")}
+              maxLength="1000"
+              rows="4"
+              placeholder="Add brand, edition, size, or other useful details"
+            />
+          </label>
+          {error && (
+            <p className="lost-report-form__error" role="alert">
+              {error}
+            </p>
+          )}
+          <footer>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Posting…" : "Post listing"}
+            </Button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  );
 }
 
 export default function MarketplacePage() {
-  const [query, setQuery] = useState(""), [filter, setFilter] = useState("All items"), [saved, setSaved] = useState([]), [listings, setListings] = useState([]), [showCreate, setShowCreate] = useState(false), [loading, setLoading] = useState(true), [saving, setSaving] = useState(false), [error, setError] = useState("");
-  useEffect(() => { let active = true; fetch(`${apiUrl}/api/marketplace-listings`, { headers: authHeaders() }).then(async (response) => { const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to load marketplace listings."); return result.listings; }).then((items) => { if (active) setListings(items); }).catch((requestError) => { if (active) setError(requestError.message); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);
-  async function createListing(values) { setSaving(true); setError(""); try { const response = await fetch(`${apiUrl}/api/marketplace-listings`, { method: "POST", headers: authHeaders(), body: JSON.stringify(values) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to post your listing."); setListings((current) => [result.listing, ...current]); setShowCreate(false); } catch (requestError) { setError(requestError.message); } finally { setSaving(false); } }
-  const items = listings.filter((item) => `${item.title} ${item.category} ${item.description}`.toLowerCase().includes(query.toLowerCase())).filter((item) => filter === "All items" || (filter === "Under 2000" ? item.price < 2000 : item.category === filter));
-  const toggleSaved = (id) => setSaved((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-  return <section className="page campus-page"><PageHeader eyebrow="Campus life" title="Student marketplace" description="Pass on what you no longer need and find what makes student life easier." actions={<Button onClick={() => setShowCreate(true)}><Plus size={17} /> Post a listing</Button>} /><section className="marketplace-intro"><div className="marketplace-intro__icon"><WalletCards size={29} /></div><div><span className="event-hero__eyebrow">Buy local, keep it circular</span><h2>Good things deserve a second semester.</h2><p>Browse trusted listings from students on your campus.</p></div><div className="marketplace-intro__stats"><strong>{listings.length}</strong><span>active listings</span></div></section><div className="marketplace-controls"><label className="event-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search books, tech, furniture…" /></label><div className="filter-pills marketplace-pills">{["All items", "Books", "Tech", "Under 2000"].map((item) => <button className={`filter-pill ${filter === item ? "is-active" : ""}`} type="button" key={item} onClick={() => setFilter(item)}>{item}</button>)}</div></div>{error && <p className="lost-page-error" role="alert">{error}</p>}{loading ? <p className="lost-page-empty">Loading listings…</p> : <div className="marketplace-grid">{items.map((item) => <article className="market-item" key={item.id}><ItemArtwork label={item.category.slice(0, 4).toUpperCase()} hue="violet" /><button type="button" className={`market-save ${saved.includes(item.id) ? "is-saved" : ""}`} onClick={() => toggleSaved(item.id)} aria-label={`Save ${item.title}`}><Heart size={17} fill={saved.includes(item.id) ? "currentColor" : "none"} /></button><div className="market-item__body"><span className="tag">{item.category}</span><h2>{item.title}</h2><p>{item.condition || item.description || "No condition details provided"}</p>{item.description && item.condition && <p>{item.description}</p>}<div><strong>{formatPrice(item.price)}</strong><span>by {item.sellerName}</span></div></div></article>)}</div>}{!loading && !items.length && <div className="no-results">No listings match that search. Try a different keyword.</div>}{showCreate && <ListingModal onClose={() => setShowCreate(false)} onCreate={createListing} saving={saving} />}</section>;
+  const [query, setQuery] = useState(""),
+    [filter, setFilter] = useState("All items"),
+    [saved, setSaved] = useState([]),
+    [listings, setListings] = useState([]),
+    [showCreate, setShowCreate] = useState(false),
+    [loading, setLoading] = useState(true),
+    [saving, setSaving] = useState(false),
+    [error, setError] = useState("");
+  useEffect(() => {
+    let active = true;
+    fetch(`${apiUrl}/api/marketplace-listings`, { headers: authHeaders() })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(
+            result.message || "Unable to load marketplace listings.",
+          );
+        return result.listings;
+      })
+      .then((items) => {
+        if (active) setListings(items);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  async function createListing(values) {
+    setSaving(true);
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/api/marketplace-listings`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(values),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Unable to post your listing.");
+      setListings((current) => [result.listing, ...current]);
+      setShowCreate(false);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+  const items = listings
+    .filter((item) =>
+      `${item.title} ${item.category} ${item.description}`
+        .toLowerCase()
+        .includes(query.toLowerCase()),
+    )
+    .filter(
+      (item) =>
+        filter === "All items" ||
+        (filter === "Under 2000"
+          ? item.price < 2000
+          : item.category === filter),
+    );
+  const toggleSaved = (id) =>
+    setSaved((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
+    );
+  return (
+    <section className="page campus-page">
+      <PageHeader
+        eyebrow="Campus life"
+        title="Student marketplace"
+        description="Pass on what you no longer need and find what makes student life easier."
+        actions={
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus size={17} /> Post a listing
+          </Button>
+        }
+      />
+      <section className="marketplace-intro">
+        <div className="marketplace-intro__icon">
+          <WalletCards size={29} />
+        </div>
+        <div>
+          <span className="event-hero__eyebrow">
+            Buy local, keep it circular
+          </span>
+          <h2>Good things deserve a second semester.</h2>
+          <p>Browse trusted listings from students on your campus.</p>
+        </div>
+        <div className="marketplace-intro__stats">
+          <strong>{listings.length}</strong>
+          <span>active listings</span>
+        </div>
+      </section>
+      <div className="marketplace-controls">
+        <label className="event-search">
+          <Search size={18} />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search books, tech, furniture…"
+          />
+        </label>
+        <div className="filter-pills marketplace-pills">
+          {["All items", "Books", "Tech", "Under 2000"].map((item) => (
+            <button
+              className={`filter-pill ${filter === item ? "is-active" : ""}`}
+              type="button"
+              key={item}
+              onClick={() => setFilter(item)}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </div>
+      {error && (
+        <p className="lost-page-error" role="alert">
+          {error}
+        </p>
+      )}
+      {loading ? (
+        <p className="lost-page-empty">Loading listings…</p>
+      ) : (
+        <div className="marketplace-grid">
+          {items.map((item) => (
+            <article className="market-item" key={item.id}>
+              <ItemArtwork
+                label={item.category.slice(0, 4).toUpperCase()}
+                hue="violet"
+              />
+              <button
+                type="button"
+                className={`market-save ${saved.includes(item.id) ? "is-saved" : ""}`}
+                onClick={() => toggleSaved(item.id)}
+                aria-label={`Save ${item.title}`}
+              >
+                <Heart
+                  size={17}
+                  fill={saved.includes(item.id) ? "currentColor" : "none"}
+                />
+              </button>
+              <div className="market-item__body">
+                <span className="tag">{item.category}</span>
+                <h2>{item.title}</h2>
+                <p>
+                  {item.condition ||
+                    item.description ||
+                    "No condition details provided"}
+                </p>
+                {item.description && item.condition && (
+                  <p>{item.description}</p>
+                )}
+                <div>
+                  <strong>{formatPrice(item.price)}</strong>
+                  <span>by {item.sellerName}</span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      {!loading && !items.length && (
+        <div className="no-results">
+          No listings match that search. Try a different keyword.
+        </div>
+      )}
+      {showCreate && (
+        <ListingModal
+          onClose={() => setShowCreate(false)}
+          onCreate={createListing}
+          saving={saving}
+        />
+      )}
+    </section>
+  );
 }

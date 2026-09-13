@@ -48,12 +48,34 @@ export function DashboardPage() {
     const token = localStorage.getItem("authToken");
     if (!token) return undefined;
     let active = true;
-    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/profile`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(async (response) => { const result = await response.json(); if (response.ok && active) setName(result.user.profile?.name || "there"); })
+    fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/profile`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
+      .then(async (response) => {
+        const result = await response.json();
+        if (response.ok && active)
+          setName(result.user.profile?.name || "there");
+      })
       .catch(() => {});
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
-  return <section className="page"><PageHeader eyebrow="Unify workspace" title={`Hello, ${name}`} description="A central overview of your university life will appear here."/><SectionCard title="Coming soon"><p className="empty-state">This section is ready for its feature-specific experience.</p></SectionCard></section>;
+  return (
+    <section className="page">
+      <PageHeader
+        eyebrow="Unify workspace"
+        title={`Hello, ${name}`}
+        description="A central overview of your university life will appear here."
+      />
+      <SectionCard title="Coming soon">
+        <p className="empty-state">
+          This section is ready for its feature-specific experience.
+        </p>
+      </SectionCard>
+    </section>
+  );
 }
 export const AcademicPage = makePage(
   "Academic",

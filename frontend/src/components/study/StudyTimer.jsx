@@ -174,8 +174,8 @@ function OpenEndedTimer({ value }) {
         <span />
       </div>
       <p>
-        No maximum duration, no progress percentage. Keep your focus as long
-        as you need.
+        No maximum duration, no progress percentage. Keep your focus as long as
+        you need.
       </p>
     </section>
   );
@@ -337,7 +337,9 @@ function SetupModal({
           </section>
         </div>
         <div className="study-timer-modal__footer">
-          <Button variant="secondary" type="button" onClick={onViewHistory}>View Study History</Button>
+          <Button variant="secondary" type="button" onClick={onViewHistory}>
+            View Study History
+          </Button>
           <Button variant="secondary" type="button" onClick={onClose}>
             Cancel
           </Button>
@@ -350,7 +352,11 @@ function SetupModal({
   );
 }
 
-export default function StudyTimer({ onExit, onSessionComplete, onViewHistory }) {
+export default function StudyTimer({
+  onExit,
+  onSessionComplete,
+  onViewHistory,
+}) {
   const [phase, setPhase] = useState("setup");
   const [mode, setMode] = useState("countdown");
   const [hours, setHours] = useState("2");
@@ -366,8 +372,9 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
   }, []);
 
   const selectedBackground =
-    backgrounds.find((item) => item.id === (session?.backgroundId || backgroundId)) ||
-    backgrounds[0];
+    backgrounds.find(
+      (item) => item.id === (session?.backgroundId || backgroundId),
+    ) || backgrounds[0];
 
   const referenceNow = session?.pauseStartedAt ?? now;
   const elapsedMs = session
@@ -391,7 +398,11 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
       : 0;
 
   useEffect(() => {
-    if (phase !== "active" || session?.mode !== "countdown" || remainingMs > 0) {
+    if (
+      phase !== "active" ||
+      session?.mode !== "countdown" ||
+      remainingMs > 0
+    ) {
       return undefined;
     }
 
@@ -439,7 +450,10 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
         ? (Number(hours) * 60 + Number(minutes)) * 60 * 1000
         : 0;
 
-    if (mode === "countdown" && (!Number.isFinite(durationMs) || durationMs <= 0)) {
+    if (
+      mode === "countdown" &&
+      (!Number.isFinite(durationMs) || durationMs <= 0)
+    ) {
       setError("Choose a study duration before starting.");
       return;
     }
@@ -517,10 +531,22 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
   function finishSession() {
     if (!session) return;
     const finishedAt = Date.now();
-    const pausedMs = session.pausedMs + (session.pauseStartedAt ? finishedAt - session.pauseStartedAt : 0);
+    const pausedMs =
+      session.pausedMs +
+      (session.pauseStartedAt ? finishedAt - session.pauseStartedAt : 0);
     const durationMs = Math.max(0, finishedAt - session.startedAt - pausedMs);
     if (durationMs >= 1000 && onSessionComplete) {
-      onSessionComplete({ startedAt: new Date(session.startedAt).toISOString(), endedAt: new Date(finishedAt).toISOString(), durationMs, mode: session.mode, backgroundId: session.backgroundId }).catch((requestError) => setSaveError(requestError.message || "Unable to save this study session."));
+      onSessionComplete({
+        startedAt: new Date(session.startedAt).toISOString(),
+        endedAt: new Date(finishedAt).toISOString(),
+        durationMs,
+        mode: session.mode,
+        backgroundId: session.backgroundId,
+      }).catch((requestError) =>
+        setSaveError(
+          requestError.message || "Unable to save this study session.",
+        ),
+      );
     }
     setSession((current) =>
       current
@@ -553,7 +579,9 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
         onEndBreak={endBreakEarly}
         onFinish={finishSession}
       />
-    ) : session?.mode === "countdown" && phase !== "setup" && phase !== "idle" ? (
+    ) : session?.mode === "countdown" &&
+      phase !== "setup" &&
+      phase !== "idle" ? (
       <CircularTimer
         label="Time remaining"
         value={timerLabel}
@@ -594,7 +622,10 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
         />
       )}
 
-      {(phase === "active" || phase === "paused" || phase === "break" || phase === "finished") && (
+      {(phase === "active" ||
+        phase === "paused" ||
+        phase === "break" ||
+        phase === "finished") && (
         <div className="study-timer-overlay">
           <video
             key={selectedBackground.id}
@@ -627,11 +658,19 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
             </div>
 
             {content}
-            {saveError && <p className="study-timer-error" role="alert">{saveError}</p>}
+            {saveError && (
+              <p className="study-timer-error" role="alert">
+                {saveError}
+              </p>
+            )}
 
             {phase === "active" && (
               <div className="study-timer-actions">
-                <Button type="button" variant="secondary" onClick={pauseSession}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={pauseSession}
+                >
                   Pause
                 </Button>
                 {breaks.map((item) => (
@@ -655,7 +694,11 @@ export default function StudyTimer({ onExit, onSessionComplete, onViewHistory })
                 <Button type="button" onClick={resumeSession}>
                   Resume
                 </Button>
-                <Button type="button" variant="secondary" onClick={finishSession}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={finishSession}
+                >
                   Finish
                 </Button>
               </div>

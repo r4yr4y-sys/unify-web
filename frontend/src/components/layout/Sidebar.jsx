@@ -60,8 +60,10 @@ function NavigationGroup({ item }) {
   const [open, setOpen] = useState(false);
   const Icon = item.icon;
   const isActiveGroup =
-    item.children?.some((child) =>
-      location.pathname === child.to || location.pathname.startsWith(`${child.to}/`),
+    item.children?.some(
+      (child) =>
+        location.pathname === child.to ||
+        location.pathname.startsWith(`${child.to}/`),
     ) || location.pathname === item.to;
 
   useEffect(() => {

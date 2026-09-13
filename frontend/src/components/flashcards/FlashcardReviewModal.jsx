@@ -19,7 +19,12 @@ function shuffleArray(array) {
   return shuffled;
 }
 
-export default function FlashcardReviewModal({ pack, onClose, onUpdate, onDeletePack }) {
+export default function FlashcardReviewModal({
+  pack,
+  onClose,
+  onUpdate,
+  onDeletePack,
+}) {
   const [displayCards, setDisplayCards] = useState(pack.cards);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -277,7 +282,9 @@ export default function FlashcardReviewModal({ pack, onClose, onUpdate, onDelete
                 >
                   <span className="flashcard-review__card-label">Answer</span>
                   <p>{card.answer}</p>
-                  <span className="flashcard-review__card-hint">Click to flip back</span>
+                  <span className="flashcard-review__card-hint">
+                    Click to flip back
+                  </span>
                 </div>
               </div>
             </div>
@@ -362,7 +369,11 @@ export default function FlashcardReviewModal({ pack, onClose, onUpdate, onDelete
 
         {confirmDelete && (
           <div className="flashcard-confirm-backdrop">
-            <div className="flashcard-confirm" role="alertdialog" aria-modal="true">
+            <div
+              className="flashcard-confirm"
+              role="alertdialog"
+              aria-modal="true"
+            >
               <h3>Delete this flashcard?</h3>
               <p>This action cannot be undone.</p>
               <div className="flashcard-confirm__actions">
@@ -386,12 +397,28 @@ export default function FlashcardReviewModal({ pack, onClose, onUpdate, onDelete
         )}
         {confirmPackDelete && (
           <div className="flashcard-confirm-backdrop">
-            <div className="flashcard-confirm" role="alertdialog" aria-modal="true">
+            <div
+              className="flashcard-confirm"
+              role="alertdialog"
+              aria-modal="true"
+            >
               <h3>Delete this flashcard pack?</h3>
               <p>This permanently deletes the pack and every card inside it.</p>
               <div className="flashcard-confirm__actions">
-                <button type="button" className="flashcard-confirm__stay" onClick={() => setConfirmPackDelete(false)}>Cancel</button>
-                <button type="button" className="flashcard-confirm__leave" onClick={() => onDeletePack(pack)}>Delete pack</button>
+                <button
+                  type="button"
+                  className="flashcard-confirm__stay"
+                  onClick={() => setConfirmPackDelete(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="flashcard-confirm__leave"
+                  onClick={() => onDeletePack(pack)}
+                >
+                  Delete pack
+                </button>
               </div>
             </div>
           </div>

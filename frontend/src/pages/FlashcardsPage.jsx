@@ -6,7 +6,10 @@ import CreateFlashcardModal from "../components/flashcards/CreateFlashcardModal"
 import FlashcardReviewModal from "../components/flashcards/FlashcardReviewModal";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("authToken")}` });
+const authHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+});
 
 export default function FlashcardsPage() {
   const [packs, setPacks] = useState([]);
@@ -19,23 +22,85 @@ export default function FlashcardsPage() {
 
   useEffect(() => {
     let active = true;
-    fetch(`${apiUrl}/api/flashcard-packs`, { headers: authHeaders() }).then(async (response) => {
-      const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to load flashcards."); return result.packs;
-    }).then((savedPacks) => { if (active) setPacks(savedPacks); }).catch((requestError) => { if (active) setError(requestError.message); }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    fetch(`${apiUrl}/api/flashcard-packs`, { headers: authHeaders() })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(result.message || "Unable to load flashcards.");
+        return result.packs;
+      })
+      .then((savedPacks) => {
+        if (active) setPacks(savedPacks);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function handleCreate(values) {
     setError("");
-    try { const response = await fetch(`${apiUrl}/api/flashcard-packs`, { method: "POST", headers: authHeaders(), body: JSON.stringify(values) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to create flashcard pack."); setPacks((prev) => [result.pack, ...prev]); setShowCreate(false); } catch (requestError) { setError(requestError.message); }
+    try {
+      const response = await fetch(`${apiUrl}/api/flashcard-packs`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(values),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Unable to create flashcard pack.");
+      setPacks((prev) => [result.pack, ...prev]);
+      setShowCreate(false);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
 
   async function handleUpdatePack(updatedPack) {
     setError("");
-    try { const response = await fetch(`${apiUrl}/api/flashcard-packs/${updatedPack.id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(updatedPack) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || "Unable to save flashcards."); setPacks((prev) => prev.map((pack) => pack.id === result.pack.id ? result.pack : pack)); setReviewPack(result.pack); } catch (requestError) { setError(requestError.message); }
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/flashcard-packs/${updatedPack.id}`,
+        {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify(updatedPack),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.message || "Unable to save flashcards.");
+      setPacks((prev) =>
+        prev.map((pack) => (pack.id === result.pack.id ? result.pack : pack)),
+      );
+      setReviewPack(result.pack);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
 
-  async function handleDeletePack(pack) { setError(""); try { const response = await fetch(`${apiUrl}/api/flashcard-packs/${pack.id}`, { method: "DELETE", headers: authHeaders() }); if (!response.ok) { const result = await response.json(); throw new Error(result.message || "Unable to delete flashcard pack."); } setPacks((current) => current.filter((item) => item.id !== pack.id)); setReviewPack(null); } catch (requestError) { setError(requestError.message); } }
+  async function handleDeletePack(pack) {
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/api/flashcard-packs/${pack.id}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Unable to delete flashcard pack.");
+      }
+      setPacks((current) => current.filter((item) => item.id !== pack.id));
+      setReviewPack(null);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
 
   const filteredPacks = packs
     .filter((pack) =>
@@ -71,7 +136,11 @@ export default function FlashcardsPage() {
           </button>
         }
       />
-      {error && <p className="flashcards-no-results" role="alert">{error}</p>}
+      {error && (
+        <p className="flashcards-no-results" role="alert">
+          {error}
+        </p>
+      )}
       {loading && <p>Loading flashcard packs…</p>}
 
       {!loading && packs.length === 0 ? (
@@ -80,9 +149,7 @@ export default function FlashcardsPage() {
             <Layers size={48} />
           </div>
           <h2>No flashcard packs yet</h2>
-          <p>
-            Create your first flashcard pack to start studying.
-          </p>
+          <p>Create your first flashcard pack to start studying.</p>
           <button
             type="button"
             className="flashcards-page__create-btn"
