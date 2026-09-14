@@ -21,6 +21,7 @@ import GradesPage from "./pages/GradesPage";
 import StudyTimerPage from "./pages/StudyTimerPage";
 import CoursesPage from "./pages/CoursesPage";
 import ExamsPage from "./pages/ExamsPage";
+import EmptyRoomsPage from "./pages/EmptyRoomsPage";
 import {
   academicRoutes,
   campusLifeRoutes,
@@ -137,6 +138,7 @@ function App() {
         <Route path="/campus-life/events" element={<EventsPage />} />
         <Route path="/campus-life/lost-found" element={<LostFoundPage />} />
         <Route path="/campus-life/marketplace" element={<MarketplacePage />} />
+        <Route path="/campus-life/empty-rooms" element={<EmptyRoomsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         {plannedRoutes
@@ -155,6 +157,7 @@ function App() {
                 "/campus-life/events",
                 "/campus-life/lost-found",
                 "/campus-life/marketplace",
+                "/campus-life/empty-rooms",
               ].includes(path),
           )
           .map(({ path, title }) => (

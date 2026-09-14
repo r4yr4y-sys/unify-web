@@ -48,6 +48,7 @@ const navigation = [
       { label: "Events", to: "/campus-life/events" },
       { label: "Lost & Found", to: "/campus-life/lost-found" },
       { label: "Marketplace", to: "/campus-life/marketplace" },
+      { label: "Empty Rooms", to: "/campus-life/empty-rooms" },
     ],
   },
 ];

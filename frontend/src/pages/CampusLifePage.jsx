@@ -7,6 +7,7 @@ import {
   SearchCheck,
   Sparkles,
   Store,
+  DoorOpen,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button, PageHeader } from "../components/ui";
@@ -50,6 +51,14 @@ export default function CampusLifePage() {
       icon: SearchCheck,
       accent: "green",
       note: foundItems[0].title,
+    },
+    {
+      title: "Empty Rooms",
+      copy: "Find a free CSE room on floor 7",
+      to: "/campus-life/empty-rooms",
+      icon: DoorOpen,
+      accent: "violet",
+      note: "Beta · hardcoded schedules",
     },
   ];
   return (
