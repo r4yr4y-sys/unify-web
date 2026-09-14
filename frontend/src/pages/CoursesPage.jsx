@@ -24,9 +24,41 @@ const blankCourse = {
   totalClasses: "",
   totalQuizzes: "",
   totalAssignments: "",
+  courseType: "theory",
   hasMidterm: false,
   hasFinal: false,
 };
+
+function CourseTypeSelector({ value, onChange, id = "course-type" }) {
+  return (
+    <div className="course-type-field">
+      <span id={`${id}-label`}>Course type</span>
+      <div
+        className="course-type-selector"
+        data-value={value || undefined}
+        role="radiogroup"
+        aria-labelledby={`${id}-label`}
+      >
+        <span className="course-type-selector__indicator" aria-hidden="true" />
+        {[
+          ["theory", "Theory"],
+          ["lab", "Lab"],
+        ].map(([type, label]) => (
+          <button
+            key={type}
+            type="button"
+            role="radio"
+            aria-checked={value === type}
+            className={value === type ? "is-selected" : ""}
+            onClick={() => onChange(type)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function CourseForm({ semester, onClose, onSaved }) {
   const [form, setForm] = useState(blankCourse);
@@ -87,6 +119,11 @@ function CourseForm({ semester, onClose, onSaved }) {
               />
             </label>
           ))}
+          <CourseTypeSelector
+            value={form.courseType}
+            onChange={(value) => change("courseType", value)}
+            id="new-course-type"
+          />
           <label>
             <input
               type="checkbox"
@@ -182,6 +219,17 @@ function CourseDetail({ course, onClose, onSaved }) {
         <p>
           {current.credits} credits · {current.totalClasses} classes
         </p>
+        <CourseTypeSelector
+          value={current.courseType}
+          onChange={(courseType) => save({ ...current, courseType })}
+          id={`course-type-${course.id}`}
+        />
+        {!current.courseType && (
+          <p className="course-type-field__hint">
+            Choose a course type to prepare this existing course for exam
+            tracking.
+          </p>
+        )}
         {error && <p className="courses-error">{error}</p>}
         <h3>Class attendance</h3>
         <div className="course-items">
@@ -356,6 +404,13 @@ export default function CoursesPage() {
                     <strong>{course.code}</strong>
                     <h3>{course.title}</h3>
                     <span>{course.credits} credits</span>
+                    <small className="course-card__type">
+                      {course.courseType
+                        ? course.courseType === "lab"
+                          ? "Lab"
+                          : "Theory"
+                        : "Course type not set"}
+                    </small>
                     <small>
                       {course.totalClasses} classes · {course.totalQuizzes}{" "}
                       quizzes · {course.totalAssignments} assignments

@@ -20,6 +20,8 @@ const courseSchema = new mongoose.Schema(
     totalClasses: { type: Number, required: true, min: 0, max: 300 },
     totalQuizzes: { type: Number, required: true, min: 0, max: 100 },
     totalAssignments: { type: Number, required: true, min: 0, max: 100 },
+    // Optional so courses created before course types were introduced remain valid.
+    courseType: { type: String, enum: ["theory", "lab"] },
     hasMidterm: { type: Boolean, default: false },
     hasFinal: { type: Boolean, default: false },
     attendance: [
@@ -39,7 +41,7 @@ const courseSchema = new mongoose.Schema(
         id: String,
         type: {
           type: String,
-          enum: ["quiz", "assignment", "midterm", "final"],
+          enum: ["quiz", "assignment", "midterm", "final", "labMidterm", "labFinal"],
           required: true,
         },
         number: Number,
@@ -50,6 +52,8 @@ const courseSchema = new mongoose.Schema(
         },
         marksObtained: { type: Number, default: null },
         maxMarks: { type: Number, default: null },
+        date: { type: String, default: null },
+        time: { type: String, default: null },
       },
     ],
   },

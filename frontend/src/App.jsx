@@ -20,6 +20,7 @@ import LogoutPage from "./pages/LogoutPage";
 import GradesPage from "./pages/GradesPage";
 import StudyTimerPage from "./pages/StudyTimerPage";
 import CoursesPage from "./pages/CoursesPage";
+import ExamsPage from "./pages/ExamsPage";
 import {
   academicRoutes,
   campusLifeRoutes,
@@ -121,6 +122,7 @@ function App() {
         <Route path="/academic/routine" element={<RoutinePage />} />
         <Route path="/academic/routine/edit" element={<EditRoutinePage />} />
         <Route path="/academic/grades" element={<GradesPage />} />
+        <Route path="/academic/exams" element={<ExamsPage />} />
         <Route path="/study" element={<StudyPage />} />
         <Route path="/study/timer" element={<StudyTimerPage />} />
         <Route path="/study/notes" element={<NotesPage />} />
@@ -143,6 +145,7 @@ function App() {
               ![
                 "/academic/routine",
                 "/academic/grades",
+                "/academic/exams",
                 "/study/notes",
                 "/study/timer",
                 "/study/resources",

@@ -4,11 +4,14 @@ import { Bell, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { IconButton } from "../ui";
 import profilePicture from "../../assets/Profile_pic.jpg";
+import { assessmentLabel, formatSchedule, upcomingAssessments } from "../../utils/assessments";
 
 export default function Topbar() {
   const greetingRef = useRef(null);
   const [name, setName] = useState("there");
   const [avatarUrl, setAvatarUrl] = useState(profilePicture);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -44,6 +47,34 @@ export default function Topbar() {
   }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return undefined;
+    let active = true;
+    const loadUpcoming = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const base = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const semesterResponse = await fetch(`${base}/api/semesters`, { headers });
+        const semesterResult = await semesterResponse.json();
+        const semester = semesterResult.semesters?.find((item) => item.isCurrent);
+        if (!semester) return;
+        const coursesResponse = await fetch(`${base}/api/courses?semesterId=${semester.id}`, { headers });
+        const courseResult = await coursesResponse.json();
+        if (coursesResponse.ok && active)
+          setNotifications(upcomingAssessments(courseResult.courses || []));
+      } catch (_error) {
+        // Notification data is non-blocking; the Exams page can surface API errors.
+      }
+    };
+    loadUpcoming();
+    window.addEventListener("unify-assessments-updated", loadUpcoming);
+    return () => {
+      active = false;
+      window.removeEventListener("unify-assessments-updated", loadUpcoming);
+    };
+  }, []);
+
+  useEffect(() => {
     const greeting = greetingRef.current;
     if (
       !greeting ||
@@ -75,9 +106,16 @@ export default function Topbar() {
           <span>Search your workspace</span>
           <kbd>⌘ K</kbd>
         </button>
-        <IconButton label="Notifications">
+        <div className="topbar-notifications">
+        <IconButton label="Notifications" className={notifications.length ? "topbar-notifications__bell has-upcoming" : "topbar-notifications__bell"} onClick={() => setNotificationsOpen((current) => !current)} aria-expanded={notificationsOpen}>
           <Bell size={19} />
+          {notifications.length > 0 && <span className="topbar-notifications__badge">{notifications.length}</span>}
         </IconButton>
+        {notificationsOpen && <section className="topbar-notifications__panel" aria-label="Upcoming assessments">
+          <h2>Upcoming assessments</h2>
+          {notifications.length ? <ul>{notifications.map(({ course, assessment }) => <li key={`${course.id}-${assessment.id}`}><strong>{course.title} — {assessmentLabel(assessment, course.courseType)}</strong><span>{formatSchedule(assessment)}</span></li>)}</ul> : <p>No assessments in the next 3 days.</p>}
+        </section>}
+        </div>
         <span ref={greetingRef} className="topbar__greeting">
           Hello, {name}!
         </span>

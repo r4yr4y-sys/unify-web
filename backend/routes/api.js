@@ -513,6 +513,7 @@ const courseFromRequest = (input, semesterId) => {
     totalQuizzes = Number(input?.totalQuizzes),
     totalAssignments = Number(input?.totalAssignments),
     credits = Number(input?.credits);
+  const courseType = text(input?.courseType).toLowerCase();
   if (
     !code ||
     !title ||
@@ -520,7 +521,8 @@ const courseFromRequest = (input, semesterId) => {
     credits < 0 ||
     ![totalClasses, totalQuizzes, totalAssignments].every(
       (value) => Number.isInteger(value) && value >= 0,
-    )
+    ) ||
+    !["theory", "lab"].includes(courseType)
   )
     throw badRequest('Complete the course details with valid counts.');
   const assessments = (type, count) =>
@@ -531,6 +533,8 @@ const courseFromRequest = (input, semesterId) => {
       status: 'pending',
       marksObtained: null,
       maxMarks: null,
+      date: null,
+      time: null,
     }));
   return {
     semester: semesterId,
@@ -540,8 +544,9 @@ const courseFromRequest = (input, semesterId) => {
     totalClasses,
     totalQuizzes,
     totalAssignments,
-    hasMidterm: input.hasMidterm === true,
-    hasFinal: input.hasFinal === true,
+    courseType,
+    hasMidterm: courseType === 'theory',
+    hasFinal: courseType === 'theory',
     attendance: Array.from({ length: totalClasses }, (_, index) => ({
       number: index + 1,
       status: 'pending',
@@ -549,10 +554,37 @@ const courseFromRequest = (input, semesterId) => {
     assessments: [
       ...assessments('quiz', totalQuizzes),
       ...assessments('assignment', totalAssignments),
-      ...(input.hasMidterm ? assessments('midterm', 1) : []),
-      ...(input.hasFinal ? assessments('final', 1) : []),
+      ...(courseType === 'theory' ? assessments('midterm', 1) : []),
+      ...(courseType === 'theory' ? assessments('final', 1) : []),
+      ...(courseType === 'lab' ? assessments('labMidterm', 1) : []),
+      ...(courseType === 'lab' ? assessments('labFinal', 1) : []),
     ],
   };
+};
+
+const ensureExamAssessments = (course) => {
+  if (!['theory', 'lab'].includes(course.courseType)) return false;
+  const requiredTypes =
+    course.courseType === 'theory'
+      ? ['midterm', 'final']
+      : ['labMidterm', 'labFinal'];
+  let changed = false;
+  for (const type of requiredTypes) {
+    if (course.assessments.some((assessment) => assessment.type === type))
+      continue;
+    course.assessments.push({
+      id: `${type}-1`,
+      type,
+      number: 1,
+      status: 'pending',
+      marksObtained: null,
+      maxMarks: null,
+      date: null,
+      time: null,
+    });
+    changed = true;
+  }
+  return changed;
 };
 router.get('/semesters', requireAuth, async (request, response, next) => {
   try {
@@ -623,6 +655,11 @@ router.get('/courses', requireAuth, async (request, response, next) => {
     const filter = { user: request.user._id };
     if (request.query.semesterId) filter.semester = request.query.semesterId;
     const courses = await Course.find(filter).sort({ createdAt: 1 });
+    await Promise.all(
+      courses.map((course) =>
+        ensureExamAssessments(course) ? course.save() : Promise.resolve(),
+      ),
+    );
     response.json({ courses: courses.map(clientDocument) });
   } catch (error) {
     next(error);
@@ -659,6 +696,13 @@ router.put('/courses/:id', requireAuth, async (request, response, next) => {
       course.attendance = request.body.attendance;
     if (Array.isArray(request.body.assessments))
       course.assessments = request.body.assessments;
+    if (request.body.courseType !== undefined) {
+      const courseType = text(request.body.courseType).toLowerCase();
+      if (!['theory', 'lab'].includes(courseType))
+        throw badRequest('Choose either Theory or Lab as the course type.');
+      course.courseType = courseType;
+      ensureExamAssessments(course);
+    }
     await course.save();
     response.json({ course: clientDocument(course) });
   } catch (error) {

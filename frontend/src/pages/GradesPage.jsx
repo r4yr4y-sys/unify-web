@@ -330,7 +330,7 @@ export default function GradesPage() {
                 </footer>
               </>
             ) : (
-              <p className="grades-card__empty">
+              <p className="grades-card__placeholder">
                 Save a semester result to see your current GPA.
               </p>
             )}
@@ -436,7 +436,7 @@ export default function GradesPage() {
                     <input
                       type="number"
                       min="0.5"
-                      step="0.5"
+                       step="0.25"
                       value={estimatorNextCredits}
                       onChange={(event) =>
                         setEstimatorNextCredits(event.target.value)
@@ -559,7 +559,7 @@ export default function GradesPage() {
                         aria-label="Course credit"
                         type="number"
                         min="0.5"
-                        step="0.5"
+                        step="0.25"
                         value={course.credits}
                         placeholder="3"
                         onChange={(event) =>
@@ -661,7 +661,7 @@ export default function GradesPage() {
               <input
                 type="number"
                 min="0.5"
-                step="0.5"
+                 step="0.25"
                 value={nextCredits}
                 onChange={(event) => setNextCredits(event.target.value)}
                 placeholder="18"
