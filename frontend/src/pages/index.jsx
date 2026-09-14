@@ -24,6 +24,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button, PageHeader, SectionCard } from "../components/ui";
+import { createDashboardGreeting } from "../utils/dashboardGreeting";
 
 const makePage = (title, description) =>
   function Page() {
@@ -43,7 +44,9 @@ const makePage = (title, description) =>
     );
   };
 export function DashboardPage() {
-  const [name, setName] = useState("there");
+  const [greeting, setGreeting] = useState(() =>
+    createDashboardGreeting("there"),
+  );
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) return undefined;
@@ -55,7 +58,7 @@ export function DashboardPage() {
       .then(async (response) => {
         const result = await response.json();
         if (response.ok && active)
-          setName(result.user.profile?.name || "there");
+          setGreeting(createDashboardGreeting(result.user.profile?.name));
       })
       .catch(() => {});
     return () => {
@@ -66,7 +69,7 @@ export function DashboardPage() {
     <section className="page">
       <PageHeader
         eyebrow="Unify workspace"
-        title={`Hello, ${name}`}
+        title={greeting}
         description="A central overview of your university life will appear here."
       />
       <SectionCard title="Coming soon">
