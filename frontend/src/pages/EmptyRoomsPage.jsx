@@ -12,9 +12,9 @@ import {
 
 // ===== BETA MANUAL TESTING CONFIGURATION =====
 // Change these two values to test any supported day and time before clicking Search.
-const EMPTY_ROOM_TEST_MODE = false;
-const TEST_DAY = "Monday";
-const TEST_TIME = "16:45";
+const EMPTY_ROOM_TEST_MODE = true;
+const TEST_DAY = "Tuesday"; // Supported values: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday
+const TEST_TIME = "10:32";
 // =============================================
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -33,9 +33,13 @@ function NoRoomsModal({ gender, onClose }) {
         "Female Common Room on the 5th Floor",
         "Canteen",
         "Plaza",
-        "Sitting outside the lab",
+        "Sitting outside the lab (Peak University Experience)",
       ]
-    : ["Plaza", "Canteen", "Sitting outside the lab"];
+    : [
+        "Plaza",
+        "Canteen",
+        "Sitting outside the lab (Peak University Experience)",
+      ];
   return (
     <div
       className="empty-rooms-modal-backdrop"
@@ -85,7 +89,11 @@ export default function EmptyRoomsPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-      setGender(data.user?.gender || "");
+
+      console.log("PROFILE RESPONSE:", data);
+      console.log("GENDER:", data.user?.profile?.gender);
+
+      setGender(data.user?.profile?.gender || "");
     } catch {
       setGender("");
     }
