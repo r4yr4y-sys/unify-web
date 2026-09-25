@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { animate } from "animejs";
 import { Bell, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IconButton } from "../ui";
 import profilePicture from "../../assets/Profile_pic.jpg";
 import { assessmentLabel, formatSchedule, isUpcoming, upcomingAssessments } from "../../utils/assessments";
@@ -10,14 +10,57 @@ const interestedEvents = (events) => {
   return events.filter((event) => event.isGoing && isUpcoming(event.date));
 };
 
+const PAGES = [
+  { label: "Dashboard", path: "/dashboard", aliases: ["dashboard"] },
+  { label: "Academic", path: "/academic", aliases: ["academic", "academics"] },
+  { label: "Courses", path: "/academic/courses", aliases: ["course", "courses"] },
+  { label: "Assignments", path: "/academic/assignments", aliases: ["assignment", "assignments"] },
+  { label: "Exams", path: "/academic/exams", aliases: ["exam", "exams"] },
+  { label: "Notes", path: "/study/notes", aliases: ["note", "notes"] },
+  { label: "Study", path: "/study", aliases: ["study", "studies", "study timer"] },
+  { label: "Announcements", path: "/campus-life/announcements", aliases: ["announcement", "announcements"] },
+  { label: "Events", path: "/campus-life/events", aliases: ["event", "events"] },
+  { label: "Lost & Found", path: "/campus-life/lost-found", aliases: ["lost", "found", "lost and found", "lost & found"] },
+  { label: "Marketplace", path: "/campus-life/marketplace", aliases: ["market", "marketplace"] },
+  { label: "Profile", path: "/profile", aliases: ["profile"] },
+  { label: "Support", path: "/settings", aliases: ["support", "help"] },
+];
+
 export default function Topbar() {
   const greetingRef = useRef(null);
+  const searchRef = useRef(null);
+  const inputRef = useRef(null);
   const [name, setName] = useState("there");
   const [avatarUrl, setAvatarUrl] = useState(profilePicture);
   const [notifications, setNotifications] = useState([]);
   const [assignmentNotifications, setAssignmentNotifications] = useState([]);
   const [eventNotifications, setEventNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -153,6 +196,47 @@ export default function Topbar() {
     };
   }, []);
 
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return PAGES.filter((page) =>
+      page.aliases.some((alias) => alias.toLowerCase().startsWith(q)),
+    );
+  }, [searchQuery]);
+
+  const navigateToPage = (path) => {
+    navigate(path);
+    setSearchQuery("");
+    setShowSuggestions(false);
+    setHighlightedIndex(0);
+  };
+
+  const handleSearchKeyDown = (event) => {
+    if (!showSuggestions) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setShowSuggestions(false);
+      setSearchQuery("");
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setHighlightedIndex((prev) =>
+        Math.min(prev + 1, Math.max(suggestions.length - 1, 0)),
+      );
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      if (suggestions.length > 0) {
+        const idx = Math.max(
+          0,
+          Math.min(highlightedIndex, suggestions.length - 1),
+        );
+        navigateToPage(suggestions[idx].path);
+      }
+    }
+  };
+
   return (
     <header className="topbar">
       <div className="topbar__welcome">
@@ -160,11 +244,57 @@ export default function Topbar() {
         <span>Stay on top of your semester</span>
       </div>
       <div className="topbar__actions">
-        <button className="search-trigger" type="button">
+        <div className="search-trigger" ref={searchRef}>
           <Search size={18} />
-          <span>Search your workspace</span>
+          <input
+            ref={inputRef}
+            type="search"
+            className="search-trigger__input"
+            placeholder="Search your workspace"
+            value={searchQuery}
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              setShowSuggestions(true);
+              setHighlightedIndex(0);
+            }}
+            onFocus={() => {
+              if (searchQuery.trim()) setShowSuggestions(true);
+            }}
+            onBlur={() => {}}
+            onKeyDown={handleSearchKeyDown}
+            aria-autocomplete="list"
+            aria-expanded={showSuggestions}
+            aria-label="Search pages"
+          />
           <kbd>⌘ K</kbd>
-        </button>
+          {showSuggestions && (
+            <ul className="search-suggestions" role="listbox">
+              {suggestions.length > 0 ? (
+                suggestions.map((page, index) => (
+                  <li
+                    key={page.path}
+                    role="option"
+                    aria-selected={index === highlightedIndex}
+                    className={
+                      index === highlightedIndex
+                        ? "is-highlighted"
+                        : ""
+                    }
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                    onMouseDown={
+                      (event) => event.preventDefault()
+                    }
+                    onClick={() => navigateToPage(page.path)}
+                  >
+                    {page.label}
+                  </li>
+                ))
+              ) : (
+                <li className="search-no-match">No matching page found</li>
+              )}
+            </ul>
+          )}
+        </div>
         <div className="topbar-notifications">
         <IconButton label="Notifications" className={notifications.length || assignmentNotifications.length || eventNotifications.length ? "topbar-notifications__bell has-upcoming" : "topbar-notifications__bell"} onClick={() => setNotificationsOpen((current) => !current)} aria-expanded={notificationsOpen}>
           <Bell size={19} />

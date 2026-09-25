@@ -477,8 +477,56 @@ button {
   box-shadow:
     inset 2px 2px 5px rgba(183, 192, 214, 0.18),
     inset -2px -2px 5px #fff;
+  position: relative;
+  cursor: text;
+  font-size: 0.8rem;
+}
+.search-trigger__input {
+  border: none;
+  background: transparent;
+  color: #3e4b67;
+  font: inherit;
+  font-size: 0.8rem;
+  width: 100%;
+  outline: none;
+  flex: 1;
+}
+.search-trigger__input::placeholder {
+  color: #8b94a9;
+}
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
+  z-index: 999;
+  background: #f8f9fc;
+  border: 1px solid #dce2ee;
+  border-radius: 12px;
+  margin-top: 4px;
+  padding: 4px 0;
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow:
+    7px 8px 19px rgba(164, 175, 201, 0.14),
+    -5px -5px 13px rgba(255, 255, 255, 0.9);
+}
+.search-suggestions li {
+  padding: 6px 12px;
   cursor: pointer;
   font-size: 0.8rem;
+  color: #3e4b67;
+  border-radius: 6px;
+  margin: 0 4px;
+}
+.search-suggestions li:hover,
+.search-suggestions li.is-highlighted {
+  background: rgba(135, 151, 222, 0.1);
+}
+.search-suggestions li.search-no-match {
+  cursor: default;
+  color: #8b94a9;
 }
 .search-trigger kbd {
   margin-left: auto;
@@ -4853,7 +4901,7 @@ button {
   .search-trigger {
     min-width: auto;
   }
-  .search-trigger span,
+  .search-trigger input,
   .search-trigger kbd {
     display: none;
   }
