@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   bookmarkedAnnouncements: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Announcement' }],
   passwordHash: { type: String, required: true, select: false },
   profileCompleted: { type: Boolean, default: false },
+  weeklyStudyGoalHours: { type: Number, default: 16, min: 1, max: 168 },
   profile: { type: profileSchema, default: () => ({}) },
 }, { timestamps: true });
 

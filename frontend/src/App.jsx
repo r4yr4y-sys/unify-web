@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
-import { AcademicPage, DashboardPage } from "./pages";
+import DashboardPage from "./pages/DashboardPage";
+import AcademicPage from "./pages/AcademicPage";
 import ProfilePage from "./pages/Profile";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
 import CampusLifePage from "./pages/CampusLifePage";
@@ -21,6 +22,7 @@ import GradesPage from "./pages/GradesPage";
 import StudyTimerPage from "./pages/StudyTimerPage";
 import CoursesPage from "./pages/CoursesPage";
 import ExamsPage from "./pages/ExamsPage";
+import AssignmentsPage from "./pages/AssignmentsPage";
 import EmptyRoomsPage from "./pages/EmptyRoomsPage";
 import {
   academicRoutes,
@@ -127,6 +129,7 @@ function App() {
         <Route path="/academic/routine/edit" element={<EditRoutinePage />} />
         <Route path="/academic/grades" element={<GradesPage />} />
         <Route path="/academic/exams" element={<ExamsPage />} />
+        <Route path="/academic/assignments" element={<AssignmentsPage />} />
         <Route path="/study" element={<StudyPage />} />
         <Route path="/study/timer" element={<StudyTimerPage />} />
         <Route path="/study/notes" element={<NotesPage />} />
@@ -151,6 +154,7 @@ function App() {
                 "/academic/routine",
                 "/academic/grades",
                 "/academic/exams",
+                "/academic/assignments",
                 "/study/notes",
                 "/study/timer",
                 "/study/resources",

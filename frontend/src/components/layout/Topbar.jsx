@@ -15,6 +15,7 @@ export default function Topbar() {
   const [name, setName] = useState("there");
   const [avatarUrl, setAvatarUrl] = useState(profilePicture);
   const [notifications, setNotifications] = useState([]);
+  const [assignmentNotifications, setAssignmentNotifications] = useState([]);
   const [eventNotifications, setEventNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -48,6 +49,27 @@ export default function Topbar() {
     return () => {
       active = false;
       window.removeEventListener("unify-profile-updated", handleProfileUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return undefined;
+    let active = true;
+    const loadUpcomingAssignments = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/assignments`, { headers: { Authorization: `Bearer ${token}` } });
+        const result = await response.json();
+        if (response.ok && active) setAssignmentNotifications((result.assignments || []).filter((assignment) => isUpcoming(assignment.dueDate)).sort((a, b) => (a.dueDate || "").localeCompare(b.dueDate || "")));
+      } catch (_error) {
+        // Assignment reminders use the same non-blocking, three-day pattern as exams.
+      }
+    };
+    loadUpcomingAssignments();
+    window.addEventListener("unify-assignments-updated", loadUpcomingAssignments);
+    return () => {
+      active = false;
+      window.removeEventListener("unify-assignments-updated", loadUpcomingAssignments);
     };
   }, []);
 
@@ -144,15 +166,16 @@ export default function Topbar() {
           <kbd>⌘ K</kbd>
         </button>
         <div className="topbar-notifications">
-        <IconButton label="Notifications" className={notifications.length || eventNotifications.length ? "topbar-notifications__bell has-upcoming" : "topbar-notifications__bell"} onClick={() => setNotificationsOpen((current) => !current)} aria-expanded={notificationsOpen}>
+        <IconButton label="Notifications" className={notifications.length || assignmentNotifications.length || eventNotifications.length ? "topbar-notifications__bell has-upcoming" : "topbar-notifications__bell"} onClick={() => setNotificationsOpen((current) => !current)} aria-expanded={notificationsOpen}>
           <Bell size={19} />
-          {notifications.length + eventNotifications.length > 0 && <span className="topbar-notifications__badge">{notifications.length + eventNotifications.length}</span>}
+          {notifications.length + assignmentNotifications.length + eventNotifications.length > 0 && <span className="topbar-notifications__badge">{notifications.length + assignmentNotifications.length + eventNotifications.length}</span>}
         </IconButton>
         {notificationsOpen && <section className="topbar-notifications__panel" aria-label="Upcoming notifications">
           <h2>Coming up</h2>
+          {assignmentNotifications.length > 0 && <ul>{assignmentNotifications.map((assignment) => <li key={`assignment-${assignment.id}`}><strong>{assignment.course?.title || "Course"} — Assignment {assignment.number}</strong><span>{assignment.topic || "Assignment details to be added"} · Due {new Date(`${assignment.dueDate}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span></li>)}</ul>}
           {notifications.length ? <ul>{notifications.map(({ course, assessment }) => <li key={`${course.id}-${assessment.id}`}><strong>{course.title} — {assessmentLabel(assessment, course.courseType)}</strong><span>{formatSchedule(assessment)}</span></li>)}</ul> : <p>No assessments in the next 3 days.</p>}
           {eventNotifications.length > 0 && <ul>{eventNotifications.map((event) => <li key={`event-${event._id}`}><strong>Event: {event.title}</strong><span>{new Date(`${event.date}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {event.time}</span></li>)}</ul>}
-          {notifications.length + eventNotifications.length === 0 && <p>No events or assessments in the next 3 days.</p>}
+          {notifications.length + assignmentNotifications.length + eventNotifications.length === 0 && <p>No events or deadlines in the next 3 days.</p>}
         </section>}
         </div>
         <span ref={greetingRef} className="topbar__greeting">

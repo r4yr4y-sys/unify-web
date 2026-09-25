@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import multer from 'multer';
-import 'dotenv/config';
+import './config/env.js';
 import signupRouter from './routes/signup.js';
 import signinRouter from './routes/signin.js';
 import adminAuthRouter from './routes/adminAuth.js';

@@ -26,24 +26,7 @@ import {
 import { Button, PageHeader, SectionCard } from "../components/ui";
 import { createDashboardGreeting } from "../utils/dashboardGreeting";
 
-const makePage = (title, description) =>
-  function Page() {
-    return (
-      <section className="page">
-        <PageHeader
-          eyebrow="Unify workspace"
-          title={title}
-          description={description}
-        />
-        <SectionCard title="Coming soon">
-          <p className="empty-state">
-            This section is ready for its feature-specific experience.
-          </p>
-        </SectionCard>
-      </section>
-    );
-  };
-export function DashboardPage() {
+export function LegacyDashboardPage() {
   const [greeting, setGreeting] = useState(() =>
     createDashboardGreeting("there"),
   );
@@ -80,10 +63,6 @@ export function DashboardPage() {
     </section>
   );
 }
-export const AcademicPage = makePage(
-  "Academic",
-  "Manage your courses, assignments, grades, and exams in one place.",
-);
 const announcements = [];
 const events = [];
 
