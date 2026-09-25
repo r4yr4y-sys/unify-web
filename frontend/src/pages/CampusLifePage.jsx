@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
-  BellRing,
   CalendarDays,
   Megaphone,
   PackageOpen,
@@ -11,14 +10,20 @@ import {
   DoorOpen,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button, PageHeader } from "../components/ui";
-import { foundItems, marketplaceItems } from "./campusLifeData";
+import { PageHeader } from "../components/ui";
+import { emptyRoomsData } from "../data/emptyRooms";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function CampusLifePage() {
   const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
+  const [marketListings, setMarketListings] = useState([]);
+  const [lostFoundItems, setLostFoundItems] = useState([]);
+  const currentDate = new Intl.DateTimeFormat("en-US", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const upcomingEvents = events.filter((event) => !event.date || event.date >= today);
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) return undefined;
@@ -27,10 +32,14 @@ export default function CampusLifePage() {
     Promise.all([
       fetch(`${apiUrl}/api/announcements`, { headers }).then((response) => response.ok ? response.json() : null),
       fetch(`${apiUrl}/api/events`, { headers }).then((response) => response.ok ? response.json() : null),
-    ]).then(([announcementResult, eventResult]) => {
+      fetch(`${apiUrl}/api/marketplace-listings`, { headers }).then((response) => response.ok ? response.json() : null),
+      fetch(`${apiUrl}/api/lost-found-items`, { headers }).then((response) => response.ok ? response.json() : null),
+    ]).then(([announcementResult, eventResult, marketplaceResult, lostFoundResult]) => {
       if (!active) return;
       setAnnouncements(announcementResult?.announcements || []);
       setEvents(eventResult?.events || []);
+      setMarketListings(marketplaceResult?.listings || []);
+      setLostFoundItems(lostFoundResult?.items || []);
     }).catch(() => {});
     return () => { active = false; };
   }, []);
@@ -38,7 +47,7 @@ export default function CampusLifePage() {
   const campusSections = [
     {
       title: "Announcements",
-      copy: "2 new updates for your week",
+      copy: `${announcements.length} announcement${announcements.length === 1 ? "" : "s"}`,
       to: "/campus-life/announcements",
       icon: Megaphone,
       accent: "blue",
@@ -46,35 +55,35 @@ export default function CampusLifePage() {
     },
     {
       title: "Events",
-      copy: "4 things happening soon",
+      copy: `${upcomingEvents.length} upcoming event${upcomingEvents.length === 1 ? "" : "s"}`,
       to: "/campus-life/events",
       icon: CalendarDays,
       accent: "violet",
-      note: events[0]?.title || "No events yet",
+      note: upcomingEvents[0]?.title || "No upcoming events",
     },
     {
       title: "Marketplace",
-      copy: "146 listings from students",
+      copy: `${marketListings.length} listing${marketListings.length === 1 ? "" : "s"} from students`,
       to: "/campus-life/marketplace",
       icon: Store,
       accent: "amber",
-      note: `${marketplaceItems[0].title} · ${marketplaceItems[0].price}`,
+      note: marketListings[0] ? `${marketListings[0].title} · ${marketListings[0].category}` : "No listings yet",
     },
     {
       title: "Lost & Found",
-      copy: "4 items need attention",
+      copy: `${lostFoundItems.length} item${lostFoundItems.length === 1 ? "" : "s"} reported`,
       to: "/campus-life/lost-found",
       icon: SearchCheck,
       accent: "green",
-      note: foundItems[0].title,
+      note: lostFoundItems[0] ? `${lostFoundItems[0].status}: ${lostFoundItems[0].title}` : "No reports yet",
     },
     {
       title: "Empty Rooms",
-      copy: "Find a free CSE room on floor 7",
+      copy: `${emptyRoomsData.length} CSE rooms listed on floor 7`,
       to: "/campus-life/empty-rooms",
       icon: DoorOpen,
       accent: "violet",
-      note: "Beta · hardcoded schedules",
+      note: "Search by day and time",
     },
   ];
   return (
@@ -83,16 +92,11 @@ export default function CampusLifePage() {
         eyebrow="Campus life"
         title="Your campus, in one place"
         description="Catch the moments, updates, and small connections that make life beyond class feel more like yours."
-        actions={
-          <Button variant="secondary">
-            <BellRing size={17} /> 2 new updates
-          </Button>
-        }
       />
       <section className="campus-hero">
         <div>
           <span className="event-hero__eyebrow">
-            <Sparkles size={16} /> Friday, 12 December
+            <Sparkles size={16} /> {currentDate}
           </span>
           <h2>There is more to campus than your timetable.</h2>
           <p>
@@ -162,9 +166,9 @@ export default function CampusLifePage() {
                 <CalendarDays size={17} />
               </span>
               <div>
-                <strong>{events[0]?.title || "No events yet"}</strong>
+                <strong>{upcomingEvents[0]?.title || "No upcoming events"}</strong>
                 <p>
-                  {events[0] ? `${events[0].time} · ${events[0].place}` : ""}
+                  {upcomingEvents[0] ? `${upcomingEvents[0].time} · ${upcomingEvents[0].place}` : ""}
                 </p>
               </div>
               <ArrowUpRight size={16} />
@@ -174,8 +178,8 @@ export default function CampusLifePage() {
                 <PackageOpen size={17} />
               </span>
               <div>
-                <strong>{foundItems[0].title}</strong>
-                <p>{foundItems[0].area}</p>
+                <strong>{lostFoundItems[0]?.title || "No lost and found reports yet"}</strong>
+                <p>{lostFoundItems[0]?.location || ""}</p>
               </div>
               <ArrowUpRight size={16} />
             </Link>

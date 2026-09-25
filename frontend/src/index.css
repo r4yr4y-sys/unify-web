@@ -4341,7 +4341,6 @@ button {
   margin-top: 6px !important;
   line-height: 1.45;
 }
-.market-item:not(.market-item--owner) { cursor: pointer; }
 .market-contact { display: grid !important; gap: 6px; margin-top: 12px; padding: 10px; border: 1px solid #d9def6; border-radius: 9px; background: #f4f6ff; }
 .market-contact strong, .market-contact > span { color: #536481; font-size: .72rem; }.market-contact > span { overflow-wrap: anywhere; }
 .market-owner-actions { display: flex !important; gap: 7px; margin-top: 13px !important; }.market-owner-actions button { display: inline-flex; align-items: center; gap: 4px; padding: 6px 8px; border: 1px solid #dce2ee; border-radius: 7px; color: #65718b; background: #f7f8fc; font: inherit; font-size: .68rem; font-weight: 700; cursor: pointer; }.market-owner-actions .is-delete { color: #b45663; border-color: #f0d8dc; background: #fff8f8; }
