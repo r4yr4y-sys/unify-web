@@ -7,8 +7,8 @@ import {
   GraduationCap,
   Home,
   Layers,
+  LifeBuoy,
   LogOut,
-  Settings,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import unifyLogo from "../../assets/unify official logo.png";
@@ -54,7 +54,7 @@ const navigation = [
 ];
 const lowerNavigation = [
   { label: "Profile", to: "/profile", icon: CircleUserRound },
-  { label: "Settings", to: "/settings", icon: Settings },
+  { label: "Support", to: "/settings", icon: LifeBuoy },
 ];
 function NavigationGroup({ item }) {
   const location = useLocation();

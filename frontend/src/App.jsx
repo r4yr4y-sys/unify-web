@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
-import { AcademicPage, DashboardPage, SettingsPage } from "./pages";
+import { AcademicPage, DashboardPage } from "./pages";
 import ProfilePage from "./pages/Profile";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
 import CampusLifePage from "./pages/CampusLifePage";
@@ -31,6 +31,7 @@ import {
 } from "./routes/routes";
 import { PageHeader, SectionCard } from "./components/ui";
 import AdminPage from "./pages/AdminPage";
+import SupportPage from "./pages/SupportPage";
 
 function PlaceholderPage({ title }) {
   return (
@@ -142,7 +143,7 @@ function App() {
         <Route path="/campus-life/marketplace" element={<MarketplacePage />} />
         <Route path="/campus-life/empty-rooms" element={<EmptyRoomsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings" element={<SupportPage />} />
         {plannedRoutes
           .filter(
             ({ path }) =>

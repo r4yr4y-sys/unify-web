@@ -7,6 +7,7 @@ import signinRouter from './routes/signin.js';
 import adminAuthRouter from './routes/adminAuth.js';
 import announcementsRouter from './routes/announcements.js';
 import eventsRouter from './routes/events.js';
+import feedbackRouter from './routes/feedback.js';
 import profileRouter from './routes/profile.js';
 import apiRouter from './routes/api.js';
 
@@ -27,6 +28,7 @@ app.use('/api/auth', signinRouter);
 app.use('/api/admin/auth', adminAuthRouter);
 app.use('/api/announcements', announcementsRouter);
 app.use('/api/events', eventsRouter);
+app.use('/api/feedback', feedbackRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api', apiRouter);
 

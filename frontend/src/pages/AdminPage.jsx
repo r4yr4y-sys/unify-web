@@ -20,6 +20,9 @@ export default function AdminPage() {
   const [editingEvent, setEditingEvent] = useState(null);
   const [eventError, setEventError] = useState('');
   const [eventsLoading, setEventsLoading] = useState(false);
+  const [feedbackItems, setFeedbackItems] = useState([]);
+  const [feedbackError, setFeedbackError] = useState('');
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -45,6 +48,21 @@ export default function AdminPage() {
       })
       .catch((requestError) => { if (active) setAnnouncementError(requestError.message); })
       .finally(() => { if (active) setAnnouncementsLoading(false); });
+    return () => { active = false; };
+  }, [user, section]);
+
+  useEffect(() => {
+    if (!user || section !== 'feedback') return;
+    let active = true;
+    setFeedbackLoading(true);
+    fetch(`${apiUrl}/api/feedback`, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to load feedback.');
+        if (active) setFeedbackItems(result.feedback || []);
+      })
+      .catch((requestError) => { if (active) setFeedbackError(requestError.message); })
+      .finally(() => { if (active) setFeedbackLoading(false); });
     return () => { active = false; };
   }, [user, section]);
 
@@ -206,6 +224,12 @@ export default function AdminPage() {
             </form>
             <div className="admin-announcement-list"><h2>Published events</h2>
               {eventsLoading ? <p className="admin-description">Loading events…</p> : events.length === 0 ? <p className="admin-description">No events yet.</p> : events.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}</span><h3>{item.title}</h3><p>{item.date} · {item.time} · {item.place}</p><small>{item.attendees} going</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingEvent(item); setEventError(''); }}>Edit</button><button type="button" onClick={() => deleteEvent(item)}>Delete</button></div></article>)}
+            </div>
+          </> : activeSection?.id === 'feedback' ? <>
+            <p className="admin-description">{activeSection.description}</p>
+            {feedbackError && <p className="admin-error" role="alert">{feedbackError}</p>}
+            <div className="admin-announcement-list"><h2>Messages from students</h2>
+              {feedbackLoading ? <p className="admin-description">Loading feedback…</p> : feedbackItems.length === 0 ? <p className="admin-description">No feedback has been submitted yet.</p> : feedbackItems.map((item) => <article className="admin-feedback-row" key={item._id}><div className="admin-feedback-row__top"><span>{item.type}</span><small>{new Date(item.createdAt).toLocaleString()}</small></div><h3>{item.subject}</h3><p>{item.message}</p><small>From {item.email}</small></article>)}
             </div>
           </> : activeSection ? <>
             <p className="admin-description">{activeSection.description}</p>

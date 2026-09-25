@@ -84,11 +84,6 @@ export const AcademicPage = makePage(
   "Academic",
   "Manage your courses, assignments, grades, and exams in one place.",
 );
-export const SettingsPage = makePage(
-  "Settings",
-  "Customize your Unify workspace preferences.",
-);
-
 const announcements = [
   {
     id: 1,
