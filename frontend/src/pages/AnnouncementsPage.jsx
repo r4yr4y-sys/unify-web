@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import { PageHeader } from "../components/ui";
 import { announcements } from "./campusLifeData";
@@ -19,6 +20,7 @@ export default function AnnouncementsPage() {
   const [bookmarkError, setBookmarkError] = useState("");
   const [announcementItems, setAnnouncementItems] = useState(announcements);
   const [selectedDate, setSelectedDate] = useState("");
+  const [query, setQuery] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -55,9 +57,13 @@ export default function AnnouncementsPage() {
     : activeFilter === "Bookmarked"
       ? announcementItems.filter((item) => saved.includes(String(item._id || item.id)))
       : announcementItems.filter((item) => item.category === activeFilter);
-  const visible = selectedDate
+  const dateFiltered = selectedDate
     ? categoryItems.filter((item) => announcementDate(item) === selectedDate)
     : categoryItems;
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const visible = normalizedQuery
+    ? dateFiltered.filter((item) => [item.title, item.copy, item.source, item.category].some((value) => value?.toLocaleLowerCase().includes(normalizedQuery)))
+    : dateFiltered;
   const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
   const leadingDays = (new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1).getDay() + 6) % 7;
   const calendarCells = [...Array(leadingDays).fill(null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)];
@@ -102,6 +108,10 @@ export default function AnnouncementsPage() {
         </div>
         {selectedDate && <button className="announcement-date-clear" type="button" onClick={() => setSelectedDate("")}>Clear date filter</button>}
       </div>
+      <label className="announcement-search">
+        <Search size={18} aria-hidden="true" />
+        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search announcements" aria-label="Search announcements" />
+      </label>
       {bookmarkError && <p className="announcement-bookmark-error" role="alert">{bookmarkError}</p>}
       <div className="announcement-layout">
         <div className="announcement-list">
