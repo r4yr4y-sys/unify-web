@@ -240,6 +240,11 @@ button {
 .admin-form-actions > * { flex: 1; }
 .admin-cancel, .admin-row-actions button { min-height: 40px; padding: 8px 12px; border: 1px solid #435174; border-radius: 8px; color: #c6cee0; background: #182541; cursor: pointer; font: inherit; font-size: 0.8rem; font-weight: 700; }
 .admin-announcement-list { display: grid; gap: 10px; margin-top: 24px; }
+.admin-list-search { display: flex; align-items: center; gap: 9px; min-height: 42px; padding: 0 12px; border: 1px solid #34415d; border-radius: 9px; color: #8999b5; background: #121d33; }
+.admin-list-search:focus-within { border-color: #8290ff; box-shadow: 0 0 0 3px rgba(113, 129, 223, 0.16); }
+.admin-list-search input { width: 100%; min-width: 0; border: 0; outline: 0; color: #f1f4ff; background: transparent; font: inherit; font-size: .84rem; }
+.admin-list-search input::placeholder { color: #77849e; }
+.admin-list-search input::-webkit-search-cancel-button { cursor: pointer; }
 .admin-announcement-row { display: flex; align-items: start; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #2b3b5b; border-radius: 11px; background: rgba(13, 22, 40, 0.42); }
 .admin-announcement-row > div:first-child { min-width: 0; }
 .admin-announcement-row span, .admin-announcement-row small { color: #9eacff; font-size: 0.7rem; }

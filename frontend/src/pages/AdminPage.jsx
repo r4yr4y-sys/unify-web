@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import unifyLogo from '../assets/unify official logo.png';
 import { postedTime } from '../utils/postedTime';
@@ -41,6 +42,9 @@ export default function AdminPage() {
   const [feedbackItems, setFeedbackItems] = useState([]);
   const [feedbackError, setFeedbackError] = useState('');
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [announcementQuery, setAnnouncementQuery] = useState('');
+  const [eventQuery, setEventQuery] = useState('');
+  const [feedbackQuery, setFeedbackQuery] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -199,6 +203,10 @@ export default function AdminPage() {
     { id: 'feedback', label: 'Feedback', description: 'Review feedback submitted by students.' },
   ];
   const activeSection = sections.find((item) => item.id === section);
+  const matchesQuery = (values, query) => values.some((value) => String(value || '').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const visibleAnnouncements = announcements.filter((item) => matchesQuery([item.title, item.category, item.copy, item.source], announcementQuery));
+  const visibleEvents = events.filter((item) => matchesQuery([item.title, item.category, item.date, item.time, item.place], eventQuery));
+  const visibleFeedback = feedbackItems.filter((item) => matchesQuery([item.type, item.subject, item.message, item.email], feedbackQuery));
 
   if (user) return (
     <main className="admin-shell">
@@ -227,7 +235,8 @@ export default function AdminPage() {
               {announcementError && <p className="admin-error" role="alert">{announcementError}</p>}
             </form>
             <div className="admin-announcement-list"><h2>Published announcements</h2>
-              {announcementsLoading ? <p className="admin-description">Loading announcements…</p> : announcements.length === 0 ? <p className="admin-description">No announcements yet.</p> : announcements.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}{item.important ? ' · Important' : ''}</span><h3>{item.title}</h3><p>{item.copy}</p><small>{item.source} · {postedTime(item)}</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingAnnouncement(item); setAnnouncementError(''); }}>Edit</button><button type="button" onClick={() => deleteAnnouncement(item)}>Delete</button></div></article>)}
+              <label className="admin-list-search"><Search size={17} aria-hidden="true" /><input type="search" aria-label="Search announcements" placeholder="Search announcements…" value={announcementQuery} onChange={(event) => setAnnouncementQuery(event.target.value)} /></label>
+              {announcementsLoading ? <p className="admin-description">Loading announcements…</p> : announcements.length === 0 ? <p className="admin-description">No announcements yet.</p> : visibleAnnouncements.length === 0 ? <p className="admin-description">No announcements match your search.</p> : visibleAnnouncements.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}{item.important ? " · Important" : ""}</span><h3>{item.title}</h3><p>{item.copy}</p><small>{item.source} · {postedTime(item)}</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingAnnouncement(item); setAnnouncementError(""); }}>Edit</button><button type="button" onClick={() => deleteAnnouncement(item)}>Delete</button></div></article>)}
             </div>
           </> : activeSection?.id === 'events' ? <>
             <p className="admin-description">{activeSection.description}</p>
@@ -242,13 +251,15 @@ export default function AdminPage() {
               {eventError && <p className="admin-error" role="alert">{eventError}</p>}
             </form>
             <div className="admin-announcement-list"><h2>Published events</h2>
-              {eventsLoading ? <p className="admin-description">Loading events…</p> : events.length === 0 ? <p className="admin-description">No events yet.</p> : events.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}</span><h3>{item.title}</h3><p>{item.date} · {item.time} · {item.place}</p><small>{item.attendees} going</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingEvent(item); setEventError(''); }}>Edit</button><button type="button" onClick={() => deleteEvent(item)}>Delete</button></div></article>)}
+              <label className="admin-list-search"><Search size={17} aria-hidden="true" /><input type="search" aria-label="Search events" placeholder="Search events…" value={eventQuery} onChange={(event) => setEventQuery(event.target.value)} /></label>
+              {eventsLoading ? <p className="admin-description">Loading events…</p> : events.length === 0 ? <p className="admin-description">No events yet.</p> : visibleEvents.length === 0 ? <p className="admin-description">No events match your search.</p> : visibleEvents.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}</span><h3>{item.title}</h3><p>{item.date} · {item.time} · {item.place}</p><small>{item.attendees} going</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingEvent(item); setEventError(""); }}>Edit</button><button type="button" onClick={() => deleteEvent(item)}>Delete</button></div></article>)}
             </div>
           </> : activeSection?.id === 'feedback' ? <>
             <p className="admin-description">{activeSection.description}</p>
             {feedbackError && <p className="admin-error" role="alert">{feedbackError}</p>}
             <div className="admin-announcement-list"><h2>Messages from students</h2>
-              {feedbackLoading ? <p className="admin-description">Loading feedback…</p> : feedbackItems.length === 0 ? <p className="admin-description">No feedback has been submitted yet.</p> : feedbackItems.map((item) => <article className="admin-feedback-row" key={item._id}><div className="admin-feedback-row__top"><span>{item.type}</span><small>{new Date(item.createdAt).toLocaleString()}</small></div><h3>{item.subject}</h3><p>{item.message}</p><small>From {item.email}</small></article>)}
+              <label className="admin-list-search"><Search size={17} aria-hidden="true" /><input type="search" aria-label="Search feedback" placeholder="Search feedback…" value={feedbackQuery} onChange={(event) => setFeedbackQuery(event.target.value)} /></label>
+              {feedbackLoading ? <p className="admin-description">Loading feedback…</p> : feedbackItems.length === 0 ? <p className="admin-description">No feedback has been submitted yet.</p> : visibleFeedback.length === 0 ? <p className="admin-description">No feedback matches your search.</p> : visibleFeedback.map((item) => <article className="admin-feedback-row" key={item._id}><div className="admin-feedback-row__top"><span>{item.type}</span><small>{new Date(item.createdAt).toLocaleString()}</small></div><h3>{item.subject}</h3><p>{item.message}</p><small>From {item.email}</small></article>)}
             </div>
           </> : activeSection ? <>
             <p className="admin-description">{activeSection.description}</p>
