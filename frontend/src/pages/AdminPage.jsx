@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import unifyLogo from '../assets/unify official logo.png';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function AdminPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const section = location.pathname.replace(/^\/admin\/?/, '').split('/')[0] || 'dashboard';
   const [mode, setMode] = useState('sign-in');
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
@@ -48,16 +51,33 @@ export default function AdminPage() {
     }
   };
 
+  const sections = [
+    { id: 'announcements', label: 'Announcements', description: 'Create and manage campus announcements.' },
+    { id: 'events', label: 'Events', description: 'Create and manage campus events.' },
+    { id: 'empty-rooms', label: 'Empty Rooms', description: 'Review and manage empty room listings.' },
+    { id: 'feedback', label: 'Feedback', description: 'Review feedback submitted by students.' },
+  ];
+  const activeSection = sections.find((item) => item.id === section);
+
   if (user) return (
     <main className="admin-shell">
       <header className="admin-header"><img src={unifyLogo} alt="Unify" /><span>ADMIN CONSOLE</span></header>
-      <section className="admin-card admin-dashboard">
-        <p className="admin-kicker">PRIVATE WORKSPACE</p>
-        <h1>Admin dashboard</h1>
-        <p>Signed in as <strong>{user.email}</strong></p>
-        <div className="admin-empty"><span aria-hidden="true">✦</span><h2>You’re all set</h2><p>Admin tools will appear here as they become available.</p></div>
-        <button className="admin-signout" type="button" onClick={() => { localStorage.removeItem('adminToken'); setUser(null); }}>Sign out</button>
-      </section>
+      <div className="admin-layout">
+        <nav className="admin-nav" aria-label="Admin pages">
+          <button className={`admin-nav__link ${section === 'dashboard' ? 'is-active' : ''}`} onClick={() => navigate('/admin')}>Dashboard</button>
+          {sections.map((item) => <button key={item.id} className={`admin-nav__link ${section === item.id ? 'is-active' : ''}`} onClick={() => navigate(`/admin/${item.id}`)}>{item.label}</button>)}
+          <button className="admin-signout" type="button" onClick={() => { localStorage.removeItem('adminToken'); setUser(null); navigate('/admin'); }}>Sign out</button>
+        </nav>
+        <section className="admin-card admin-dashboard">
+          <p className="admin-kicker">PRIVATE WORKSPACE</p>
+          <h1>{activeSection?.label || 'Admin dashboard'}</h1>
+          <p>Signed in as <strong>{user.email}</strong></p>
+          {activeSection ? <>
+            <p className="admin-description">{activeSection.description}</p>
+            <div className="admin-empty"><span aria-hidden="true">✦</span><h2>{activeSection.label}</h2><p>{section === 'feedback' ? 'Student feedback will appear here.' : `No ${activeSection.label.toLowerCase()} have been added yet.`}</p></div>
+          </> : <div className="admin-empty"><span aria-hidden="true">✦</span><h2>You’re all set</h2><p>Choose a page to manage campus content.</p></div>}
+        </section>
+      </div>
     </main>
   );
 

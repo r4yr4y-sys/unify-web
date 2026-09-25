@@ -219,12 +219,18 @@ button {
 .admin-submit:disabled { opacity: 0.7; cursor: wait; }
 .admin-error { margin: 0; color: #ff9ba6; font-size: 0.78rem; text-align: center; }
 .admin-user-link { display: block; margin-top: 22px; color: #9eacff; font-size: 0.78rem; text-align: center; text-decoration: none; }
+.admin-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 22px; align-items: start; max-width: 1120px; margin: 46px auto 0; }
+.admin-layout .admin-card { width: 100%; margin: 0; }
+.admin-nav { display: grid; gap: 6px; padding: 12px; border: 1px solid rgba(186, 201, 237, 0.15); border-radius: 15px; background: rgba(20, 31, 54, 0.78); }
+.admin-nav__link { padding: 11px 12px; border: 0; border-radius: 8px; color: #aab5cb; background: transparent; cursor: pointer; font: inherit; font-size: 0.82rem; text-align: left; }
+.admin-nav__link:hover, .admin-nav__link.is-active { color: #f4f6ff; background: #2b3c67; }
+.admin-nav .admin-signout { margin: 10px 12px 4px; text-align: left; }
 .admin-empty { margin: 32px 0 22px; padding: 28px 18px; border: 1px solid #2b3b5b; border-radius: 13px; background: rgba(13, 22, 40, 0.5); text-align: center; }
 .admin-empty > span { color: #9eacff; font-size: 1.4rem; }
 .admin-empty h2 { margin: 10px 0 5px; font-size: 1rem; }
 .admin-empty p { margin: 0; color: #9ba8c0; font-size: 0.8rem; }
 .admin-signout { padding: 0; border: 0; color: #9eacff; background: none; cursor: pointer; font: inherit; font-size: 0.8rem; }
-@media (max-width: 520px) { .admin-shell { padding: 20px; } .admin-card { margin-top: 6vh; padding: 26px 22px; } }
+@media (max-width: 680px) { .admin-shell { padding: 20px; } .admin-card { margin-top: 6vh; padding: 26px 22px; } .admin-layout { grid-template-columns: 1fr; gap: 14px; margin-top: 26px; } .admin-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } .admin-nav .admin-signout { margin: 4px 12px; } .admin-layout .admin-card { margin: 0; } }
 .antigravity-panel {
   position: relative;
   min-width: 0;
