@@ -66,6 +66,7 @@ export default function EventsPage() {
         ? current.filter((item) => item !== key)
         : [...current, key];
       localStorage.setItem(interestStorageKey(), JSON.stringify(next));
+      window.dispatchEvent(new Event("unify-interested-events-updated"));
       return next;
     });
   };

@@ -6,6 +6,14 @@ import { IconButton } from "../ui";
 import profilePicture from "../../assets/Profile_pic.jpg";
 import { assessmentLabel, formatSchedule, isUpcoming, upcomingAssessments } from "../../utils/assessments";
 
+const interestedEvents = (events) => {
+  let userId = "account";
+  try { userId = JSON.parse(localStorage.getItem("user") || "{}").id || userId; } catch {}
+  let selected = [];
+  try { selected = JSON.parse(localStorage.getItem(`unify-interested-events:${userId}`) || "[]").map(String); } catch {}
+  return events.filter((event) => selected.includes(String(event._id || event.id)) && isUpcoming(event.date));
+};
+
 export default function Topbar() {
   const greetingRef = useRef(null);
   const [name, setName] = useState("there");
@@ -79,21 +87,28 @@ export default function Topbar() {
     const token = localStorage.getItem("authToken");
     if (!token) return undefined;
     let active = true;
+    let loadedEvents = [];
+    const refreshInterestedEvents = () => setEventNotifications(interestedEvents(loadedEvents));
     fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/events`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (response) => {
         const result = await response.json();
         if (response.ok && active) {
-          setEventNotifications((result.events || [])
-            .filter((event) => isUpcoming(event.date))
-            .sort((a, b) => a.date.localeCompare(b.date)));
+          loadedEvents = result.events || [];
+          refreshInterestedEvents();
         }
       })
       .catch(() => {
         // Event notifications are non-blocking; the Events page can surface API errors.
       });
-    return () => { active = false; };
+    window.addEventListener("unify-interested-events-updated", refreshInterestedEvents);
+    window.addEventListener("storage", refreshInterestedEvents);
+    return () => {
+      active = false;
+      window.removeEventListener("unify-interested-events-updated", refreshInterestedEvents);
+      window.removeEventListener("storage", refreshInterestedEvents);
+    };
   }, []);
 
   useEffect(() => {
