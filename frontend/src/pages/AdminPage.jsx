@@ -238,7 +238,6 @@ export default function AdminPage() {
               <label>Date<input name="date" type="date" defaultValue={editingEvent?.date || ''} required /></label>
               <fieldset className="admin-time-range"><legend>Time</legend><label>Start<input name="startTime" type="time" defaultValue={eventTimeValue(editingEvent?.time, 0)} required /></label><span aria-hidden="true">–</span><label>End<input name="endTime" type="time" defaultValue={eventTimeValue(editingEvent?.time, 1)} required /></label></fieldset>
               <label>Location<input name="place" defaultValue={editingEvent?.place || ''} maxLength="160" placeholder="e.g. AUST Auditorium" required /></label>
-              <label>Attendees<input name="attendees" type="number" min="0" step="1" defaultValue={editingEvent?.attendees ?? 0} /></label>
               <div className="admin-form-actions"><button className="admin-submit" type="submit">{editingEvent?._id ? 'Save changes' : 'Publish event'}</button>{editingEvent && <button className="admin-cancel" type="button" onClick={() => setEditingEvent(null)}>Cancel</button>}</div>
               {eventError && <p className="admin-error" role="alert">{eventError}</p>}
             </form>

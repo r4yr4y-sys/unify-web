@@ -16,16 +16,36 @@ const clean = (body) => ({
   color: categoryColors[typeof body.category === 'string' ? body.category.trim() : ''] || 'violet',
 });
 const valid = (event) => event.title && categories.includes(event.category) && /^\d{4}-\d{2}-\d{2}$/.test(event.date) && event.time && event.place;
-const serialize = (event) => {
+const serialize = (event, userId) => {
   const item = event.toObject ? event.toObject() : event;
   const parsedDate = new Date(`${item.date}T12:00:00`);
-  return { ...item, color: categoryColors[item.category] || 'violet', month: parsedDate.toLocaleString('en-US', { month: 'short' }).toUpperCase(), day: parsedDate.getDate().toString().padStart(2, '0') };
+  const goingUsers = item.goingUsers || [];
+  return { ...item, attendees: goingUsers.length, isGoing: userId ? goingUsers.some((id) => String(id) === String(userId)) : false, color: categoryColors[item.category] || 'violet', month: parsedDate.toLocaleString('en-US', { month: 'short' }).toUpperCase(), day: parsedDate.getDate().toString().padStart(2, '0') };
 };
 
-router.get('/', requireAuth, async (_request, response, next) => {
+router.get('/', requireAuth, async (request, response, next) => {
   try {
     const events = await Event.find().sort({ date: 1, createdAt: -1 });
-    response.json({ events: events.map(serialize) });
+    response.json({ events: events.map((event) => serialize(event, request.user._id)) });
+  } catch (error) { next(error); }
+});
+
+router.post('/:id/going', requireAuth, async (request, response, next) => {
+  try {
+    if (!mongoose.isValidObjectId(request.params.id))
+      return response.status(404).json({ message: 'Event not found.' });
+    const event = await Event.findById(request.params.id);
+    if (!event) return response.status(404).json({ message: 'Event not found.' });
+    const goingUsers = (event.goingUsers || []).map(String);
+    const alreadyGoing = goingUsers.includes(String(request.user._id));
+    const updated = await Event.findByIdAndUpdate(
+      event._id,
+      alreadyGoing
+        ? { $pull: { goingUsers: request.user._id } }
+        : { $addToSet: { goingUsers: request.user._id } },
+      { new: true },
+    );
+    response.json({ event: serialize(updated, request.user._id) });
   } catch (error) { next(error); }
 });
 

@@ -8,18 +8,8 @@ import {
   Users,
 } from "lucide-react";
 import { Button, PageHeader } from "../components/ui";
-import { events } from "./campusLifeData";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-const interestStorageKey = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    return `unify-interested-events:${user.id || "account"}`;
-  } catch {
-    return "unify-interested-events:account";
-  }
-};
 
 const eventDateLabel = (event) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(event.date || "")) return `${event.month} ${event.day || event.date}`;
@@ -30,16 +20,9 @@ const eventDateLabel = (event) => {
 
 export default function EventsPage() {
   const currentDate = new Date();
-  const [selected, setSelected] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(interestStorageKey()) || "[]").map(String);
-    } catch {
-      return [];
-    }
-  });
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [eventItems, setEventItems] = useState(events);
+  const [eventItems, setEventItems] = useState([]);
   const [calendarOpen, setCalendarOpen] = useState(false);
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -59,20 +42,24 @@ export default function EventsPage() {
     (selectedCategory === "All" || event.category === selectedCategory) &&
     (!normalizedQuery || [event.title, event.category, event.place, event.time].some((value) => value?.toLowerCase().includes(normalizedQuery))),
   );
-  const toggleEvent = (id) => {
-    const key = String(id);
-    setSelected((current) => {
-      const next = current.includes(key)
-        ? current.filter((item) => item !== key)
-        : [...current, key];
-      localStorage.setItem(interestStorageKey(), JSON.stringify(next));
-      window.dispatchEvent(new Event("unify-interested-events-updated"));
-      return next;
-    });
+  const toggleEvent = async (id) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+    try {
+      const response = await fetch(`${apiUrl}/api/events/${id}/going`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to update event attendance.");
+      setEventItems((current) => current.map((event) => event._id === result.event._id ? result.event : event));
+      window.dispatchEvent(new CustomEvent("unify-interested-events-updated", { detail: { event: result.event } }));
+    } catch {
+      // Attendance updates are non-blocking; retrying the button sends the request again.
+    }
   };
-  const interestedEvents = selected
-    .map((id) => eventItems.find((event) => String(event._id || event.id) === id))
-    .filter(Boolean)
+  const interestedEvents = eventItems
+    .filter((event) => event.isGoing)
     .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
   return (
     <section className="page campus-page">
@@ -152,13 +139,13 @@ export default function EventsPage() {
                 <button
                   type="button"
                   className={
-                    selected.includes(String(event._id || event.id))
+                    event.isGoing
                       ? "event-rsvp is-going"
                       : "event-rsvp"
                   }
                   onClick={() => toggleEvent(event._id || event.id)}
                 >
-                  {selected.includes(String(event._id || event.id)) ? (
+                  {event.isGoing ? (
                     <>
                       <CheckCircle2 size={16} /> Going
                     </>

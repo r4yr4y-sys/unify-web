@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   BellRing,
@@ -11,14 +12,29 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button, PageHeader } from "../components/ui";
-import {
-  announcements,
-  events,
-  foundItems,
-  marketplaceItems,
-} from "./campusLifeData";
+import { foundItems, marketplaceItems } from "./campusLifeData";
+
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function CampusLifePage() {
+  const [announcements, setAnnouncements] = useState([]);
+  const [events, setEvents] = useState([]);
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return undefined;
+    let active = true;
+    const headers = { Authorization: `Bearer ${token}` };
+    Promise.all([
+      fetch(`${apiUrl}/api/announcements`, { headers }).then((response) => response.ok ? response.json() : null),
+      fetch(`${apiUrl}/api/events`, { headers }).then((response) => response.ok ? response.json() : null),
+    ]).then(([announcementResult, eventResult]) => {
+      if (!active) return;
+      setAnnouncements(announcementResult?.announcements || []);
+      setEvents(eventResult?.events || []);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
   const campusSections = [
     {
       title: "Announcements",
@@ -26,7 +42,7 @@ export default function CampusLifePage() {
       to: "/campus-life/announcements",
       icon: Megaphone,
       accent: "blue",
-      note: announcements[0].title,
+      note: announcements[0]?.title || "No announcements yet",
     },
     {
       title: "Events",
@@ -34,7 +50,7 @@ export default function CampusLifePage() {
       to: "/campus-life/events",
       icon: CalendarDays,
       accent: "violet",
-      note: events[0].title,
+      note: events[0]?.title || "No events yet",
     },
     {
       title: "Marketplace",
@@ -134,9 +150,9 @@ export default function CampusLifePage() {
                 <Megaphone size={17} />
               </span>
               <div>
-                <strong>{announcements[0].title}</strong>
+                <strong>{announcements[0]?.title || "No announcements yet"}</strong>
                 <p>
-                  {announcements[0].source} · {announcements[0].time}
+                  {announcements[0] ? `${announcements[0].source} · ${announcements[0].time}` : ""}
                 </p>
               </div>
               <ArrowUpRight size={16} />
@@ -146,9 +162,9 @@ export default function CampusLifePage() {
                 <CalendarDays size={17} />
               </span>
               <div>
-                <strong>{events[0].title}</strong>
+                <strong>{events[0]?.title || "No events yet"}</strong>
                 <p>
-                  {events[0].time} · {events[0].place}
+                  {events[0] ? `${events[0].time} · ${events[0].place}` : ""}
                 </p>
               </div>
               <ArrowUpRight size={16} />

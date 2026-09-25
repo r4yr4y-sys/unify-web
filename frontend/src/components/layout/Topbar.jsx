@@ -7,11 +7,7 @@ import profilePicture from "../../assets/Profile_pic.jpg";
 import { assessmentLabel, formatSchedule, isUpcoming, upcomingAssessments } from "../../utils/assessments";
 
 const interestedEvents = (events) => {
-  let userId = "account";
-  try { userId = JSON.parse(localStorage.getItem("user") || "{}").id || userId; } catch {}
-  let selected = [];
-  try { selected = JSON.parse(localStorage.getItem(`unify-interested-events:${userId}`) || "[]").map(String); } catch {}
-  return events.filter((event) => selected.includes(String(event._id || event.id)) && isUpcoming(event.date));
+  return events.filter((event) => event.isGoing && isUpcoming(event.date));
 };
 
 export default function Topbar() {
@@ -89,6 +85,12 @@ export default function Topbar() {
     let active = true;
     let loadedEvents = [];
     const refreshInterestedEvents = () => setEventNotifications(interestedEvents(loadedEvents));
+    const handleAttendanceUpdate = (notification) => {
+      if (notification.detail?.event) {
+        loadedEvents = loadedEvents.map((event) => event._id === notification.detail.event._id ? notification.detail.event : event);
+      }
+      refreshInterestedEvents();
+    };
     fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/events`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -102,12 +104,10 @@ export default function Topbar() {
       .catch(() => {
         // Event notifications are non-blocking; the Events page can surface API errors.
       });
-    window.addEventListener("unify-interested-events-updated", refreshInterestedEvents);
-    window.addEventListener("storage", refreshInterestedEvents);
+    window.addEventListener("unify-interested-events-updated", handleAttendanceUpdate);
     return () => {
       active = false;
-      window.removeEventListener("unify-interested-events-updated", refreshInterestedEvents);
-      window.removeEventListener("storage", refreshInterestedEvents);
+      window.removeEventListener("unify-interested-events-updated", handleAttendanceUpdate);
     };
   }, []);
 

@@ -7,6 +7,7 @@ const eventSchema = new mongoose.Schema({
   time: { type: String, required: true, trim: true, maxlength: 100 },
   place: { type: String, required: true, trim: true, maxlength: 160 },
   attendees: { type: Number, default: 0, min: 0 },
+  goingUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   color: { type: String, enum: ['violet', 'green', 'orange', 'pink'], default: 'violet' },
 }, { timestamps: true });
 
