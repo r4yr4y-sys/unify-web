@@ -4,13 +4,14 @@ import { Bell, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { IconButton } from "../ui";
 import profilePicture from "../../assets/Profile_pic.jpg";
-import { assessmentLabel, formatSchedule, upcomingAssessments } from "../../utils/assessments";
+import { assessmentLabel, formatSchedule, isUpcoming, upcomingAssessments } from "../../utils/assessments";
 
 export default function Topbar() {
   const greetingRef = useRef(null);
   const [name, setName] = useState("there");
   const [avatarUrl, setAvatarUrl] = useState(profilePicture);
   const [notifications, setNotifications] = useState([]);
+  const [eventNotifications, setEventNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
@@ -75,6 +76,27 @@ export default function Topbar() {
   }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return undefined;
+    let active = true;
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/events`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (response.ok && active) {
+          setEventNotifications((result.events || [])
+            .filter((event) => isUpcoming(event.date))
+            .sort((a, b) => a.date.localeCompare(b.date)));
+        }
+      })
+      .catch(() => {
+        // Event notifications are non-blocking; the Events page can surface API errors.
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
     const greeting = greetingRef.current;
     if (
       !greeting ||
@@ -107,13 +129,15 @@ export default function Topbar() {
           <kbd>⌘ K</kbd>
         </button>
         <div className="topbar-notifications">
-        <IconButton label="Notifications" className={notifications.length ? "topbar-notifications__bell has-upcoming" : "topbar-notifications__bell"} onClick={() => setNotificationsOpen((current) => !current)} aria-expanded={notificationsOpen}>
+        <IconButton label="Notifications" className={notifications.length || eventNotifications.length ? "topbar-notifications__bell has-upcoming" : "topbar-notifications__bell"} onClick={() => setNotificationsOpen((current) => !current)} aria-expanded={notificationsOpen}>
           <Bell size={19} />
-          {notifications.length > 0 && <span className="topbar-notifications__badge">{notifications.length}</span>}
+          {notifications.length + eventNotifications.length > 0 && <span className="topbar-notifications__badge">{notifications.length + eventNotifications.length}</span>}
         </IconButton>
-        {notificationsOpen && <section className="topbar-notifications__panel" aria-label="Upcoming assessments">
-          <h2>Upcoming assessments</h2>
+        {notificationsOpen && <section className="topbar-notifications__panel" aria-label="Upcoming notifications">
+          <h2>Coming up</h2>
           {notifications.length ? <ul>{notifications.map(({ course, assessment }) => <li key={`${course.id}-${assessment.id}`}><strong>{course.title} — {assessmentLabel(assessment, course.courseType)}</strong><span>{formatSchedule(assessment)}</span></li>)}</ul> : <p>No assessments in the next 3 days.</p>}
+          {eventNotifications.length > 0 && <ul>{eventNotifications.map((event) => <li key={`event-${event._id}`}><strong>Event: {event.title}</strong><span>{new Date(`${event.date}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {event.time}</span></li>)}</ul>}
+          {notifications.length + eventNotifications.length === 0 && <p>No events or assessments in the next 3 days.</p>}
         </section>}
         </div>
         <span ref={greetingRef} className="topbar__greeting">

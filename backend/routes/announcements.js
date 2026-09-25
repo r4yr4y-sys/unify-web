@@ -5,14 +5,6 @@ import User from '../models/userSchema.js';
 import { requireAdmin, requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
-const seedSchema = new mongoose.Schema({ _id: String }, { versionKey: false });
-const AnnouncementSeed = mongoose.models.AnnouncementSeed || mongoose.model('AnnouncementSeed', seedSchema);
-const initialAnnouncements = [
-  { category: 'Academic', tone: 'blue', title: 'Midterm Examination Schedule', copy: 'Exam dates, times, rooms, and instructions for students.', source: 'Office of the Registrar', time: '2 hours ago', important: true },
-  { category: 'Campus update', tone: 'violet', title: 'New Club Formation', copy: 'AUST recently announced the formation of the AUST Model United Nations Cell and AUST Cybersecurity and AI Club.', source: 'University Library', time: 'Yesterday' },
-  { category: 'Opportunity', tone: 'amber', title: 'Research Grant Opportunity', copy: 'Call for students to submit research proposals through the AUST Student Research Grant.', source: 'Research & Innovation', time: 'Dec 4' },
-  { category: 'Student life', tone: 'green', title: 'Club Recruitment', copy: 'Recruitment for AUST Model United Nations Cell.', source: 'Student Affairs', time: 'Dec 2' },
-];
 const tones = { Academic: 'blue', 'Campus update': 'violet', Opportunity: 'amber', 'Student life': 'green' };
 const clean = (body) => ({
   category: body.category,
@@ -28,14 +20,6 @@ const valid = (item) => item.category && tones[item.category] && item.title && i
 
 router.get('/', requireAuth, async (_request, response, next) => {
   try {
-    if (!(await AnnouncementSeed.exists({ _id: 'initial-v1' }))) {
-      try {
-        if (!(await Announcement.exists())) await Announcement.insertMany(initialAnnouncements);
-        await AnnouncementSeed.create({ _id: 'initial-v1' });
-      } catch (error) {
-        if (error?.code !== 11000) throw error;
-      }
-    }
     const items = await Announcement.find().sort({ publishedOn: -1, createdAt: -1 });
     response.json({ announcements: items.map((item) => ({ ...item.toObject(), publishedOn: item.publishedOn || item.createdAt.toISOString().slice(0, 10) })) });
   } catch (error) { next(error); }

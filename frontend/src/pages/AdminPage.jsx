@@ -8,6 +8,19 @@ const localDate = () => {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
+const eventTimeValue = (time, index) => {
+  const parts = String(time || '').split(/\s*[–—-]\s*/);
+  const match = parts[index]?.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
+  if (!match) return '';
+  let hour = Number(match[1]);
+  const meridiem = match[3]?.toUpperCase();
+  if (meridiem) hour = (hour % 12) + (meridiem === 'PM' ? 12 : 0);
+  if (hour > 23 || Number(match[2]) > 59) return '';
+  return `${String(hour).padStart(2, '0')}:${match[2]}`;
+};
+const formatEventTime = (time) => new Date(`2000-01-01T${time}:00`).toLocaleTimeString('en-US', {
+  hour: 'numeric', minute: '2-digit',
+});
 
 export default function AdminPage() {
   const location = useLocation();
@@ -90,6 +103,9 @@ export default function AdminPage() {
     event.preventDefault();
     setEventError('');
     const fields = Object.fromEntries(new FormData(event.currentTarget));
+    fields.time = `${formatEventTime(fields.startTime)} – ${formatEventTime(fields.endTime)}`;
+    delete fields.startTime;
+    delete fields.endTime;
     const isEditing = Boolean(editingEvent?._id);
     try {
       const response = await fetch(`${apiUrl}/api/events${isEditing ? `/${editingEvent._id}` : ''}`, {
@@ -218,12 +234,11 @@ export default function AdminPage() {
             <form key={editingEvent?._id || 'new-event'} className="admin-form admin-announcement-form" onSubmit={submitEvent}>
               <h2>{editingEvent?._id ? 'Edit event' : 'Create event'}</h2>
               <label>Event title<input name="title" defaultValue={editingEvent?.title || ''} maxLength="140" required /></label>
-              <label>Category<input name="category" defaultValue={editingEvent?.category || ''} maxLength="60" placeholder="e.g. Workshop" required /></label>
+              <label>Category<select name="category" defaultValue={editingEvent?.category || 'Career'} required><option>Career</option><option>Workshop</option><option>Sports</option><option>Community</option></select></label>
               <label>Date<input name="date" type="date" defaultValue={editingEvent?.date || ''} required /></label>
-              <label>Time<input name="time" defaultValue={editingEvent?.time || ''} maxLength="100" placeholder="e.g. 10:00 AM – 12:00 PM" required /></label>
+              <fieldset className="admin-time-range"><legend>Time</legend><label>Start<input name="startTime" type="time" defaultValue={eventTimeValue(editingEvent?.time, 0)} required /></label><span aria-hidden="true">–</span><label>End<input name="endTime" type="time" defaultValue={eventTimeValue(editingEvent?.time, 1)} required /></label></fieldset>
               <label>Location<input name="place" defaultValue={editingEvent?.place || ''} maxLength="160" placeholder="e.g. AUST Auditorium" required /></label>
               <label>Attendees<input name="attendees" type="number" min="0" step="1" defaultValue={editingEvent?.attendees ?? 0} /></label>
-              <label>Card color<select name="color" defaultValue={editingEvent?.color || 'blue'}><option value="violet">Violet</option><option value="blue">Blue</option><option value="orange">Orange</option><option value="pink">Pink</option></select></label>
               <div className="admin-form-actions"><button className="admin-submit" type="submit">{editingEvent?._id ? 'Save changes' : 'Publish event'}</button>{editingEvent && <button className="admin-cancel" type="button" onClick={() => setEditingEvent(null)}>Cancel</button>}</div>
               {eventError && <p className="admin-error" role="alert">{eventError}</p>}
             </form>
