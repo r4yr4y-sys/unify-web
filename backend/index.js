@@ -5,6 +5,7 @@ import 'dotenv/config';
 import signupRouter from './routes/signup.js';
 import signinRouter from './routes/signin.js';
 import adminAuthRouter from './routes/adminAuth.js';
+import announcementsRouter from './routes/announcements.js';
 import profileRouter from './routes/profile.js';
 import apiRouter from './routes/api.js';
 
@@ -23,6 +24,7 @@ app.use((request, response, next) => {
 app.use('/api/auth', signupRouter);
 app.use('/api/auth', signinRouter);
 app.use('/api/admin/auth', adminAuthRouter);
+app.use('/api/announcements', announcementsRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api', apiRouter);
 

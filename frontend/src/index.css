@@ -225,6 +225,25 @@ button {
 .admin-nav__link { padding: 11px 12px; border: 0; border-radius: 8px; color: #aab5cb; background: transparent; cursor: pointer; font: inherit; font-size: 0.82rem; text-align: left; }
 .admin-nav__link:hover, .admin-nav__link.is-active { color: #f4f6ff; background: #2b3c67; }
 .admin-nav .admin-signout { margin: 10px 12px 4px; text-align: left; }
+.admin-announcement-form { margin-top: 22px; padding: 20px; border: 1px solid #2b3b5b; border-radius: 13px; background: rgba(13, 22, 40, 0.5); }
+.admin-announcement-form h2, .admin-announcement-list > h2 { margin: 0 0 4px; color: #f1f4ff; font-size: 1rem; }
+.admin-form select, .admin-form textarea { width: 100%; padding: 11px 12px; border: 1px solid #34415d; border-radius: 9px; outline: none; color: #f1f4ff; background: #121d33; font: inherit; font-size: 0.84rem; }
+.admin-form select { height: 44px; }
+.admin-form textarea { resize: vertical; line-height: 1.5; }
+.admin-form select:focus, .admin-form textarea:focus { border-color: #8290ff; box-shadow: 0 0 0 3px rgba(113, 129, 223, 0.16); }
+.admin-form .admin-checkbox { display: flex; align-items: center; gap: 9px; }
+.admin-checkbox input { width: 16px; height: 16px; accent-color: #8290ff; }
+.admin-form-actions, .admin-row-actions { display: flex; gap: 9px; }
+.admin-form-actions > * { flex: 1; }
+.admin-cancel, .admin-row-actions button { min-height: 40px; padding: 8px 12px; border: 1px solid #435174; border-radius: 8px; color: #c6cee0; background: #182541; cursor: pointer; font: inherit; font-size: 0.8rem; font-weight: 700; }
+.admin-announcement-list { display: grid; gap: 10px; margin-top: 24px; }
+.admin-announcement-row { display: flex; align-items: start; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #2b3b5b; border-radius: 11px; background: rgba(13, 22, 40, 0.42); }
+.admin-announcement-row > div:first-child { min-width: 0; }
+.admin-announcement-row span, .admin-announcement-row small { color: #9eacff; font-size: 0.7rem; }
+.admin-announcement-row h3 { margin: 6px 0; color: #f1f4ff; font-size: 0.92rem; }
+.admin-announcement-row p { margin: 0 0 7px; color: #aab5cb; font-size: 0.8rem; line-height: 1.5; }
+.admin-row-actions { flex-shrink: 0; }
+.admin-row-actions button:last-child { color: #ff9ba6; }
 .admin-empty { margin: 32px 0 22px; padding: 28px 18px; border: 1px solid #2b3b5b; border-radius: 13px; background: rgba(13, 22, 40, 0.5); text-align: center; }
 .admin-empty > span { color: #9eacff; font-size: 1.4rem; }
 .admin-empty h2 { margin: 10px 0 5px; font-size: 1rem; }

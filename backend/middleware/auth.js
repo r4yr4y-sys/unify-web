@@ -42,4 +42,13 @@ const requireAuth = async (request, response, next) => {
   }
 };
 
-export { createToken, serializeUser, requireAuth };
+const requireAdmin = (request, response, next) => {
+  requireAuth(request, response, (error) => {
+    if (error) return next(error);
+    if (request.user?.role !== 'admin')
+      return response.status(403).json({ message: 'Administrator access is required.' });
+    next();
+  });
+};
+
+export { createToken, serializeUser, requireAuth, requireAdmin };

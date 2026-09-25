@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BellRing,
   Bookmark,
@@ -9,14 +9,30 @@ import {
 import { Button, PageHeader } from "../components/ui";
 import { announcements } from "./campusLifeData";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function AnnouncementsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [saved, setSaved] = useState([]);
-  const filters = ["All", "Academic", "Campus update", "Opportunity"];
+  const [announcementItems, setAnnouncementItems] = useState(announcements);
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return undefined;
+    let active = true;
+    fetch(`${apiUrl}/api/announcements`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Unable to load announcements.");
+        if (active) setAnnouncementItems(result.announcements || []);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const filters = ["All", "Academic", "Campus update", "Opportunity", "Student life"];
   const visible =
     activeFilter === "All"
-      ? announcements
-      : announcements.filter((item) => item.category === activeFilter);
+      ? announcementItems
+      : announcementItems.filter((item) => item.category === activeFilter);
   const toggleSaved = (id) =>
     setSaved((current) =>
       current.includes(id)
@@ -57,7 +73,7 @@ export default function AnnouncementsPage() {
           {visible.map((item) => (
             <article
               className={`announcement-card announcement-card--${item.tone}`}
-              key={item.id}
+              key={item._id || item.id}
             >
               <div className="announcement-card__marker" aria-hidden="true" />
               <div className="announcement-card__body">
@@ -71,13 +87,13 @@ export default function AnnouncementsPage() {
               </div>
               <button
                 type="button"
-                className={`save-button ${saved.includes(item.id) ? "is-saved" : ""}`}
-                onClick={() => toggleSaved(item.id)}
+                className={`save-button ${saved.includes(item._id || item.id) ? "is-saved" : ""}`}
+                onClick={() => toggleSaved(item._id || item.id)}
                 aria-label={`Save ${item.title}`}
               >
                 <Bookmark
                   size={18}
-                  fill={saved.includes(item.id) ? "currentColor" : "none"}
+                  fill={saved.includes(item._id || item.id) ? "currentColor" : "none"}
                 />
               </button>
             </article>
