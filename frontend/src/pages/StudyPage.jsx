@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   Clock3,
@@ -9,12 +10,38 @@ import {
 import { Link } from "react-router-dom";
 import { PageHeader } from "../components/ui";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` });
+
 export default function StudyPage() {
+  const [stats, setStats] = useState({ notes: "Loading…", resources: "Loading…", plans: "Loading…" });
+  useEffect(() => {
+    let active = true;
+    const loadCount = (path, collection, getStat) => {
+      const key = path === "study-plans" ? "plans" : path;
+      fetch(`${apiUrl}/api/${path}`, { headers: authHeaders() })
+        .then(async (response) => {
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || "Unable to load summary.");
+          return getStat(result[collection] || []);
+        })
+        .then((stat) => { if (active) setStats((current) => ({ ...current, [key]: stat })); })
+        .catch(() => { if (active) setStats((current) => ({ ...current, [key]: "Unavailable" })); });
+    };
+    loadCount("notes", "notes", (notes) => `${notes.length} note${notes.length === 1 ? "" : "s"}`);
+    loadCount("resources", "resources", (resources) => `${resources.length} resource${resources.length === 1 ? "" : "s"}`);
+    loadCount("study-plans", "plans", (plans) => {
+      const activePlans = plans.filter((plan) => plan.checkpoints.some((checkpoint) => !checkpoint.completed)).length;
+      return `${activePlans} active plan${activePlans === 1 ? "" : "s"}`;
+    });
+    return () => { active = false; };
+  }, []);
+
   const sections = [
     {
       title: "Notes",
       copy: "Capture and revisit your lecture notes.",
-      stat: "3 notes",
+      stat: stats.notes,
       to: "/study/notes",
       icon: FileText,
       hue: "blue",
@@ -22,7 +49,7 @@ export default function StudyPage() {
     {
       title: "Resources",
       copy: "Keep files and helpful links together.",
-      stat: "3 resources",
+      stat: stats.resources,
       to: "/study/resources",
       icon: FolderOpen,
       hue: "violet",
@@ -30,7 +57,7 @@ export default function StudyPage() {
     {
       title: "Study plans",
       copy: "Build a clear path through revision.",
-      stat: "2 active plans",
+      stat: stats.plans,
       to: "/study/plans",
       icon: Target,
       hue: "amber",

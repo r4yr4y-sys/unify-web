@@ -4,6 +4,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Plus,
+  Trash2,
   Target,
 } from "lucide-react";
 import { Button, PageHeader } from "../components/ui";
@@ -41,26 +42,14 @@ function deadlineLabel(deadline) {
   return `${overdue} day${overdue === 1 ? "" : "s"} overdue`;
 }
 
-function StudyPlanCard({ plan, onOpen }) {
+function StudyPlanCard({ plan, onOpen, onDelete, deleting }) {
   const completed = plan.checkpoints.filter(
     (checkpoint) => checkpoint.completed,
   ).length;
   const progress = Math.round((completed / plan.checkpoints.length) * 100);
   const deadline = deadlineLabel(plan.deadline);
   return (
-    <article
-      className={`plan-card study-plan-card ${progress === 100 ? "is-complete" : ""}`}
-      onClick={onOpen}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onOpen();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={`Open ${plan.topic} study plan`}
-    >
+    <article className={`plan-card study-plan-card ${progress === 100 ? "is-complete" : ""}`}>
       <div className="plan-card__top">
         <span>{plan.subject}</span>
         {progress === 100 && <CheckCircle2 size={17} aria-label="Completed" />}
@@ -82,8 +71,13 @@ function StudyPlanCard({ plan, onOpen }) {
         )}
       </div>
       <footer>
-        <span>{progress === 100 ? "Plan completed" : "Open plan"}</span>
-        <ArrowUpRight size={16} />
+        <button type="button" className="study-plan-card__open" onClick={onOpen}>
+          <span>{progress === 100 ? "Plan completed" : "Open plan"}</span>
+          <ArrowUpRight size={16} />
+        </button>
+        <button type="button" className="study-plan-card__delete" onClick={onDelete} disabled={deleting} aria-label={`Delete ${plan.topic}`} title="Delete plan">
+          <Trash2 size={16} />
+        </button>
       </footer>
     </article>
   );
@@ -95,6 +89,7 @@ export default function StudyPlansPage() {
   const [activePlanId, setActivePlanId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const activePlan = plans.find((plan) => plan.id === activePlanId) || null;
   useEffect(() => {
     let active = true;
@@ -159,6 +154,27 @@ export default function StudyPlansPage() {
       setError(requestError.message);
     }
   }
+  async function deletePlan(plan) {
+    if (!window.confirm(`Delete “${plan.topic}” study plan?`)) return;
+    setError("");
+    setDeletingId(plan.id);
+    try {
+      const response = await fetch(`${apiUrl}/api/study-plans/${plan.id}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Unable to delete study plan.");
+      }
+      setPlans((current) => current.filter((item) => item.id !== plan.id));
+      if (activePlanId === plan.id) setActivePlanId(null);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setDeletingId("");
+    }
+  }
   return (
     <section className="page study-page">
       <PageHeader
@@ -198,6 +214,8 @@ export default function StudyPlansPage() {
               key={plan.id}
               plan={plan}
               onOpen={() => setActivePlanId(plan.id)}
+              onDelete={() => deletePlan(plan)}
+              deleting={deletingId === plan.id}
             />
           ))}
         </div>

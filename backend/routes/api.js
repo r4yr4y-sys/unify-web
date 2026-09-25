@@ -625,6 +625,18 @@ router.put(
     }
   },
 );
+router.delete('/study-plans/:id', requireAuth, async (request, response, next) => {
+  try {
+    const plan = await StudyPlan.findOneAndDelete({
+      _id: request.params.id,
+      user: request.user._id,
+    });
+    if (!plan) return response.status(404).json({ message: 'Study plan not found.' });
+    response.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/study-sessions', requireAuth, async (request, response, next) => {
   try {

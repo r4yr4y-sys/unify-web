@@ -2710,7 +2710,7 @@ button {
 .study-plan-card {
   display: flex;
   flex-direction: column;
-  cursor: pointer;
+  cursor: default;
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease;
@@ -2746,7 +2746,44 @@ button {
   font-weight: 700;
 }
 .study-plan-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-top: auto;
+}
+.study-plan-card__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  color: #6073d4;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+.study-plan-card__open:focus-visible,
+.study-plan-card__delete:focus-visible {
+  outline: 2px solid #7181df;
+  outline-offset: 3px;
+}
+.study-plan-card__delete {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  color: #bd5e68;
+  background: #fff0f1;
+  cursor: pointer;
+}
+.study-plan-card__delete:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 .study-plan-modal-backdrop {
   position: fixed;
