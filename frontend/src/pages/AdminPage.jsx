@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import unifyLogo from '../assets/unify official logo.png';
+import { postedTime } from '../utils/postedTime';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const localDate = () => {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
 
 export default function AdminPage() {
   const location = useLocation();
@@ -200,13 +205,13 @@ export default function AdminPage() {
               <label>Title<input name="title" defaultValue={editingAnnouncement?.title || ''} maxLength="120" required /></label>
               <label>Description<textarea name="copy" defaultValue={editingAnnouncement?.copy || ''} maxLength="2000" rows="4" required /></label>
               <label>Source<input name="source" defaultValue={editingAnnouncement?.source || ''} maxLength="120" placeholder="e.g. Office of the Registrar" required /></label>
-              <label>Display time<input name="time" defaultValue={editingAnnouncement?.time || 'Just now'} maxLength="80" /></label>
+              <label>Announcement date<input name="publishedOn" type="date" defaultValue={editingAnnouncement?.publishedOn || editingAnnouncement?.createdAt?.slice(0, 10) || localDate()} required /></label>
               <label className="admin-checkbox"><input type="checkbox" name="important" value="true" defaultChecked={editingAnnouncement?.important === true} /> Mark as important</label>
               <div className="admin-form-actions"><button className="admin-submit" type="submit">{editingAnnouncement?._id ? 'Save changes' : 'Publish announcement'}</button>{editingAnnouncement && <button className="admin-cancel" type="button" onClick={() => setEditingAnnouncement(null)}>Cancel</button>}</div>
               {announcementError && <p className="admin-error" role="alert">{announcementError}</p>}
             </form>
             <div className="admin-announcement-list"><h2>Published announcements</h2>
-              {announcementsLoading ? <p className="admin-description">Loading announcements…</p> : announcements.length === 0 ? <p className="admin-description">No announcements yet.</p> : announcements.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}{item.important ? ' · Important' : ''}</span><h3>{item.title}</h3><p>{item.copy}</p><small>{item.source} · {item.time}</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingAnnouncement(item); setAnnouncementError(''); }}>Edit</button><button type="button" onClick={() => deleteAnnouncement(item)}>Delete</button></div></article>)}
+              {announcementsLoading ? <p className="admin-description">Loading announcements…</p> : announcements.length === 0 ? <p className="admin-description">No announcements yet.</p> : announcements.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}{item.important ? ' · Important' : ''}</span><h3>{item.title}</h3><p>{item.copy}</p><small>{item.source} · {postedTime(item)}</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingAnnouncement(item); setAnnouncementError(''); }}>Edit</button><button type="button" onClick={() => deleteAnnouncement(item)}>Delete</button></div></article>)}
             </div>
           </> : activeSection?.id === 'events' ? <>
             <p className="admin-description">{activeSection.description}</p>

@@ -266,6 +266,7 @@ button {
 .support-error, .support-success { margin: 0; font-size: 0.82rem; }
 .support-error { color: #c34050; }
 .support-success { color: #23764b; }
+.announcement-bookmark-error { margin: 0 0 14px; color: #c34050; font-size: 0.82rem; }
 .admin-empty { margin: 32px 0 22px; padding: 28px 18px; border: 1px solid #2b3b5b; border-radius: 13px; background: rgba(13, 22, 40, 0.5); text-align: center; }
 .admin-empty > span { color: #9eacff; font-size: 1.4rem; }
 .admin-empty h2 { margin: 10px 0 5px; font-size: 1rem; }
@@ -3551,10 +3552,68 @@ button {
   aspect-ratio: 1;
   place-items: center;
 }
-.calendar-days .is-today {
+.calendar-days button {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  place-items: center;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+.calendar-days button:hover { background: #eef0ff; }
+.calendar-days button.has-announcements::after {
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #8b68db;
+  content: "";
+}
+.calendar-days button.is-selected {
   color: #fff;
-  background: #687ae4;
+  background: #4d5fc6;
+}
+.calendar-days button.is-selected::after { background: #fff; }
+.calendar-days button.is-today:not(.is-selected) {
+  outline: 1px solid #687ae4;
+  outline-offset: -1px;
+  color: #4f60c4;
+}
+.calendar-days button.is-today.is-selected {
+  outline: 2px solid #99a4ff;
+  outline-offset: 1px;
+}
+.mini-calendar__heading button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  color: #6476d9;
+  background: transparent;
+  cursor: pointer;
+}
+.mini-calendar__heading button:hover { background: #eef0ff; }
+.mini-calendar__heading > svg { flex-shrink: 0; }
+.mini-calendar__heading h2 { flex: 1; margin-left: 6px; font-size: 0.84rem; }
+.announcement-date-clear {
+  padding: 7px 11px;
+  border: 1px solid #dfe4ef;
+  border-radius: 999px;
+  color: #596bdd;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 .mini-calendar p {
   margin: 16px 0 0;
