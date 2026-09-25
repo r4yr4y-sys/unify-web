@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   Download,
+  Eye,
   FileText,
   Plus,
   Search,
   Trash2,
   Upload,
+  X,
 } from "lucide-react";
 import { PageHeader } from "../components/ui";
 
@@ -27,6 +29,9 @@ export default function NotesPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState("");
+  const [viewingNote, setViewingNote] = useState(null);
+  const [viewUrl, setViewUrl] = useState("");
+  const [viewLoading, setViewLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -95,6 +100,32 @@ export default function NotesPage() {
       URL.revokeObjectURL(url);
     } catch (requestError) {
       setError(requestError.message);
+    }
+  };
+
+  const closeViewer = () => {
+    if (viewUrl) URL.revokeObjectURL(viewUrl);
+    setViewUrl("");
+    setViewingNote(null);
+  };
+
+  const viewNote = async (note) => {
+    setViewLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/api/notes/${note.id}/download`, {
+        headers: authHeaders(),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Unable to open the PDF.");
+      }
+      setViewUrl(URL.createObjectURL(await response.blob()));
+      setViewingNote(note);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setViewLoading(false);
     }
   };
 
@@ -173,6 +204,15 @@ export default function NotesPage() {
                 <span className="note-card__actions">
                   <button
                     type="button"
+                    aria-label={`View ${note.title}`}
+                    title="View PDF"
+                    onClick={() => viewNote(note)}
+                    disabled={viewLoading}
+                  >
+                    <Eye size={17} />
+                  </button>
+                  <button
+                    type="button"
                     aria-label={`Download ${note.title}`}
                     title="Download PDF"
                     onClick={() => downloadNote(note)}
@@ -199,6 +239,20 @@ export default function NotesPage() {
         <p className="study-empty">
           {items.length === 0 ? "There are no notes" : "No notes match that search."}
         </p>
+      )}
+      {viewingNote && viewUrl && (
+        <div className="note-viewer-backdrop" role="presentation" onClick={closeViewer}>
+          <section className="note-viewer" role="dialog" aria-modal="true" aria-labelledby="note-viewer-title" onClick={(event) => event.stopPropagation()}>
+            <header>
+              <div>
+                <p className="eyebrow">PDF preview</p>
+                <h2 id="note-viewer-title">{viewingNote.title}</h2>
+              </div>
+              <button type="button" onClick={closeViewer} aria-label="Close PDF viewer"><X size={19} /></button>
+            </header>
+            <iframe title={`Preview of ${viewingNote.title}`} src={viewUrl} />
+          </section>
+        </div>
       )}
     </section>
   );

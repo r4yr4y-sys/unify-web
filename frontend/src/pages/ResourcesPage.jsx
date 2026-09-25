@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowDownToLine, ArrowUpRight, FolderOpen, Link2, Plus, Search, Trash2, Upload, X } from "lucide-react";
+import { ArrowDownToLine, ArrowUpRight, Eye, FolderOpen, Link2, Plus, Search, Trash2, Upload, X } from "lucide-react";
 import { PageHeader } from "../components/ui";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -14,6 +14,9 @@ export default function ResourcesPage() {
   const [resourceType, setResourceType] = useState("file");
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState("");
+  const [viewingResource, setViewingResource] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -102,6 +105,31 @@ export default function ResourcesPage() {
     }
   };
 
+  const closePreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl("");
+    setViewingResource(null);
+  };
+
+  const viewPdf = async (resource) => {
+    if (resource.type !== "PDF") return;
+    setPreviewLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/api/resources/${resource.id}/download`, { headers: authHeaders() });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || "Unable to open this PDF.");
+      }
+      setPreviewUrl(URL.createObjectURL(await response.blob()));
+      setViewingResource(resource);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const visibleItems = normalizedQuery
     ? items.filter((resource) => [resource.title, resource.course, resource.type, resource.detail, resource.originalName].some((value) => value?.toLocaleLowerCase().includes(normalizedQuery)))
@@ -140,7 +168,7 @@ export default function ResourcesPage() {
                 <small>{resource.detail || resource.originalName || (resource.type === "LINK" ? "External learning resource" : "Uploaded file")}</small>
               </div>
               <span className="resource-item__actions">
-                {resource.type === "LINK" ? <a href={resource.url} target="_blank" rel="noreferrer" aria-label={`Open ${resource.title}`} title="Open link"><ArrowUpRight size={18} /></a> : <button type="button" aria-label={`Download ${resource.title}`} title="Download document" onClick={() => downloadResource(resource)}><ArrowDownToLine size={16} /></button>}
+                {resource.type === "LINK" ? <a href={resource.url} target="_blank" rel="noreferrer" aria-label={`Open ${resource.title}`} title="Open link"><ArrowUpRight size={18} /></a> : <>{resource.type === "PDF" && <button type="button" aria-label={`View ${resource.title}`} title="View PDF in browser" onClick={() => viewPdf(resource)} disabled={previewLoading}><Eye size={17} /></button>}<button type="button" aria-label={`Download ${resource.title}`} title="Download document" onClick={() => downloadResource(resource)}><ArrowDownToLine size={16} /></button></>}
                 <button type="button" aria-label={`Remove ${resource.title}`} title="Remove resource" onClick={() => deleteResource(resource)} disabled={deletingId === resource.id}><Trash2 size={16} /></button>
               </span>
             </article>
@@ -169,6 +197,14 @@ export default function ResourcesPage() {
               <label>Note <span>(optional)</span><input name="detail" maxLength="300" placeholder="What is this resource useful for?" /></label>
               <div className="resource-dialog__footer"><button type="button" className="button button--secondary" onClick={() => setDialogOpen(false)} disabled={saving}>Cancel</button><button type="submit" className="button button--primary" disabled={saving}>{saving ? "Saving…" : resourceType === "link" ? "Save link" : "Upload file"}</button></div>
             </form>
+          </section>
+        </div>
+      )}
+      {viewingResource && previewUrl && (
+        <div className="note-viewer-backdrop" role="presentation" onClick={closePreview}>
+          <section className="note-viewer" role="dialog" aria-modal="true" aria-labelledby="resource-viewer-title" onClick={(event) => event.stopPropagation()}>
+            <header><div><p className="eyebrow">PDF preview</p><h2 id="resource-viewer-title">{viewingResource.title}</h2></div><button type="button" onClick={closePreview} aria-label="Close PDF preview"><X size={19} /></button></header>
+            <iframe title={`Preview of ${viewingResource.title}`} src={previewUrl} />
           </section>
         </div>
       )}
