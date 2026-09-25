@@ -11,15 +11,16 @@ function ReportItemModal({ item, onClose, onSave, saving }) {
   const [values, setValues] = useState(() => item ? { status: item.status, title: item.title, location: item.location, description: item.description || "", contactEmail: item.contactEmail, contactPhone: item.contactPhone, images: [] } : { status: "Lost", title: "", location: "", description: "", contactEmail: "", contactPhone: "", images: [] });
   const [error, setError] = useState("");
   useEffect(() => { const closeOnEscape = (event) => event.key === "Escape" && onClose(); window.addEventListener("keydown", closeOnEscape); return () => window.removeEventListener("keydown", closeOnEscape); }, [onClose]);
-  const change = (field) => (event) => setValues((current) => ({ ...current, [field]: event.target.value }));
+  const change = (field) => (event) => { setError(""); setValues((current) => ({ ...current, [field]: event.target.value })); };
   const submit = (event) => {
     event.preventDefault();
-    if (!values.title.trim() || !values.location.trim() || !values.contactEmail.trim()) return setError("Item name, location, and email are required.");
+    if (!values.title.trim() || !values.location.trim()) return setError("Item name and location are required.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.contactEmail.trim())) return setError("Enter a valid email address.");
     onSave(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, value.trim ? value.trim() : value])));
   };
   return <div className="lost-report-backdrop" role="presentation" onClick={onClose}><section className="lost-report-modal" role="dialog" aria-modal="true" aria-labelledby="report-item-title" onClick={(event) => event.stopPropagation()}>
     <button type="button" className="lost-report-modal__close" onClick={onClose} aria-label="Close report form"><X size={18} /></button>
-    <form onSubmit={submit} className="lost-report-form"><header><p className="eyebrow">Lost & found</p><h2 id="report-item-title">{item ? "Edit report" : "Report an item"}</h2><p>Share enough detail for other students to recognize and contact you about the item.</p></header>
+    <form noValidate onSubmit={submit} className="lost-report-form"><header><p className="eyebrow">Lost & found</p><h2 id="report-item-title">{item ? "Edit report" : "Report an item"}</h2><p>Share enough detail for other students to recognize and contact you about the item.</p></header>
       <label><span>Report type</span><select value={values.status} onChange={change("status")}><option value="Lost">I lost something</option><option value="Found">I found something</option></select></label>
       <label><span>Item name</span><input autoFocus maxLength="150" value={values.title} onChange={change("title")} placeholder="e.g. Black wireless earbuds" /></label>
       <label><span>Location</span><input maxLength="250" value={values.location} onChange={change("location")} placeholder="e.g. North Library entrance" /></label>
