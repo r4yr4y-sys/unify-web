@@ -12,7 +12,7 @@ import {
 
 // ===== BETA MANUAL TESTING CONFIGURATION =====
 // Change these two values to test any supported day and time before clicking Search.
-const EMPTY_ROOM_TEST_MODE = true;
+const EMPTY_ROOM_TEST_MODE = false;
 const TEST_DAY = "Tuesday"; // Supported values: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday
 const TEST_TIME = "10:32";
 // =============================================

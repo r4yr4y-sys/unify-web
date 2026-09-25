@@ -8,6 +8,8 @@ const marketplaceListingSchema = new mongoose.Schema({
   condition: { type: String, trim: true, default: '', maxlength: 100 },
   description: { type: String, trim: true, default: '', maxlength: 1000 },
   sellerName: { type: String, trim: true, maxlength: 100 },
+  contactEmail: { type: String, trim: true, lowercase: true, default: '', maxlength: 254 },
+  contactPhone: { type: String, trim: true, default: '', maxlength: 30 },
 }, { timestamps: true });
 
 export default mongoose.models.MarketplaceListing || mongoose.model('MarketplaceListing', marketplaceListingSchema);

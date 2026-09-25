@@ -218,9 +218,12 @@ const marketplaceListingFromRequest = (input) => {
   const condition = text(input?.condition).slice(0, 100);
   const description = text(input?.description).slice(0, 1000);
   const price = Number(input?.price);
+  const contactEmail = text(input?.contactEmail).toLowerCase().slice(0, 254);
+  const contactPhone = text(input?.contactPhone).slice(0, 30);
   if (!title || !category || !Number.isFinite(price) || price < 0 || price > 10000000)
     throw badRequest('Title, category, and a valid price are required.');
-  return { title, category, price, condition, description };
+  if (contactEmail && !/^\S+@\S+\.\S+$/.test(contactEmail)) throw badRequest('Enter a valid email address.');
+  return { title, category, price, condition, description, contactEmail, contactPhone };
 };
 const semestersFromRequest = (semesters) => {
   if (!Array.isArray(semesters))
@@ -390,10 +393,20 @@ router.delete('/lost-found-items/:id', requireAuth, async (request, response, ne
   } catch (error) { next(error); }
 });
 
-router.get('/marketplace-listings', requireAuth, async (_request, response, next) => {
+const marketplaceClientDocument = (listing, userId) => {
+  const canEdit = String(listing.user) === String(userId);
+  const document = clientDocument(listing);
+  if (!canEdit) {
+    delete document.contactEmail;
+    delete document.contactPhone;
+  }
+  return { ...document, canEdit };
+};
+
+router.get('/marketplace-listings', requireAuth, async (request, response, next) => {
   try {
     const listings = await MarketplaceListing.find().sort({ createdAt: -1 }).limit(200);
-    response.json({ listings: listings.map(clientDocument) });
+    response.json({ listings: listings.map((listing) => marketplaceClientDocument(listing, request.user._id)) });
   } catch (error) {
     next(error);
   }
@@ -405,12 +418,40 @@ router.post('/marketplace-listings', requireAuth, async (request, response, next
       sellerName: text(request.user.profile?.name).slice(0, 100) || request.user.email,
       ...marketplaceListingFromRequest(request.body),
     });
-    response.status(201).json({ listing: clientDocument(listing) });
+    response.status(201).json({ listing: marketplaceClientDocument(listing, request.user._id) });
   } catch (error) {
     if (error.status)
       return response.status(error.status).json({ message: error.message });
     next(error);
   }
+});
+router.get('/marketplace-listings/:id/contact', requireAuth, async (request, response, next) => {
+  try {
+    const listing = await MarketplaceListing.findById(request.params.id).select('contactEmail contactPhone');
+    if (!listing) return response.status(404).json({ message: 'Listing not found.' });
+    response.json({ contactEmail: listing.contactEmail, contactPhone: listing.contactPhone });
+  } catch (error) { next(error); }
+});
+router.put('/marketplace-listings/:id', requireAuth, async (request, response, next) => {
+  try {
+    const listing = await MarketplaceListing.findOneAndUpdate(
+      { _id: request.params.id, user: request.user._id },
+      marketplaceListingFromRequest(request.body),
+      { new: true, runValidators: true },
+    );
+    if (!listing) return response.status(404).json({ message: 'Listing not found.' });
+    response.json({ listing: marketplaceClientDocument(listing, request.user._id) });
+  } catch (error) {
+    if (error.status) return response.status(error.status).json({ message: error.message });
+    next(error);
+  }
+});
+router.delete('/marketplace-listings/:id', requireAuth, async (request, response, next) => {
+  try {
+    const listing = await MarketplaceListing.findOneAndDelete({ _id: request.params.id, user: request.user._id });
+    if (!listing) return response.status(404).json({ message: 'Listing not found.' });
+    response.sendStatus(204);
+  } catch (error) { next(error); }
 });
 
 router.get('/cgpa', requireAuth, async (request, response, next) => {
