@@ -9,6 +9,7 @@ const createToken = (user) =>
 const serializeUser = (user) => ({
   id: user.id,
   email: user.email,
+  role: user.role || 'user',
   // Older accounts will not have this field until their first profile save.
   profileCompleted: user.profileCompleted === true,
   profile: user.profile || {},
@@ -42,4 +43,3 @@ const requireAuth = async (request, response, next) => {
 };
 
 export { createToken, serializeUser, requireAuth };
-
