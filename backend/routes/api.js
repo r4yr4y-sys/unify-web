@@ -298,8 +298,8 @@ const lostFoundItemFromRequest = (input) => {
   const description = text(input?.description).slice(0, 1000);
   const contactEmail = text(input?.contactEmail).toLowerCase().slice(0, 254);
   const contactPhone = text(input?.contactPhone).slice(0, 30);
-  if (!['Lost', 'Found'].includes(status) || !title || !location || !contactEmail || !contactPhone)
-    throw badRequest('Item type, title, location, email, and mobile number are required.');
+  if (!['Lost', 'Found'].includes(status) || !title || !location || !contactEmail)
+    throw badRequest('Item type, title, location, and email are required.');
   if (!/^\S+@\S+\.\S+$/.test(contactEmail)) throw badRequest('Enter a valid email address.');
   return { status, title, location, description, contactEmail, contactPhone };
 };

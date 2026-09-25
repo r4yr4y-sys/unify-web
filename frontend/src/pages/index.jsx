@@ -607,7 +607,7 @@ export function MarketplacePage() {
           <WalletCards size={29} />
         </div>
         <div>
-          <span className="event-hero__eyebrow">
+          <span className="page-header__description">
             Buy local, keep it circular
           </span>
           <h2>Good things deserve a second semester.</h2>
