@@ -7,6 +7,8 @@ const lostFoundItemSchema = new mongoose.Schema({
   location: { type: String, required: true, trim: true, maxlength: 250 },
   description: { type: String, trim: true, default: '', maxlength: 1000 },
   reporterName: { type: String, trim: true, maxlength: 100 },
+  contactEmail: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
+  contactPhone: { type: String, required: true, trim: true, maxlength: 30 },
 }, { timestamps: true });
 
 export default mongoose.models.LostFoundItem || mongoose.model('LostFoundItem', lostFoundItemSchema);

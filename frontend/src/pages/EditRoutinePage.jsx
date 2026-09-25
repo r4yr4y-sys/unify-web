@@ -1,141 +1,60 @@
 import { useState } from "react";
-import { ArrowLeft, Plus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Plus, Trash2, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { PageHeader } from "../components/ui";
+import { getRoutineClasses, ROUTINE_DAYS, saveRoutineClasses } from "../utils/routine";
 
-const days = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+const emptyClass = (day) => ({
+  id: `${Date.now()}-${Math.random()}`,
+  day,
+  title: "",
+  faculty: "",
+  start: "",
+  end: "",
+});
 
 export default function EditRoutinePage() {
   const navigate = useNavigate();
-  const [day, setDay] = useState("Monday");
-  const [date, setDate] = useState("");
-  const [classes, setClasses] = useState([]);
-  const addClass = () =>
-    setClasses((current) => [
-      ...current,
-      { id: Date.now(), name: "New course", start: "09:00", end: "10:30" },
-    ]);
-  const updateClass = (id, field, value) =>
-    setClasses((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item,
-      ),
-    );
+  const [classes, setClasses] = useState(getRoutineClasses);
+  const [draft, setDraft] = useState(null);
+  const updateDraft = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
+  const saveClass = () => {
+    if (!draft.title.trim() || !draft.start || !draft.end) return;
+    const nextClasses = [...classes, { ...draft, title: draft.title.trim(), faculty: draft.faculty.trim() }];
+    setClasses(nextClasses);
+    saveRoutineClasses(nextClasses);
+    setDraft(null);
+  };
+  const removeClass = (id) => {
+    const nextClasses = classes.filter((course) => course.id !== id);
+    setClasses(nextClasses);
+    saveRoutineClasses(nextClasses);
+  };
 
   return (
-    <section className="page routine-page">
-      <PageHeader
-        eyebrow="Academic"
-        title="Edit routine"
-        description="Add, change, or remove classes from your schedule."
-        actions={
-          <Link className="routine-editor__done" to="/academic/routine">
-            <ArrowLeft size={17} /> Back to routine
-          </Link>
-        }
-      />
+    <section className="page routine-page routine-page--wide">
+      <PageHeader eyebrow="Academic" title="Edit routine" description="Add your classes to the day and time they are held." />
       <section className="routine-editor">
-        <div className="routine-editor__header">
-          <div>
-            <p className="eyebrow">Edit current routine</p>
-            <h2>Plan your classes</h2>
+        <div className="routine-editor__header"><div><p className="eyebrow">Weekly timetable</p><h2>Plan your classes</h2></div><button type="button" className="routine-editor__done" onClick={() => navigate("/academic/routine")}>Done</button></div>
+        {draft && <section className="routine-class-form" aria-label={`Add class on ${draft.day}`}>
+          <div className="routine-class-form__heading"><div><p className="eyebrow">New class</p><h3>Add class for {draft.day}</h3></div><button type="button" className="routine-icon-button" onClick={() => setDraft(null)} aria-label="Close class form"><X size={18} /></button></div>
+          <div className="routine-class-form__fields">
+            <label>Start time<input type="time" value={draft.start} onChange={(event) => updateDraft("start", event.target.value)} /></label>
+            <label>End time<input type="time" value={draft.end} onChange={(event) => updateDraft("end", event.target.value)} /></label>
+            <label>Course title<input placeholder="e.g. CSE 2201" value={draft.title} onChange={(event) => updateDraft("title", event.target.value)} /></label>
+            <label>Faculty name <span>(optional)</span><input placeholder="e.g. Dr. Rahman" value={draft.faculty} onChange={(event) => updateDraft("faculty", event.target.value)} /></label>
+            <button type="button" className="routine-add-button" onClick={saveClass} disabled={!draft.title.trim() || !draft.start || !draft.end}>Save class</button>
           </div>
-          <button
-            type="button"
-            className="routine-editor__done"
-            onClick={() => navigate("/academic/routine")}
-          >
-            Done
-          </button>
-        </div>
-        <div className="routine-editor__controls">
-          <label>
-            Day
-            <select
-              value={day}
-              onChange={(event) => setDay(event.target.value)}
-            >
-              {days.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Date
-            <input
-              type="date"
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-            />
-          </label>
-          <button
-            type="button"
-            className="routine-add-button"
-            onClick={addClass}
-          >
-            <Plus size={18} /> Add class
-          </button>
-        </div>
-        <div className="routine-editor__classes">
-          {classes.map((course) => (
-            <article className="routine-course-card" key={course.id}>
-              <input
-                aria-label="Course name"
-                value={course.name}
-                onChange={(event) =>
-                  updateClass(course.id, "name", event.target.value)
-                }
-              />
-              <div>
-                <label>
-                  Start
-                  <input
-                    aria-label="Course start time"
-                    type="time"
-                    value={course.start}
-                    onChange={(event) =>
-                      updateClass(course.id, "start", event.target.value)
-                    }
-                  />
-                </label>
-                <label>
-                  End
-                  <input
-                    aria-label="Course end time"
-                    type="time"
-                    value={course.end}
-                    onChange={(event) =>
-                      updateClass(course.id, "end", event.target.value)
-                    }
-                  />
-                </label>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setClasses((current) =>
-                    current.filter((item) => item.id !== course.id),
-                  )
-                }
-              >
-                Remove
-              </button>
-            </article>
-          ))}
-          {!classes.length && (
-            <p className="routine-editor__empty">
-              No classes added for {day} yet. Use “Add class” to start your
-              routine.
-            </p>
-          )}
+        </section>}
+        <div className="routine-edit-grid" role="table" aria-label="Weekly class timetable">
+          <div className="routine-edit-grid__corner" role="columnheader">Day</div><div className="routine-edit-grid__heading" role="columnheader">Classes</div>
+          {ROUTINE_DAYS.map((day) => {
+            const dayClasses = classes.filter((course) => course.day === day).sort((a, b) => a.start.localeCompare(b.start));
+            return <div className="routine-edit-grid__row" role="row" key={day}><strong role="rowheader">{day}</strong><div className="routine-edit-grid__classes" role="cell">
+              {dayClasses.map((course) => <article className="routine-edit-class" key={course.id}><span>{course.start} – {course.end}</span><strong>{course.title}</strong>{course.faculty && <small>{course.faculty}</small>}<button type="button" onClick={() => removeClass(course.id)} aria-label={`Remove ${course.title}`}><Trash2 size={14} /></button></article>)}
+              <button type="button" className="routine-day-add" onClick={() => setDraft(emptyClass(day))} aria-label={`Add class for ${day}`}><Plus size={19} /><span>Add class</span></button>
+            </div></div>;
+          })}
         </div>
       </section>
     </section>

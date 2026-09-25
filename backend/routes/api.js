@@ -205,9 +205,12 @@ const lostFoundItemFromRequest = (input) => {
   const title = text(input?.title).slice(0, 150);
   const location = text(input?.location).slice(0, 250);
   const description = text(input?.description).slice(0, 1000);
-  if (!['Lost', 'Found'].includes(status) || !title || !location)
-    throw badRequest('Item type, title, and location are required.');
-  return { status, title, location, description };
+  const contactEmail = text(input?.contactEmail).toLowerCase().slice(0, 254);
+  const contactPhone = text(input?.contactPhone).slice(0, 30);
+  if (!['Lost', 'Found'].includes(status) || !title || !location || !contactEmail || !contactPhone)
+    throw badRequest('Item type, title, location, email, and mobile number are required.');
+  if (!/^\S+@\S+\.\S+$/.test(contactEmail)) throw badRequest('Enter a valid email address.');
+  return { status, title, location, description, contactEmail, contactPhone };
 };
 const marketplaceListingFromRequest = (input) => {
   const title = text(input?.title).slice(0, 150);
@@ -326,10 +329,20 @@ router.delete(
   },
 );
 
-router.get('/lost-found-items', requireAuth, async (_request, response, next) => {
+const lostFoundClientDocument = (item, userId) => {
+  const canEdit = String(item.user) === String(userId);
+  const document = clientDocument(item);
+  if (!canEdit) {
+    delete document.contactEmail;
+    delete document.contactPhone;
+  }
+  return { ...document, canEdit };
+};
+
+router.get('/lost-found-items', requireAuth, async (request, response, next) => {
   try {
     const items = await LostFoundItem.find().sort({ createdAt: -1 }).limit(200);
-    response.json({ items: items.map(clientDocument) });
+    response.json({ items: items.map((item) => lostFoundClientDocument(item, request.user._id)) });
   } catch (error) {
     next(error);
   }
@@ -341,12 +354,40 @@ router.post('/lost-found-items', requireAuth, async (request, response, next) =>
       reporterName: text(request.user.profile?.name).slice(0, 100) || request.user.email,
       ...lostFoundItemFromRequest(request.body),
     });
-    response.status(201).json({ item: clientDocument(item) });
+    response.status(201).json({ item: lostFoundClientDocument(item, request.user._id) });
   } catch (error) {
     if (error.status)
       return response.status(error.status).json({ message: error.message });
     next(error);
   }
+});
+router.get('/lost-found-items/:id/contact', requireAuth, async (request, response, next) => {
+  try {
+    const item = await LostFoundItem.findById(request.params.id).select('contactEmail contactPhone');
+    if (!item) return response.status(404).json({ message: 'Item report not found.' });
+    response.json({ contactEmail: item.contactEmail, contactPhone: item.contactPhone });
+  } catch (error) { next(error); }
+});
+router.put('/lost-found-items/:id', requireAuth, async (request, response, next) => {
+  try {
+    const item = await LostFoundItem.findOneAndUpdate(
+      { _id: request.params.id, user: request.user._id },
+      lostFoundItemFromRequest(request.body),
+      { new: true, runValidators: true },
+    );
+    if (!item) return response.status(404).json({ message: 'Item report not found.' });
+    response.json({ item: lostFoundClientDocument(item, request.user._id) });
+  } catch (error) {
+    if (error.status) return response.status(error.status).json({ message: error.message });
+    next(error);
+  }
+});
+router.delete('/lost-found-items/:id', requireAuth, async (request, response, next) => {
+  try {
+    const item = await LostFoundItem.findOneAndDelete({ _id: request.params.id, user: request.user._id });
+    if (!item) return response.status(404).json({ message: 'Item report not found.' });
+    response.sendStatus(204);
+  } catch (error) { next(error); }
 });
 
 router.get('/marketplace-listings', requireAuth, async (_request, response, next) => {
