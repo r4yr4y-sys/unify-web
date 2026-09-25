@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, BookOpen, CalendarDays } from "lucide-react";
+import { Plus, BookOpen, CalendarDays, Trash2 } from "lucide-react";
 import { Button, PageHeader, SectionCard } from "../components/ui";
 
 const api = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -366,6 +366,17 @@ export default function CoursesPage() {
       setError(err.message);
     }
   };
+  const deleteCourse = async (course) => {
+    if (!window.confirm("Delete " + course.code + " — " + course.title + "?")) return;
+    setError("");
+    try {
+      await request("/api/courses/" + course.id, { method: "DELETE" });
+      setCourses((items) => items.filter((item) => item.id !== course.id));
+      setDetail((current) => current?.id === course.id ? null : current);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
   const ownCourses = courses.filter((course) => course.semester === active);
   return (
     <section className="page courses-page">
@@ -396,11 +407,8 @@ export default function CoursesPage() {
             {ownCourses.length ? (
               <div className="courses-grid">
                 {ownCourses.map((course) => (
-                  <button
-                    className="course-card"
-                    key={course.id}
-                    onClick={() => setDetail(course)}
-                  >
+                  <div className="course-card-wrap" key={course.id}>
+                    <button className="course-card" onClick={() => setDetail(course)}>
                     <strong>{course.code}</strong>
                     <h3>{course.title}</h3>
                     <span>{course.credits} credits</span>
@@ -415,7 +423,7 @@ export default function CoursesPage() {
                       {course.totalClasses} classes · {course.totalQuizzes}{" "}
                       quizzes · {course.totalAssignments} assignments
                     </small>
-                  </button>
+                  </button><button type="button" className="course-card-delete" aria-label={"Delete " + course.code + " " + course.title} onClick={() => deleteCourse(course)}><Trash2 size={16} /></button></div>
                 ))}
               </div>
             ) : (

@@ -961,5 +961,18 @@ router.put('/courses/:id', requireAuth, async (request, response, next) => {
     next(error);
   }
 });
+router.delete('/courses/:id', requireAuth, async (request, response, next) => {
+  try {
+    const course = await Course.findOneAndDelete({
+      _id: request.params.id,
+      user: request.user._id,
+    });
+    if (!course)
+      return response.status(404).json({ message: 'Course not found.' });
+    response.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

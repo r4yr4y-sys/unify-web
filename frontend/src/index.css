@@ -3132,6 +3132,7 @@ button {
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 14px;
 }
+.course-card-wrap { position: relative; min-width: 0; }
 .course-card,
 .semester-list button {
   border: 1px solid #e6eaf1;
@@ -3144,6 +3145,9 @@ button {
   gap: 7px;
   cursor: pointer;
 }
+.course-card { width: 100%; height: 100%; padding-right: 48px; }
+.course-card-delete { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid #f0d8dc; border-radius: 9px; color: #b45663; background: #fff8f8; cursor: pointer; }
+.course-card-delete:hover { background: #ffeded; }
 .course-card small {
   color: #68728a;
 }
