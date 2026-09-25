@@ -3,6 +3,8 @@ import { Readable } from 'node:stream';
 import cloudinary from '../config/cloudinary.js';
 import pdfUpload from '../config/pdfUpload.js';
 import resourceUpload from '../config/resourceUpload.js';
+import lostFoundImageUpload from '../config/lostFoundImageUpload.js';
+import marketplaceImageUpload from '../config/marketplaceImageUpload.js';
 import { requireAuth } from '../middleware/auth.js';
 import { text, badRequest } from '../utils/text.js';
 import FlashcardPack from '../models/flashcardPackSchema.js';
@@ -38,6 +40,34 @@ const uploadResourceToCloudinary = (file, userId) =>
         resource_type: 'raw',
         folder: `unify/resources/${userId}`,
         public_id: `resource-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      },
+      (error, result) => (error ? reject(error) : resolve(result)),
+    );
+    stream.end(file.buffer);
+  });
+
+const uploadLostFoundImage = (file, userId) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'image',
+        folder: `unify/lost-found/${userId}`,
+        public_id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        transformation: [{ width: 1400, crop: 'limit' }],
+      },
+      (error, result) => (error ? reject(error) : resolve(result)),
+    );
+    stream.end(file.buffer);
+  });
+
+const uploadMarketplaceImage = (file, userId) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'image',
+        folder: `unify/marketplace/${userId}`,
+        public_id: `listing-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        transformation: [{ width: 1400, crop: 'limit' }],
       },
       (error, result) => (error ? reject(error) : resolve(result)),
     );
@@ -441,11 +471,19 @@ router.get('/lost-found-items', requireAuth, async (request, response, next) => 
     next(error);
   }
 });
-router.post('/lost-found-items', requireAuth, async (request, response, next) => {
+router.post('/lost-found-items', requireAuth, lostFoundImageUpload.array('images', 5), async (request, response, next) => {
   try {
+    let images = [];
+    if (request.files?.length) {
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET)
+        return response.status(503).json({ message: 'Image uploads are not configured. Add the Cloudinary credentials to backend/.env.' });
+      const uploaded = await Promise.all(request.files.map((file) => uploadLostFoundImage(file, request.user.id)));
+      images = uploaded.map((image) => ({ url: image.secure_url, publicId: image.public_id }));
+    }
     const item = await LostFoundItem.create({
       user: request.user._id,
       reporterName: text(request.user.profile?.name).slice(0, 100) || request.user.email,
+      images,
       ...lostFoundItemFromRequest(request.body),
     });
     response.status(201).json({ item: lostFoundClientDocument(item, request.user._id) });
@@ -462,14 +500,21 @@ router.get('/lost-found-items/:id/contact', requireAuth, async (request, respons
     response.json({ contactEmail: item.contactEmail, contactPhone: item.contactPhone });
   } catch (error) { next(error); }
 });
-router.put('/lost-found-items/:id', requireAuth, async (request, response, next) => {
+router.put('/lost-found-items/:id', requireAuth, lostFoundImageUpload.array('images', 5), async (request, response, next) => {
   try {
-    const item = await LostFoundItem.findOneAndUpdate(
-      { _id: request.params.id, user: request.user._id },
-      lostFoundItemFromRequest(request.body),
-      { new: true, runValidators: true },
-    );
-    if (!item) return response.status(404).json({ message: 'Item report not found.' });
+    const existing = await LostFoundItem.findOne({ _id: request.params.id, user: request.user._id });
+    if (!existing) return response.status(404).json({ message: 'Item report not found.' });
+    const update = lostFoundItemFromRequest(request.body);
+    if (request.files?.length) {
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET)
+        return response.status(503).json({ message: 'Image uploads are not configured. Add the Cloudinary credentials to backend/.env.' });
+      const uploaded = await Promise.all(request.files.map((file) => uploadLostFoundImage(file, request.user.id)));
+      update.images = [
+        ...(existing.images || []),
+        ...uploaded.map((image) => ({ url: image.secure_url, publicId: image.public_id })),
+      ];
+    }
+    const item = await LostFoundItem.findByIdAndUpdate(existing._id, update, { new: true, runValidators: true });
     response.json({ item: lostFoundClientDocument(item, request.user._id) });
   } catch (error) {
     if (error.status) return response.status(error.status).json({ message: error.message });
@@ -480,6 +525,8 @@ router.delete('/lost-found-items/:id', requireAuth, async (request, response, ne
   try {
     const item = await LostFoundItem.findOneAndDelete({ _id: request.params.id, user: request.user._id });
     if (!item) return response.status(404).json({ message: 'Item report not found.' });
+    const imageIds = [item.imagePublicId, ...(item.images || []).map((image) => image.publicId)].filter(Boolean);
+    imageIds.forEach((publicId) => cloudinary.uploader.destroy(publicId, { resource_type: 'image' }).catch(() => {}));
     response.sendStatus(204);
   } catch (error) { next(error); }
 });
@@ -502,11 +549,19 @@ router.get('/marketplace-listings', requireAuth, async (request, response, next)
     next(error);
   }
 });
-router.post('/marketplace-listings', requireAuth, async (request, response, next) => {
+router.post('/marketplace-listings', requireAuth, marketplaceImageUpload.array('images', 5), async (request, response, next) => {
   try {
+    let images = [];
+    if (request.files?.length) {
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET)
+        return response.status(503).json({ message: 'Image uploads are not configured. Add the Cloudinary credentials to backend/.env.' });
+      const uploaded = await Promise.all(request.files.map((file) => uploadMarketplaceImage(file, request.user.id)));
+      images = uploaded.map((image) => ({ url: image.secure_url, publicId: image.public_id }));
+    }
     const listing = await MarketplaceListing.create({
       user: request.user._id,
       sellerName: text(request.user.profile?.name).slice(0, 100) || request.user.email,
+      images,
       ...marketplaceListingFromRequest(request.body),
     });
     response.status(201).json({ listing: marketplaceClientDocument(listing, request.user._id) });
@@ -523,14 +578,25 @@ router.get('/marketplace-listings/:id/contact', requireAuth, async (request, res
     response.json({ contactEmail: listing.contactEmail, contactPhone: listing.contactPhone });
   } catch (error) { next(error); }
 });
-router.put('/marketplace-listings/:id', requireAuth, async (request, response, next) => {
+router.put('/marketplace-listings/:id', requireAuth, marketplaceImageUpload.array('images', 5), async (request, response, next) => {
   try {
-    const listing = await MarketplaceListing.findOneAndUpdate(
-      { _id: request.params.id, user: request.user._id },
-      marketplaceListingFromRequest(request.body),
+    const existing = await MarketplaceListing.findOne({ _id: request.params.id, user: request.user._id });
+    if (!existing) return response.status(404).json({ message: 'Listing not found.' });
+    const update = marketplaceListingFromRequest(request.body);
+    if (request.files?.length) {
+      const existingImages = existing.images || [];
+      if (existingImages.length + request.files.length > 5)
+        throw badRequest('A listing can have up to 5 images.');
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET)
+        return response.status(503).json({ message: 'Image uploads are not configured. Add the Cloudinary credentials to backend/.env.' });
+      const uploaded = await Promise.all(request.files.map((file) => uploadMarketplaceImage(file, request.user.id)));
+      update.images = [...existingImages, ...uploaded.map((image) => ({ url: image.secure_url, publicId: image.public_id }))];
+    }
+    const listing = await MarketplaceListing.findByIdAndUpdate(
+      existing._id,
+      update,
       { new: true, runValidators: true },
     );
-    if (!listing) return response.status(404).json({ message: 'Listing not found.' });
     response.json({ listing: marketplaceClientDocument(listing, request.user._id) });
   } catch (error) {
     if (error.status) return response.status(error.status).json({ message: error.message });
@@ -541,6 +607,7 @@ router.delete('/marketplace-listings/:id', requireAuth, async (request, response
   try {
     const listing = await MarketplaceListing.findOneAndDelete({ _id: request.params.id, user: request.user._id });
     if (!listing) return response.status(404).json({ message: 'Listing not found.' });
+    (listing.images || []).map((image) => image.publicId).filter(Boolean).forEach((publicId) => cloudinary.uploader.destroy(publicId, { resource_type: 'image' }).catch(() => {}));
     response.sendStatus(204);
   } catch (error) { next(error); }
 });

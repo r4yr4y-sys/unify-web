@@ -10,6 +10,10 @@ const marketplaceListingSchema = new mongoose.Schema({
   sellerName: { type: String, trim: true, maxlength: 100 },
   contactEmail: { type: String, trim: true, lowercase: true, default: '', maxlength: 254 },
   contactPhone: { type: String, trim: true, default: '', maxlength: 30 },
+  images: [{
+    url: { type: String, trim: true },
+    publicId: { type: String, trim: true },
+  }],
 }, { timestamps: true });
 
 export default mongoose.models.MarketplaceListing || mongoose.model('MarketplaceListing', marketplaceListingSchema);

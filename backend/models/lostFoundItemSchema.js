@@ -9,6 +9,12 @@ const lostFoundItemSchema = new mongoose.Schema({
   reporterName: { type: String, trim: true, maxlength: 100 },
   contactEmail: { type: String, required: true, trim: true, lowercase: true, maxlength: 254 },
   contactPhone: { type: String, trim: true, maxlength: 30, default: '' },
+  imageUrl: { type: String, trim: true, default: '' },
+  imagePublicId: { type: String, trim: true, default: '' },
+  images: [{
+    url: { type: String, trim: true },
+    publicId: { type: String, trim: true },
+  }],
 }, { timestamps: true });
 
 export default mongoose.models.LostFoundItem || mongoose.model('LostFoundItem', lostFoundItemSchema);
