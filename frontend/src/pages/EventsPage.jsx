@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -12,10 +12,26 @@ import {
 import { Button, PageHeader } from "../components/ui";
 import { events } from "./campusLifeData";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function EventsPage() {
   const [selected, setSelected] = useState([]);
   const [query, setQuery] = useState("");
-  const visibleEvents = events.filter(
+  const [eventItems, setEventItems] = useState(events);
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return undefined;
+    let active = true;
+    fetch(`${apiUrl}/api/events`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Unable to load events.");
+        if (active) setEventItems(result.events || []);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const visibleEvents = eventItems.filter(
     (event) =>
       event.title.toLowerCase().includes(query.toLowerCase()) ||
       event.category.toLowerCase().includes(query.toLowerCase()),
@@ -72,10 +88,10 @@ export default function EventsPage() {
       </div>
       <div className="events-grid">
         {visibleEvents.map((event) => (
-          <article className="event-card" key={event.id}>
+          <article className="event-card" key={event._id || event.id}>
             <div className={`event-date event-date--${event.color}`}>
               <span>{event.month}</span>
-              <strong>{event.date}</strong>
+              <strong>{event.day || event.date}</strong>
             </div>
             <div className="event-card__content">
               <span className="tag">{event.category}</span>
@@ -93,11 +109,11 @@ export default function EventsPage() {
                 <button
                   type="button"
                   className={
-                    selected.includes(event.id)
+                    selected.includes(event._id || event.id)
                       ? "event-rsvp is-going"
                       : "event-rsvp"
                   }
-                  onClick={() => toggleEvent(event.id)}
+                  onClick={() => toggleEvent(event._id || event.id)}
                 >
                   {selected.includes(event.id) ? (
                     <>
@@ -114,7 +130,7 @@ export default function EventsPage() {
       </div>
       {!visibleEvents.length && (
         <div className="no-results">
-          No events match that search. Try another keyword.
+        {eventItems.length ? "No events match that search. Try another keyword." : "There are no upcoming events right now."}
         </div>
       )}
     </section>

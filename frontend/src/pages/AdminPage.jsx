@@ -16,6 +16,10 @@ export default function AdminPage() {
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [announcementError, setAnnouncementError] = useState('');
   const [announcementsLoading, setAnnouncementsLoading] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [eventError, setEventError] = useState('');
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -43,6 +47,53 @@ export default function AdminPage() {
       .finally(() => { if (active) setAnnouncementsLoading(false); });
     return () => { active = false; };
   }, [user, section]);
+
+  useEffect(() => {
+    if (!user || section !== 'events') return;
+    let active = true;
+    setEventsLoading(true);
+    fetch(`${apiUrl}/api/events`, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Unable to load events.');
+        if (active) setEvents(result.events || []);
+      })
+      .catch((requestError) => { if (active) setEventError(requestError.message); })
+      .finally(() => { if (active) setEventsLoading(false); });
+    return () => { active = false; };
+  }, [user, section]);
+
+  const submitEvent = async (event) => {
+    event.preventDefault();
+    setEventError('');
+    const fields = Object.fromEntries(new FormData(event.currentTarget));
+    const isEditing = Boolean(editingEvent?._id);
+    try {
+      const response = await fetch(`${apiUrl}/api/events${isEditing ? `/${editingEvent._id}` : ''}`, {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+        body: JSON.stringify(fields),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Unable to save event.');
+      setEvents((current) => isEditing
+        ? current.map((item) => item._id === result.event._id ? result.event : item)
+        : [...current, result.event].sort((a, b) => a.date.localeCompare(b.date)));
+      setEditingEvent(null);
+    } catch (requestError) { setEventError(requestError.message); }
+  };
+
+  const deleteEvent = async (item) => {
+    if (!window.confirm(`Delete “${item.title}”?`)) return;
+    setEventError('');
+    try {
+      const response = await fetch(`${apiUrl}/api/events/${item._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Unable to delete event.');
+      setEvents((current) => current.filter((entry) => entry._id !== item._id));
+      if (editingEvent?._id === item._id) setEditingEvent(null);
+    } catch (requestError) { setEventError(requestError.message); }
+  };
 
   const submitAnnouncement = async (event) => {
     event.preventDefault();
@@ -138,6 +189,23 @@ export default function AdminPage() {
             </form>
             <div className="admin-announcement-list"><h2>Published announcements</h2>
               {announcementsLoading ? <p className="admin-description">Loading announcements…</p> : announcements.length === 0 ? <p className="admin-description">No announcements yet.</p> : announcements.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}{item.important ? ' · Important' : ''}</span><h3>{item.title}</h3><p>{item.copy}</p><small>{item.source} · {item.time}</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingAnnouncement(item); setAnnouncementError(''); }}>Edit</button><button type="button" onClick={() => deleteAnnouncement(item)}>Delete</button></div></article>)}
+            </div>
+          </> : activeSection?.id === 'events' ? <>
+            <p className="admin-description">{activeSection.description}</p>
+            <form key={editingEvent?._id || 'new-event'} className="admin-form admin-announcement-form" onSubmit={submitEvent}>
+              <h2>{editingEvent?._id ? 'Edit event' : 'Create event'}</h2>
+              <label>Event title<input name="title" defaultValue={editingEvent?.title || ''} maxLength="140" required /></label>
+              <label>Category<input name="category" defaultValue={editingEvent?.category || ''} maxLength="60" placeholder="e.g. Workshop" required /></label>
+              <label>Date<input name="date" type="date" defaultValue={editingEvent?.date || ''} required /></label>
+              <label>Time<input name="time" defaultValue={editingEvent?.time || ''} maxLength="100" placeholder="e.g. 10:00 AM – 12:00 PM" required /></label>
+              <label>Location<input name="place" defaultValue={editingEvent?.place || ''} maxLength="160" placeholder="e.g. AUST Auditorium" required /></label>
+              <label>Attendees<input name="attendees" type="number" min="0" step="1" defaultValue={editingEvent?.attendees ?? 0} /></label>
+              <label>Card color<select name="color" defaultValue={editingEvent?.color || 'blue'}><option value="violet">Violet</option><option value="blue">Blue</option><option value="orange">Orange</option><option value="pink">Pink</option></select></label>
+              <div className="admin-form-actions"><button className="admin-submit" type="submit">{editingEvent?._id ? 'Save changes' : 'Publish event'}</button>{editingEvent && <button className="admin-cancel" type="button" onClick={() => setEditingEvent(null)}>Cancel</button>}</div>
+              {eventError && <p className="admin-error" role="alert">{eventError}</p>}
+            </form>
+            <div className="admin-announcement-list"><h2>Published events</h2>
+              {eventsLoading ? <p className="admin-description">Loading events…</p> : events.length === 0 ? <p className="admin-description">No events yet.</p> : events.map((item) => <article className="admin-announcement-row" key={item._id}><div><span>{item.category}</span><h3>{item.title}</h3><p>{item.date} · {item.time} · {item.place}</p><small>{item.attendees} going</small></div><div className="admin-row-actions"><button type="button" onClick={() => { setEditingEvent(item); setEventError(''); }}>Edit</button><button type="button" onClick={() => deleteEvent(item)}>Delete</button></div></article>)}
             </div>
           </> : activeSection ? <>
             <p className="admin-description">{activeSection.description}</p>
