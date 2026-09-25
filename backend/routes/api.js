@@ -2,6 +2,7 @@ import express from 'express';
 import { Readable } from 'node:stream';
 import cloudinary from '../config/cloudinary.js';
 import pdfUpload from '../config/pdfUpload.js';
+import resourceUpload from '../config/resourceUpload.js';
 import { requireAuth } from '../middleware/auth.js';
 import { text, badRequest } from '../utils/text.js';
 import FlashcardPack from '../models/flashcardPackSchema.js';
@@ -9,6 +10,7 @@ import CgpaRecord from '../models/cgpaRecordSchema.js';
 import StudyPlan from '../models/studyPlanSchema.js';
 import StudySession from '../models/studySessionSchema.js';
 import Note from '../models/noteSchema.js';
+import StudyResource from '../models/studyResourceSchema.js';
 import LostFoundItem from '../models/lostFoundItemSchema.js';
 import MarketplaceListing from '../models/marketplaceListingSchema.js';
 import Semester from '../models/semesterSchema.js';
@@ -28,6 +30,95 @@ const uploadPdfToCloudinary = (file, userId) =>
     );
     stream.end(file.buffer);
   });
+
+const uploadResourceToCloudinary = (file, userId) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'raw',
+        folder: `unify/resources/${userId}`,
+        public_id: `resource-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      },
+      (error, result) => (error ? reject(error) : resolve(result)),
+    );
+    stream.end(file.buffer);
+  });
+
+router.get('/resources', requireAuth, async (request, response, next) => {
+  try {
+    const resources = await StudyResource.find({ user: request.user._id }).sort({ createdAt: -1 });
+    response.json({ resources: resources.map(clientDocument) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/resources', requireAuth, resourceUpload.single('file'), async (request, response, next) => {
+  try {
+    const course = text(request.body.course).slice(0, 80) || 'Unsorted';
+    const detail = text(request.body.detail).slice(0, 300);
+    let resourceData;
+    if (request.file) {
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        return response.status(503).json({ message: 'File uploads are not configured. Add the Cloudinary credentials to backend/.env.' });
+      }
+      const extension = request.file.originalname.split('.').pop().toLowerCase();
+      const type = ({ pdf: 'PDF', docx: 'DOCX', ppt: 'PPT', pptx: 'PPTX' })[extension];
+      const uploaded = await uploadResourceToCloudinary(request.file, request.user.id);
+      resourceData = {
+        type,
+        title: text(request.body.title).slice(0, 180) || request.file.originalname.replace(/\.[^.]+$/, '').slice(0, 180),
+        originalName: request.file.originalname.slice(0, 255),
+        publicId: uploaded.public_id,
+        url: uploaded.secure_url,
+        bytes: uploaded.bytes || request.file.size,
+      };
+    } else {
+      const title = text(request.body.title).slice(0, 180);
+      let parsedUrl;
+      try { parsedUrl = new URL(text(request.body.url)); } catch {}
+      if (text(request.body.type).toUpperCase() !== 'LINK' || !title || !parsedUrl || !['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return response.status(400).json({ message: 'Enter a title and a valid HTTP or HTTPS link.' });
+      }
+      resourceData = { type: 'LINK', title, url: parsedUrl.toString(), bytes: 0 };
+    }
+    const resource = await StudyResource.create({ ...resourceData, user: request.user._id, course, detail });
+    response.status(201).json({ resource: clientDocument(resource) });
+  } catch (error) {
+    if (error.status) return response.status(error.status).json({ message: error.message });
+    next(error);
+  }
+});
+
+router.get('/resources/:id/download', requireAuth, async (request, response, next) => {
+  try {
+    const resource = await StudyResource.findOne({ _id: request.params.id, user: request.user._id });
+    if (!resource) return response.status(404).json({ message: 'Resource not found.' });
+    if (resource.type === 'LINK') return response.status(400).json({ message: 'Links cannot be downloaded as files.' });
+    const file = await fetch(resource.url);
+    if (!file.ok || !file.body) throw new Error('The uploaded file could not be retrieved.');
+    response.type(file.headers.get('content-type') || 'application/octet-stream');
+    response.attachment(resource.originalName || resource.title);
+    Readable.fromWeb(file.body).pipe(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/resources/:id', requireAuth, async (request, response, next) => {
+  try {
+    const resource = await StudyResource.findOne({ _id: request.params.id, user: request.user._id });
+    if (!resource) return response.status(404).json({ message: 'Resource not found.' });
+    if (resource.publicId) {
+      const result = await cloudinary.uploader.destroy(resource.publicId, { resource_type: 'raw', invalidate: true });
+      if (!['ok', 'not found'].includes(result.result)) throw new Error('The uploaded file could not be deleted.');
+    }
+    await resource.deleteOne();
+    response.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/notes', requireAuth, async (request, response, next) => {
   try {
@@ -793,4 +884,3 @@ router.put('/courses/:id', requireAuth, async (request, response, next) => {
 });
 
 export default router;
-

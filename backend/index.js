@@ -39,7 +39,9 @@ app.use((error, request, response, _next) => {
       message: error.code === 'LIMIT_FILE_SIZE'
         ? request.originalUrl.startsWith('/api/profile/avatar')
           ? 'Profile pictures must be 5 MB or smaller.'
-          : 'PDF files must be 10 MB or smaller.'
+          : request.originalUrl.startsWith('/api/resources')
+            ? 'Resource files must be 25 MB or smaller.'
+            : 'PDF files must be 10 MB or smaller.'
         : 'Unable to process the uploaded file.',
     });
   }

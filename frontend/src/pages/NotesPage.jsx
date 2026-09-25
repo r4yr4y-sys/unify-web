@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   Download,
   FileText,
-  FolderOpen,
   Plus,
   Search,
   Trash2,
@@ -153,9 +152,6 @@ export default function NotesPage() {
             placeholder="Search your notes"
           />
         </label>
-        <button className="filter-control" type="button">
-          <FolderOpen size={17} /> All PDFs
-        </button>
       </div>
       {error && <p className="notes-message notes-message--error">{error}</p>}
       {loading ? (
@@ -200,7 +196,9 @@ export default function NotesPage() {
         </div>
       )}
       {!loading && !visible.length && (
-        <p className="study-empty">No PDFs match that search.</p>
+        <p className="study-empty">
+          {items.length === 0 ? "There are no notes" : "No notes match that search."}
+        </p>
       )}
     </section>
   );
