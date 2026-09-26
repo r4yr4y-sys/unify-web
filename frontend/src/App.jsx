@@ -1,29 +1,31 @@
-import { useEffect, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
-import DashboardPage from "./pages/DashboardPage";
-import AcademicPage from "./pages/AcademicPage";
-import ProfilePage from "./pages/Profile";
-import AnnouncementsPage from "./pages/AnnouncementsPage";
-import CampusLifePage from "./pages/CampusLifePage";
-import EventsPage from "./pages/EventsPage";
-import LostFoundPage from "./pages/LostFoundPage";
-import MarketplacePage from "./pages/MarketplacePage";
-import NotesPage from "./pages/NotesPage";
-import ResourcesPage from "./pages/ResourcesPage";
-import RoutinePage from "./pages/RoutinePage";
-import EditRoutinePage from "./pages/EditRoutinePage";
-import StudyPage from "./pages/StudyPage";
-import StudyPlansPage from "./pages/StudyPlansPage";
-import FlashcardsPage from "./pages/FlashcardsPage";
-import LoginPage from "./pages/LoginPage";
-import LogoutPage from "./pages/LogoutPage";
-import GradesPage from "./pages/GradesPage";
-import StudyTimerPage from "./pages/StudyTimerPage";
-import CoursesPage from "./pages/CoursesPage";
-import ExamsPage from "./pages/ExamsPage";
-import AssignmentsPage from "./pages/AssignmentsPage";
-import EmptyRoomsPage from "./pages/EmptyRoomsPage";
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const AcademicPage = lazy(() => import("./pages/AcademicPage"));
+const ProfilePage = lazy(() => import("./pages/Profile"));
+const AnnouncementsPage = lazy(() => import("./pages/AnnouncementsPage"));
+const CampusLifePage = lazy(() => import("./pages/CampusLifePage"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const LostFoundPage = lazy(() => import("./pages/LostFoundPage"));
+const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const NotesPage = lazy(() => import("./pages/NotesPage"));
+const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+const RoutinePage = lazy(() => import("./pages/RoutinePage"));
+const EditRoutinePage = lazy(() => import("./pages/EditRoutinePage"));
+const StudyPage = lazy(() => import("./pages/StudyPage"));
+const StudyPlansPage = lazy(() => import("./pages/StudyPlansPage"));
+const FlashcardsPage = lazy(() => import("./pages/FlashcardsPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const LogoutPage = lazy(() => import("./pages/LogoutPage"));
+const GradesPage = lazy(() => import("./pages/GradesPage"));
+const StudyTimerPage = lazy(() => import("./pages/StudyTimerPage"));
+const CoursesPage = lazy(() => import("./pages/CoursesPage"));
+const ExamsPage = lazy(() => import("./pages/ExamsPage"));
+const AssignmentsPage = lazy(() => import("./pages/AssignmentsPage"));
+const EmptyRoomsPage = lazy(() => import("./pages/EmptyRoomsPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const SupportPage = lazy(() => import("./pages/SupportPage"));
 import {
   academicRoutes,
   campusLifeRoutes,
@@ -32,10 +34,25 @@ import {
   studyRoutes,
 } from "./routes/routes";
 import { PageHeader, SectionCard } from "./components/ui";
-import AdminPage from "./pages/AdminPage";
-import SupportPage from "./pages/SupportPage";
 
-function PlaceholderPage({ title }) {
+const plannedRoutes = [
+  ...academicRoutes,
+  ...studyRoutes,
+  ...campusLifeRoutes,
+  ...profileRoutes,
+  ...settingsRoutes,
+];
+
+const fallbackRoutes = new Set([
+  "/academic/routine", "/academic/grades", "/academic/exams",
+  "/academic/assignments", "/study/notes", "/study/timer",
+  "/study/resources", "/study/plans", "/study/flashcards",
+  "/campus-life/announcements", "/campus-life/events",
+  "/campus-life/lost-found", "/campus-life/marketplace",
+  "/campus-life/empty-rooms",
+]);
+
+const PlaceholderPage = memo(function PlaceholderPage({ title }) {
   return (
     <section className="page">
       <PageHeader
@@ -50,7 +67,7 @@ function PlaceholderPage({ title }) {
       </SectionCard>
     </section>
   );
-}
+});
 
 function RequireAuth({ children }) {
   const token = localStorage.getItem("authToken");
@@ -103,25 +120,19 @@ function RequireAuth({ children }) {
 }
 
 function App() {
-  const plannedRoutes = [
-    ...academicRoutes,
-    ...studyRoutes,
-    ...campusLifeRoutes,
-    ...profileRoutes,
-    ...settingsRoutes,
-  ];
   return (
-    <Routes>
-      <Route path="/admin/*" element={<AdminPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/logout" element={<LogoutPage />} />
-      <Route
-        element={
-          <RequireAuth>
-            <AppLayout />
-          </RequireAuth>
-        }
-      >
+    <Suspense fallback={<main className="logout-page">Loading page…</main>}>
+      <Routes>
+        <Route path="/admin/*" element={<AdminPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/logout" element={<LogoutPage />} />
+        <Route
+          element={
+            <RequireAuth>
+              <AppLayout />
+            </RequireAuth>
+          }
+        >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/academic" element={<AcademicPage />} />
         <Route path="/academic/courses" element={<CoursesPage />} />
@@ -148,25 +159,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SupportPage />} />
         {plannedRoutes
-          .filter(
-            ({ path }) =>
-              ![
-                "/academic/routine",
-                "/academic/grades",
-                "/academic/exams",
-                "/academic/assignments",
-                "/study/notes",
-                "/study/timer",
-                "/study/resources",
-                "/study/plans",
-                "/study/flashcards",
-                "/campus-life/announcements",
-                "/campus-life/events",
-                "/campus-life/lost-found",
-                "/campus-life/marketplace",
-                "/campus-life/empty-rooms",
-              ].includes(path),
-          )
+          .filter(({ path }) => !fallbackRoutes.has(path))
           .map(({ path, title }) => (
             <Route
               key={path}
@@ -174,9 +167,10 @@ function App() {
               element={<PlaceholderPage title={title} />}
             />
           ))}
-      </Route>
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        </Route>
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 export default App;

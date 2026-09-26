@@ -36,8 +36,9 @@ router.post('/:id/going', requireAuth, async (request, response, next) => {
       return response.status(404).json({ message: 'Event not found.' });
     const event = await Event.findById(request.params.id);
     if (!event) return response.status(404).json({ message: 'Event not found.' });
-    const goingUsers = (event.goingUsers || []).map(String);
-    const alreadyGoing = goingUsers.includes(String(request.user._id));
+    const alreadyGoing = (event.goingUsers || []).some(
+      (userId) => String(userId) === String(request.user._id),
+    );
     const updated = await Event.findByIdAndUpdate(
       event._id,
       alreadyGoing

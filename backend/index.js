@@ -11,6 +11,7 @@ import emptyRoomsRouter from './routes/emptyRooms.js';
 import feedbackRouter from './routes/feedback.js';
 import profileRouter from './routes/profile.js';
 import apiRouter from './routes/api.js';
+import carbonFootprint from './middleware/carbonFootprint.js';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -20,9 +21,11 @@ app.use((request, response, next) => {
   response.setHeader('Access-Control-Allow-Origin', process.env.CLIENT_ORIGIN || 'http://localhost:5173');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.setHeader('Access-Control-Expose-Headers', 'X-Data-Transferred-Bytes, X-Estimated-CO2-Grams');
   if (request.method === 'OPTIONS') return response.sendStatus(204);
   next();
 });
+app.use(carbonFootprint);
 
 app.use('/api/auth', signupRouter);
 app.use('/api/auth', signinRouter);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import {
   BookOpen,
   CalendarDays,
@@ -58,7 +58,7 @@ const lowerNavigation = [
   { label: "Profile", to: "/profile", icon: CircleUserRound },
   { label: "Support", to: "/settings", icon: LifeBuoy },
 ];
-function NavigationGroup({ item, onNavigate }) {
+const NavigationGroup = memo(function NavigationGroup({ item, onNavigate }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const Icon = item.icon;
@@ -108,10 +108,10 @@ function NavigationGroup({ item, onNavigate }) {
       )}
     </div>
   );
-}
+});
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  const close = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
     if (!open) return undefined;

@@ -18,6 +18,44 @@ body {
 button {
   font: inherit;
 }
+.carbon-footprint {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 20;
+  width: min(270px, calc(100vw - 36px));
+  padding: 14px 16px 12px;
+  border: 1px solid rgba(218, 225, 237, 0.9);
+  border-radius: 14px;
+  color: #34415e;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 26px rgba(52, 65, 94, 0.14);
+  backdrop-filter: blur(12px);
+}
+.carbon-footprint__eyebrow {
+  margin: 0 0 9px;
+  color: #536079;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.carbon-footprint__metric {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0;
+  color: #737e94;
+  font-size: 0.72rem;
+}
+.carbon-footprint__metric strong {
+  color: #34415e;
+  font-variant-numeric: tabular-nums;
+}
+.carbon-footprint__note {
+  margin: 9px 0 0;
+  color: #929bad;
+  font-size: 0.61rem;
+  line-height: 1.35;
+}
 .login-page {
   display: grid;
   grid-template-columns: 46fr 54fr;
