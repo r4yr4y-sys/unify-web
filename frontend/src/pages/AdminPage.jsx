@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import unifyLogo from '../assets/unify official logo.png';
 import { postedTime } from '../utils/postedTime';
+import EmptyRoomsAdmin from '../components/EmptyRoomsAdmin';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const localDate = () => {
@@ -26,7 +27,7 @@ const formatEventTime = (time) => new Date(`2000-01-01T${time}:00`).toLocaleTime
 export default function AdminPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const section = location.pathname.replace(/^\/admin\/?/, '').split('/')[0] || 'dashboard';
+  const section = location.pathname.replace(/^\/admin\/?/, '').split('/')[0] || 'announcements';
   const [mode, setMode] = useState('sign-in');
   const [user, setUser] = useState(null);
   const [error, setError] = useState('');
@@ -213,13 +214,12 @@ export default function AdminPage() {
       <header className="admin-header"><img src={unifyLogo} alt="Unify" /><span>ADMIN CONSOLE</span></header>
       <div className="admin-layout">
         <nav className="admin-nav" aria-label="Admin pages">
-          <button className={`admin-nav__link ${section === 'dashboard' ? 'is-active' : ''}`} onClick={() => navigate('/admin')}>Dashboard</button>
           {sections.map((item) => <button key={item.id} className={`admin-nav__link ${section === item.id ? 'is-active' : ''}`} onClick={() => navigate(`/admin/${item.id}`)}>{item.label}</button>)}
           <button className="admin-signout" type="button" onClick={() => { localStorage.removeItem('adminToken'); setUser(null); navigate('/admin'); }}>Sign out</button>
         </nav>
         <section className="admin-card admin-dashboard">
           <p className="admin-kicker">PRIVATE WORKSPACE</p>
-          <h1>{activeSection?.label || 'Admin dashboard'}</h1>
+          <h1>{activeSection?.label || 'Announcements'}</h1>
           <p>Signed in as <strong>{user.email}</strong></p>
           {activeSection?.id === 'announcements' ? <>
             <p className="admin-description">{activeSection.description}</p>
@@ -261,7 +261,7 @@ export default function AdminPage() {
               <label className="admin-list-search"><Search size={17} aria-hidden="true" /><input type="search" aria-label="Search feedback" placeholder="Search feedback…" value={feedbackQuery} onChange={(event) => setFeedbackQuery(event.target.value)} /></label>
               {feedbackLoading ? <p className="admin-description">Loading feedback…</p> : feedbackItems.length === 0 ? <p className="admin-description">No feedback has been submitted yet.</p> : visibleFeedback.length === 0 ? <p className="admin-description">No feedback matches your search.</p> : visibleFeedback.map((item) => <article className="admin-feedback-row" key={item._id}><div className="admin-feedback-row__top"><span>{item.type}</span><small>{new Date(item.createdAt).toLocaleString()}</small></div><h3>{item.subject}</h3><p>{item.message}</p><small>From {item.email}</small></article>)}
             </div>
-          </> : activeSection ? <>
+          </> : activeSection?.id === 'empty-rooms' ? <EmptyRoomsAdmin /> : activeSection ? <>
             <p className="admin-description">{activeSection.description}</p>
             <div className="admin-empty"><span aria-hidden="true">✦</span><h2>{activeSection.label}</h2><p>{section === 'feedback' ? 'Student feedback will appear here.' : `No ${activeSection.label.toLowerCase()} have been added yet.`}</p></div>
           </> : <div className="admin-empty"><span aria-hidden="true">✦</span><h2>You’re all set</h2><p>Choose a page to manage campus content.</p></div>}

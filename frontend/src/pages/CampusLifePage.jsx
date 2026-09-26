@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "../components/ui";
-import { emptyRoomsData } from "../data/emptyRooms";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -20,6 +19,7 @@ export default function CampusLifePage() {
   const [events, setEvents] = useState([]);
   const [marketListings, setMarketListings] = useState([]);
   const [lostFoundItems, setLostFoundItems] = useState([]);
+  const [emptyRoomCount, setEmptyRoomCount] = useState(0);
   const currentDate = new Intl.DateTimeFormat("en-US", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -34,12 +34,14 @@ export default function CampusLifePage() {
       fetch(`${apiUrl}/api/events`, { headers }).then((response) => response.ok ? response.json() : null),
       fetch(`${apiUrl}/api/marketplace-listings`, { headers }).then((response) => response.ok ? response.json() : null),
       fetch(`${apiUrl}/api/lost-found-items`, { headers }).then((response) => response.ok ? response.json() : null),
-    ]).then(([announcementResult, eventResult, marketplaceResult, lostFoundResult]) => {
+      fetch(`${apiUrl}/api/empty-rooms`, { headers }).then((response) => response.ok ? response.json() : null),
+    ]).then(([announcementResult, eventResult, marketplaceResult, lostFoundResult, emptyRoomsResult]) => {
       if (!active) return;
       setAnnouncements(announcementResult?.announcements || []);
       setEvents(eventResult?.events || []);
       setMarketListings(marketplaceResult?.listings || []);
       setLostFoundItems(lostFoundResult?.items || []);
+      setEmptyRoomCount(emptyRoomsResult?.rooms?.length || 0);
     }).catch(() => {});
     return () => { active = false; };
   }, []);
@@ -79,7 +81,7 @@ export default function CampusLifePage() {
     },
     {
       title: "Empty Rooms",
-      copy: `${emptyRoomsData.length} CSE rooms listed on floor 7`,
+      copy: `${emptyRoomCount} room${emptyRoomCount === 1 ? "" : "s"} listed by admins`,
       to: "/campus-life/empty-rooms",
       icon: DoorOpen,
       accent: "violet",

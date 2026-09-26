@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock3, DoorOpen, FlaskConical, Search, X } from "lucide-react";
 import { Button, PageHeader } from "../components/ui";
-import { emptyRoomsData } from "../data/emptyRooms";
 import {
   findEmptyRooms,
   formatRemainingTime,
@@ -81,6 +80,30 @@ export default function EmptyRoomsPage() {
   const [result, setResult] = useState(null);
   const [showNoRooms, setShowNoRooms] = useState(false);
   const [gender, setGender] = useState("");
+  const [roomsData, setRoomsData] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    fetch(`${apiUrl}/api/empty-rooms`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to load room listings.");
+        const addedRooms = (data.rooms || []).map((room) => ({
+          room: room.room,
+          type: room.type,
+          empty: (room.availability || []).reduce((schedule, slot) => {
+            schedule[slot.day] ||= [];
+            schedule[slot.day].push([slot.start, slot.end]);
+            return schedule;
+          }, {}),
+        }));
+        if (active) setRoomsData(addedRooms);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const loadGender = async () => {
     try {
@@ -106,9 +129,9 @@ export default function EmptyRoomsPage() {
       setResult({ day, time, availability, rooms: [] });
       return;
     }
-    const rooms = findEmptyRooms(emptyRoomsData, day, time);
-    setResult({ day, time, availability, rooms });
-    if (!rooms.length) {
+    const rooms = findEmptyRooms(roomsData, day, time);
+    setResult({ day, time, availability, rooms, roomCount: roomsData.length });
+    if (roomsData.length && !rooms.length) {
       await loadGender();
       setShowNoRooms(true);
     }
@@ -150,7 +173,7 @@ export default function EmptyRoomsPage() {
 }
 
 function SearchResults({ result }) {
-  const { day, time, availability, rooms } = result;
+  const { day, time, availability, rooms, roomCount } = result;
   if (availability === "weekend")
     return (
       <StatusMessage
@@ -175,8 +198,8 @@ function SearchResults({ result }) {
   if (!rooms.length)
     return (
       <StatusMessage
-        title="No empty rooms right now."
-        copy="We checked all 13 listed rooms. A little escape-plan popup has your next options."
+        title={roomCount ? "No empty rooms right now." : "No rooms have been added yet."}
+        copy={roomCount ? `We checked all ${roomCount} listed rooms. A little escape-plan popup has your next options.` : "Check back after an admin adds room availability."}
       />
     );
   return (

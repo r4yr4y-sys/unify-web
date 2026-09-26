@@ -14,14 +14,21 @@ const PAGES = [
   { label: "Dashboard", path: "/dashboard", aliases: ["dashboard"] },
   { label: "Academic", path: "/academic", aliases: ["academic", "academics"] },
   { label: "Courses", path: "/academic/courses", aliases: ["course", "courses"] },
+  { label: "Routine", path: "/academic/routine", aliases: ["routine", "class routine"] },
+  { label: "Grades & GPA", path: "/academic/grades", aliases: ["grade", "grades", "gpa", "grade & gpa"] },
   { label: "Assignments", path: "/academic/assignments", aliases: ["assignment", "assignments"] },
   { label: "Exams", path: "/academic/exams", aliases: ["exam", "exams"] },
   { label: "Notes", path: "/study/notes", aliases: ["note", "notes"] },
-  { label: "Study", path: "/study", aliases: ["study", "studies", "study timer"] },
+  { label: "Study", path: "/study", aliases: ["study", "studies"] },
+  { label: "Study Timer", path: "/study/timer", aliases: ["study timer", "timer"] },
+  { label: "Study Resources", path: "/study/resources", aliases: ["resource", "resources", "study resource", "study resources"] },
+  { label: "Study Plans", path: "/study/plans", aliases: ["study plan", "study plans", "plans"] },
+  { label: "Flashcards", path: "/study/flashcards", aliases: ["flashcard", "flashcards"] },
   { label: "Announcements", path: "/campus-life/announcements", aliases: ["announcement", "announcements"] },
   { label: "Events", path: "/campus-life/events", aliases: ["event", "events"] },
   { label: "Lost & Found", path: "/campus-life/lost-found", aliases: ["lost", "found", "lost and found", "lost & found"] },
   { label: "Marketplace", path: "/campus-life/marketplace", aliases: ["market", "marketplace"] },
+  { label: "Empty Rooms", path: "/campus-life/empty-rooms", aliases: ["empty room", "empty rooms"] },
   { label: "Profile", path: "/profile", aliases: ["profile"] },
   { label: "Support", path: "/settings", aliases: ["support", "help"] },
 ];
@@ -266,7 +273,6 @@ export default function Topbar() {
             aria-expanded={showSuggestions}
             aria-label="Search pages"
           />
-          <kbd>⌘ K</kbd>
           {showSuggestions && (
             <ul className="search-suggestions" role="listbox">
               {suggestions.length > 0 ? (
