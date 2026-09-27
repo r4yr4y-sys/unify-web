@@ -56,7 +56,7 @@ const navigation = [
 ];
 const lowerNavigation = [
   { label: "Profile", to: "/profile", icon: CircleUserRound },
-  { label: "Support", to: "/settings", icon: LifeBuoy },
+  { label: "Support", to: "/support", icon: LifeBuoy },
 ];
 const NavigationGroup = memo(function NavigationGroup({ item, onNavigate }) {
   const location = useLocation();

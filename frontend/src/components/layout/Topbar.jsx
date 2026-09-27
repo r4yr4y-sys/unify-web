@@ -30,7 +30,7 @@ const PAGES = [
   { label: "Marketplace", path: "/campus-life/marketplace", aliases: ["market", "marketplace"] },
   { label: "Empty Rooms", path: "/campus-life/empty-rooms", aliases: ["empty room", "empty rooms"] },
   { label: "Profile", path: "/profile", aliases: ["profile"] },
-  { label: "Support", path: "/settings", aliases: ["support", "help"] },
+  { label: "Support", path: "/support", aliases: ["support", "help"] },
 ];
 
 export default function Topbar() {

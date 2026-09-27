@@ -157,7 +157,8 @@ function App() {
         <Route path="/campus-life/marketplace" element={<MarketplacePage />} />
         <Route path="/campus-life/empty-rooms" element={<EmptyRoomsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SupportPage />} />
+        <Route path="/support" element={<SupportPage />} />
+        <Route path="/settings" element={<Navigate to="/support" replace />} />
         {plannedRoutes
           .filter(({ path }) => !fallbackRoutes.has(path))
           .map(({ path, title }) => (
