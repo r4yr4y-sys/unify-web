@@ -11,10 +11,16 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "../components/ui";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` });
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
+});
 
 export default function StudyPage() {
-  const [stats, setStats] = useState({ notes: "Loading…", resources: "Loading…", plans: "Loading…" });
+  const [stats, setStats] = useState({
+    notes: "Loading…",
+    resources: "Loading…",
+    plans: "Loading…",
+  });
   useEffect(() => {
     let active = true;
     const loadCount = (path, collection, getStat) => {
@@ -22,19 +28,38 @@ export default function StudyPage() {
       fetch(`${apiUrl}/api/${path}`, { headers: authHeaders() })
         .then(async (response) => {
           const result = await response.json();
-          if (!response.ok) throw new Error(result.message || "Unable to load summary.");
+          if (!response.ok)
+            throw new Error(result.message || "Unable to load summary.");
           return getStat(result[collection] || []);
         })
-        .then((stat) => { if (active) setStats((current) => ({ ...current, [key]: stat })); })
-        .catch(() => { if (active) setStats((current) => ({ ...current, [key]: "Unavailable" })); });
+        .then((stat) => {
+          if (active) setStats((current) => ({ ...current, [key]: stat }));
+        })
+        .catch(() => {
+          if (active)
+            setStats((current) => ({ ...current, [key]: "Unavailable" }));
+        });
     };
-    loadCount("notes", "notes", (notes) => `${notes.length} note${notes.length === 1 ? "" : "s"}`);
-    loadCount("resources", "resources", (resources) => `${resources.length} resource${resources.length === 1 ? "" : "s"}`);
+    loadCount(
+      "notes",
+      "notes",
+      (notes) => `${notes.length} note${notes.length === 1 ? "" : "s"}`,
+    );
+    loadCount(
+      "resources",
+      "resources",
+      (resources) =>
+        `${resources.length} resource${resources.length === 1 ? "" : "s"}`,
+    );
     loadCount("study-plans", "plans", (plans) => {
-      const activePlans = plans.filter((plan) => plan.checkpoints.some((checkpoint) => !checkpoint.completed)).length;
+      const activePlans = plans.filter((plan) =>
+        plan.checkpoints.some((checkpoint) => !checkpoint.completed),
+      ).length;
       return `${activePlans} active plan${activePlans === 1 ? "" : "s"}`;
     });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const sections = [

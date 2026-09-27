@@ -134,9 +134,24 @@ export default function Sidebar() {
       >
         {open ? <X size={21} /> : <Menu size={21} />}
       </button>
-      {open && <button className="sidebar-scrim" type="button" aria-label="Close navigation menu" onClick={close} />}
-      <aside id="primary-sidebar" className={`sidebar ${open ? "is-open" : ""}`}>
-        <NavLink className="brand" to="/dashboard" aria-label="Unify dashboard" onClick={close}>
+      {open && (
+        <button
+          className="sidebar-scrim"
+          type="button"
+          aria-label="Close navigation menu"
+          onClick={close}
+        />
+      )}
+      <aside
+        id="primary-sidebar"
+        className={`sidebar ${open ? "is-open" : ""}`}
+      >
+        <NavLink
+          className="brand"
+          to="/dashboard"
+          aria-label="Unify dashboard"
+          onClick={close}
+        >
           <img className="brand-logo" src={unifyLogo} alt="Unify" />
         </NavLink>
         <nav className="sidebar-nav" aria-label="Main navigation">
@@ -151,7 +166,11 @@ export default function Sidebar() {
           {lowerNavigation.map((item) => (
             <NavigationGroup key={item.to} item={item} onNavigate={close} />
           ))}
-          <NavLink className="nav-link nav-link--logout" to="/logout" onClick={close}>
+          <NavLink
+            className="nav-link nav-link--logout"
+            to="/logout"
+            onClick={close}
+          >
             <LogOut size={19} />
             <span>Log out</span>
           </NavLink>

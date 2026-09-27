@@ -21,6 +21,33 @@ import Assignment from "../models/assignmentSchema.js";
 
 const router = express.Router();
 
+router.get("/routine", requireAuth, (request, response) => {
+  response.json({ classes: request.user.routineClasses || [] });
+});
+
+router.put("/routine", requireAuth, async (request, response, next) => {
+  try {
+    const classes = request.body.classes;
+    const days = ["Sun", "Mon", "Tues", "Wed", "Thurs"];
+    if (!Array.isArray(classes) || classes.length > 100)
+      throw badRequest("Provide a valid routine with up to 100 classes.");
+    for (const course of classes) {
+      if (!course || typeof course.id !== "string" || !days.includes(course.day) ||
+          typeof course.title !== "string" || !course.title.trim() || course.title.length > 150 ||
+          typeof course.faculty !== "string" || course.faculty.length > 150 ||
+          !/^([01]\d|2[0-3]):[0-5]\d$/.test(course.start) ||
+          !/^([01]\d|2[0-3]):[0-5]\d$/.test(course.end))
+        throw badRequest("One or more routine classes have invalid details.");
+    }
+    request.user.routineClasses = classes.map(({ id, day, title, faculty, start, end }) => ({ id, day, title: title.trim(), faculty: faculty.trim(), start, end }));
+    await request.user.save();
+    response.json({ classes: request.user.routineClasses });
+  } catch (error) {
+    if (error.status) return response.status(error.status).json({ message: error.message });
+    next(error);
+  }
+});
+
 router.get("/dashboard-preferences", requireAuth, (request, response) => {
   response.json({
     weeklyStudyGoalHours: request.user.weeklyStudyGoalHours || 16,

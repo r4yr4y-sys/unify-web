@@ -20,30 +20,58 @@ export default function CampusLifePage() {
   const [marketListings, setMarketListings] = useState([]);
   const [lostFoundItems, setLostFoundItems] = useState([]);
   const [emptyRoomCount, setEmptyRoomCount] = useState(0);
-  const currentDate = new Intl.DateTimeFormat("en-US", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+  const currentDate = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const upcomingEvents = events.filter((event) => !event.date || event.date >= today);
+  const upcomingEvents = events.filter(
+    (event) => !event.date || event.date >= today,
+  );
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) return undefined;
     let active = true;
     const headers = { Authorization: `Bearer ${token}` };
     Promise.all([
-      fetch(`${apiUrl}/api/announcements`, { headers }).then((response) => response.ok ? response.json() : null),
-      fetch(`${apiUrl}/api/events`, { headers }).then((response) => response.ok ? response.json() : null),
-      fetch(`${apiUrl}/api/marketplace-listings`, { headers }).then((response) => response.ok ? response.json() : null),
-      fetch(`${apiUrl}/api/lost-found-items`, { headers }).then((response) => response.ok ? response.json() : null),
-      fetch(`${apiUrl}/api/empty-rooms`, { headers }).then((response) => response.ok ? response.json() : null),
-    ]).then(([announcementResult, eventResult, marketplaceResult, lostFoundResult, emptyRoomsResult]) => {
-      if (!active) return;
-      setAnnouncements(announcementResult?.announcements || []);
-      setEvents(eventResult?.events || []);
-      setMarketListings(marketplaceResult?.listings || []);
-      setLostFoundItems(lostFoundResult?.items || []);
-      setEmptyRoomCount(emptyRoomsResult?.rooms?.length || 0);
-    }).catch(() => {});
-    return () => { active = false; };
+      fetch(`${apiUrl}/api/announcements`, { headers }).then((response) =>
+        response.ok ? response.json() : null,
+      ),
+      fetch(`${apiUrl}/api/events`, { headers }).then((response) =>
+        response.ok ? response.json() : null,
+      ),
+      fetch(`${apiUrl}/api/marketplace-listings`, { headers }).then(
+        (response) => (response.ok ? response.json() : null),
+      ),
+      fetch(`${apiUrl}/api/lost-found-items`, { headers }).then((response) =>
+        response.ok ? response.json() : null,
+      ),
+      fetch(`${apiUrl}/api/empty-rooms`, { headers }).then((response) =>
+        response.ok ? response.json() : null,
+      ),
+    ])
+      .then(
+        ([
+          announcementResult,
+          eventResult,
+          marketplaceResult,
+          lostFoundResult,
+          emptyRoomsResult,
+        ]) => {
+          if (!active) return;
+          setAnnouncements(announcementResult?.announcements || []);
+          setEvents(eventResult?.events || []);
+          setMarketListings(marketplaceResult?.listings || []);
+          setLostFoundItems(lostFoundResult?.items || []);
+          setEmptyRoomCount(emptyRoomsResult?.rooms?.length || 0);
+        },
+      )
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
   const campusSections = [
@@ -69,7 +97,9 @@ export default function CampusLifePage() {
       to: "/campus-life/marketplace",
       icon: Store,
       accent: "amber",
-      note: marketListings[0] ? `${marketListings[0].title} · ${marketListings[0].category}` : "No listings yet",
+      note: marketListings[0]
+        ? `${marketListings[0].title} · ${marketListings[0].category}`
+        : "No listings yet",
     },
     {
       title: "Lost & Found",
@@ -77,7 +107,9 @@ export default function CampusLifePage() {
       to: "/campus-life/lost-found",
       icon: SearchCheck,
       accent: "green",
-      note: lostFoundItems[0] ? `${lostFoundItems[0].status}: ${lostFoundItems[0].title}` : "No reports yet",
+      note: lostFoundItems[0]
+        ? `${lostFoundItems[0].status}: ${lostFoundItems[0].title}`
+        : "No reports yet",
     },
     {
       title: "Empty Rooms",
@@ -156,9 +188,13 @@ export default function CampusLifePage() {
                 <Megaphone size={17} />
               </span>
               <div>
-                <strong>{announcements[0]?.title || "No announcements yet"}</strong>
+                <strong>
+                  {announcements[0]?.title || "No announcements yet"}
+                </strong>
                 <p>
-                  {announcements[0] ? `${announcements[0].source} · ${announcements[0].time}` : ""}
+                  {announcements[0]
+                    ? `${announcements[0].source} · ${announcements[0].time}`
+                    : ""}
                 </p>
               </div>
               <ArrowUpRight size={16} />
@@ -168,9 +204,13 @@ export default function CampusLifePage() {
                 <CalendarDays size={17} />
               </span>
               <div>
-                <strong>{upcomingEvents[0]?.title || "No upcoming events"}</strong>
+                <strong>
+                  {upcomingEvents[0]?.title || "No upcoming events"}
+                </strong>
                 <p>
-                  {upcomingEvents[0] ? `${upcomingEvents[0].time} · ${upcomingEvents[0].place}` : ""}
+                  {upcomingEvents[0]
+                    ? `${upcomingEvents[0].time} · ${upcomingEvents[0].place}`
+                    : ""}
                 </p>
               </div>
               <ArrowUpRight size={16} />
@@ -180,7 +220,9 @@ export default function CampusLifePage() {
                 <PackageOpen size={17} />
               </span>
               <div>
-                <strong>{lostFoundItems[0]?.title || "No lost and found reports yet"}</strong>
+                <strong>
+                  {lostFoundItems[0]?.title || "No lost and found reports yet"}
+                </strong>
                 <p>{lostFoundItems[0]?.location || ""}</p>
               </div>
               <ArrowUpRight size={16} />

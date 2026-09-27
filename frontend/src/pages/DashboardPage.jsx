@@ -232,6 +232,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [now, setNow] = useState(new Date());
+  const [routineClasses, setRoutineClasses] = useState([]);
   const [goalOpen, setGoalOpen] = useState(false);
   const [goalDraft, setGoalDraft] = useState(16);
   const load = async () => {
@@ -265,6 +266,9 @@ export default function DashboardPage() {
   };
   useEffect(() => {
     load();
+    getRoutineClasses()
+      .then(setRoutineClasses)
+      .catch(() => {});
     const interval = window.setInterval(() => setNow(new Date()), 60000);
     return () => window.clearInterval(interval);
   }, []);
@@ -346,7 +350,7 @@ export default function DashboardPage() {
       />
       {error && <p className="courses-error">{error}</p>}
       <div className="dashboard-grid">
-        <TodayCard classes={getRoutineClasses()} now={now} />
+        <TodayCard classes={routineClasses} now={now} />
         <Link
           className="dashboard-card dashboard-assignments dashboard-link"
           to="/academic/assignments"

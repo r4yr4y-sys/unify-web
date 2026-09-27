@@ -4,7 +4,12 @@ import { Bell, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { IconButton } from "../ui";
 import profilePicture from "../../assets/Profile_pic.jpg";
-import { assessmentLabel, formatSchedule, isUpcoming, upcomingAssessments } from "../../utils/assessments";
+import {
+  assessmentLabel,
+  formatSchedule,
+  isUpcoming,
+  upcomingAssessments,
+} from "../../utils/assessments";
 
 const interestedEvents = (events) => {
   return events.filter((event) => event.isGoing && isUpcoming(event.date));
@@ -13,24 +18,76 @@ const interestedEvents = (events) => {
 const PAGES = [
   { label: "Dashboard", path: "/dashboard", aliases: ["dashboard"] },
   { label: "Academic", path: "/academic", aliases: ["academic", "academics"] },
-  { label: "Courses", path: "/academic/courses", aliases: ["course", "courses"] },
-  { label: "Routine", path: "/academic/routine", aliases: ["routine", "class routine"] },
-  { label: "Grades & GPA", path: "/academic/grades", aliases: ["grade", "grades", "gpa", "grade & gpa"] },
-  { label: "Assignments", path: "/academic/assignments", aliases: ["assignment", "assignments"] },
+  {
+    label: "Courses",
+    path: "/academic/courses",
+    aliases: ["course", "courses"],
+  },
+  {
+    label: "Routine",
+    path: "/academic/routine",
+    aliases: ["routine", "class routine"],
+  },
+  {
+    label: "Grades & GPA",
+    path: "/academic/grades",
+    aliases: ["grade", "grades", "gpa", "grade & gpa"],
+  },
+  {
+    label: "Assignments",
+    path: "/academic/assignments",
+    aliases: ["assignment", "assignments"],
+  },
   { label: "Exams", path: "/academic/exams", aliases: ["exam", "exams"] },
   { label: "Notes", path: "/study/notes", aliases: ["note", "notes"] },
   { label: "Study", path: "/study", aliases: ["study", "studies"] },
-  { label: "Study Timer", path: "/study/timer", aliases: ["study timer", "timer"] },
-  { label: "Study Resources", path: "/study/resources", aliases: ["resource", "resources", "study resource", "study resources"] },
-  { label: "Study Plans", path: "/study/plans", aliases: ["study plan", "study plans", "plans"] },
-  { label: "Flashcards", path: "/study/flashcards", aliases: ["flashcard", "flashcards"] },
-  { label: "Announcements", path: "/campus-life/announcements", aliases: ["announcement", "announcements"] },
-  { label: "Events", path: "/campus-life/events", aliases: ["event", "events"] },
-  { label: "Lost & Found", path: "/campus-life/lost-found", aliases: ["lost", "found", "lost and found", "lost & found"] },
-  { label: "Marketplace", path: "/campus-life/marketplace", aliases: ["market", "marketplace"] },
-  { label: "Empty Rooms", path: "/campus-life/empty-rooms", aliases: ["empty room", "empty rooms"] },
+  {
+    label: "Study Timer",
+    path: "/study/timer",
+    aliases: ["study timer", "timer"],
+  },
+  {
+    label: "Study Resources",
+    path: "/study/resources",
+    aliases: ["resource", "resources", "study resource", "study resources"],
+  },
+  {
+    label: "Study Plans",
+    path: "/study/plans",
+    aliases: ["study plan", "study plans", "plans"],
+  },
+  {
+    label: "Flashcards",
+    path: "/study/flashcards",
+    aliases: ["flashcard", "flashcards"],
+  },
+  {
+    label: "Announcements",
+    path: "/campus-life/announcements",
+    aliases: ["announcement", "announcements"],
+  },
+  {
+    label: "Events",
+    path: "/campus-life/events",
+    aliases: ["event", "events"],
+  },
+  {
+    label: "Lost & Found",
+    path: "/campus-life/lost-found",
+    aliases: ["lost", "found", "lost and found", "lost & found"],
+  },
+  {
+    label: "Marketplace",
+    path: "/campus-life/marketplace",
+    aliases: ["market", "marketplace"],
+  },
+  {
+    label: "Empty Rooms",
+    path: "/campus-life/empty-rooms",
+    aliases: ["empty room", "empty rooms"],
+  },
   { label: "Profile", path: "/profile", aliases: ["profile"] },
-  { label: "Support", path: "/settings", aliases: ["support", "help"] },
+  { label: "Support", path: "/support", aliases: ["support", "help"] },
 ];
 
 export default function Topbar() {
@@ -108,18 +165,32 @@ export default function Topbar() {
     let active = true;
     const loadUpcomingAssignments = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/assignments`, { headers: { Authorization: `Bearer ${token}` } });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/assignments`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
         const result = await response.json();
-        if (response.ok && active) setAssignmentNotifications((result.assignments || []).filter((assignment) => isUpcoming(assignment.dueDate)).sort((a, b) => (a.dueDate || "").localeCompare(b.dueDate || "")));
+        if (response.ok && active)
+          setAssignmentNotifications(
+            (result.assignments || [])
+              .filter((assignment) => isUpcoming(assignment.dueDate))
+              .sort((a, b) => (a.dueDate || "").localeCompare(b.dueDate || "")),
+          );
       } catch (_error) {
         // Assignment reminders use the same non-blocking, three-day pattern as exams.
       }
     };
     loadUpcomingAssignments();
-    window.addEventListener("unify-assignments-updated", loadUpcomingAssignments);
+    window.addEventListener(
+      "unify-assignments-updated",
+      loadUpcomingAssignments,
+    );
     return () => {
       active = false;
-      window.removeEventListener("unify-assignments-updated", loadUpcomingAssignments);
+      window.removeEventListener(
+        "unify-assignments-updated",
+        loadUpcomingAssignments,
+      );
     };
   }, []);
 
@@ -131,11 +202,18 @@ export default function Topbar() {
       try {
         const headers = { Authorization: `Bearer ${token}` };
         const base = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const semesterResponse = await fetch(`${base}/api/semesters`, { headers });
+        const semesterResponse = await fetch(`${base}/api/semesters`, {
+          headers,
+        });
         const semesterResult = await semesterResponse.json();
-        const semester = semesterResult.semesters?.find((item) => item.isCurrent);
+        const semester = semesterResult.semesters?.find(
+          (item) => item.isCurrent,
+        );
         if (!semester) return;
-        const coursesResponse = await fetch(`${base}/api/courses?semesterId=${semester.id}`, { headers });
+        const coursesResponse = await fetch(
+          `${base}/api/courses?semesterId=${semester.id}`,
+          { headers },
+        );
         const courseResult = await coursesResponse.json();
         if (coursesResponse.ok && active)
           setNotifications(upcomingAssessments(courseResult.courses || []));
@@ -156,16 +234,24 @@ export default function Topbar() {
     if (!token) return undefined;
     let active = true;
     let loadedEvents = [];
-    const refreshInterestedEvents = () => setEventNotifications(interestedEvents(loadedEvents));
+    const refreshInterestedEvents = () =>
+      setEventNotifications(interestedEvents(loadedEvents));
     const handleAttendanceUpdate = (notification) => {
       if (notification.detail?.event) {
-        loadedEvents = loadedEvents.map((event) => event._id === notification.detail.event._id ? notification.detail.event : event);
+        loadedEvents = loadedEvents.map((event) =>
+          event._id === notification.detail.event._id
+            ? notification.detail.event
+            : event,
+        );
       }
       refreshInterestedEvents();
     };
-    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/events`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/events`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    )
       .then(async (response) => {
         const result = await response.json();
         if (response.ok && active) {
@@ -176,10 +262,16 @@ export default function Topbar() {
       .catch(() => {
         // Event notifications are non-blocking; the Events page can surface API errors.
       });
-    window.addEventListener("unify-interested-events-updated", handleAttendanceUpdate);
+    window.addEventListener(
+      "unify-interested-events-updated",
+      handleAttendanceUpdate,
+    );
     return () => {
       active = false;
-      window.removeEventListener("unify-interested-events-updated", handleAttendanceUpdate);
+      window.removeEventListener(
+        "unify-interested-events-updated",
+        handleAttendanceUpdate,
+      );
     };
   }, []);
 
@@ -282,14 +374,10 @@ export default function Topbar() {
                     role="option"
                     aria-selected={index === highlightedIndex}
                     className={
-                      index === highlightedIndex
-                        ? "is-highlighted"
-                        : ""
+                      index === highlightedIndex ? "is-highlighted" : ""
                     }
                     onMouseEnter={() => setHighlightedIndex(index)}
-                    onMouseDown={
-                      (event) => event.preventDefault()
-                    }
+                    onMouseDown={(event) => event.preventDefault()}
                     onClick={() => navigateToPage(page.path)}
                   >
                     {page.label}
@@ -302,17 +390,96 @@ export default function Topbar() {
           )}
         </div>
         <div className="topbar-notifications">
-        <IconButton label="Notifications" className={notifications.length || assignmentNotifications.length || eventNotifications.length ? "topbar-notifications__bell has-upcoming" : "topbar-notifications__bell"} onClick={() => setNotificationsOpen((current) => !current)} aria-expanded={notificationsOpen}>
-          <Bell size={19} />
-          {notifications.length + assignmentNotifications.length + eventNotifications.length > 0 && <span className="topbar-notifications__badge">{notifications.length + assignmentNotifications.length + eventNotifications.length}</span>}
-        </IconButton>
-        {notificationsOpen && <section className="topbar-notifications__panel" aria-label="Upcoming notifications">
-          <h2>Coming up</h2>
-          {assignmentNotifications.length > 0 && <ul>{assignmentNotifications.map((assignment) => <li key={`assignment-${assignment.id}`}><strong>{assignment.course?.title || "Course"} — Assignment {assignment.number}</strong><span>{assignment.topic || "Assignment details to be added"} · Due {new Date(`${assignment.dueDate}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span></li>)}</ul>}
-          {notifications.length ? <ul>{notifications.map(({ course, assessment }) => <li key={`${course.id}-${assessment.id}`}><strong>{course.title} — {assessmentLabel(assessment, course.courseType)}</strong><span>{formatSchedule(assessment)}</span></li>)}</ul> : <p>No assessments in the next 3 days.</p>}
-          {eventNotifications.length > 0 && <ul>{eventNotifications.map((event) => <li key={`event-${event._id}`}><strong>Event: {event.title}</strong><span>{new Date(`${event.date}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {event.time}</span></li>)}</ul>}
-          {notifications.length + assignmentNotifications.length + eventNotifications.length === 0 && <p>No events or deadlines in the next 3 days.</p>}
-        </section>}
+          <IconButton
+            label="Notifications"
+            className={
+              notifications.length ||
+              assignmentNotifications.length ||
+              eventNotifications.length
+                ? "topbar-notifications__bell has-upcoming"
+                : "topbar-notifications__bell"
+            }
+            onClick={() => setNotificationsOpen((current) => !current)}
+            aria-expanded={notificationsOpen}
+          >
+            <Bell size={19} />
+            {notifications.length +
+              assignmentNotifications.length +
+              eventNotifications.length >
+              0 && (
+              <span className="topbar-notifications__badge">
+                {notifications.length +
+                  assignmentNotifications.length +
+                  eventNotifications.length}
+              </span>
+            )}
+          </IconButton>
+          {notificationsOpen && (
+            <section
+              className="topbar-notifications__panel"
+              aria-label="Upcoming notifications"
+            >
+              <h2>Coming up</h2>
+              {assignmentNotifications.length > 0 && (
+                <ul>
+                  {assignmentNotifications.map((assignment) => (
+                    <li key={`assignment-${assignment.id}`}>
+                      <strong>
+                        {assignment.course?.title || "Course"} — Assignment{" "}
+                        {assignment.number}
+                      </strong>
+                      <span>
+                        {assignment.topic || "Assignment details to be added"} ·
+                        Due{" "}
+                        {new Date(
+                          `${assignment.dueDate}T00:00:00`,
+                        ).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {notifications.length ? (
+                <ul>
+                  {notifications.map(({ course, assessment }) => (
+                    <li key={`${course.id}-${assessment.id}`}>
+                      <strong>
+                        {course.title} —{" "}
+                        {assessmentLabel(assessment, course.courseType)}
+                      </strong>
+                      <span>{formatSchedule(assessment)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No assessments in the next 3 days.</p>
+              )}
+              {eventNotifications.length > 0 && (
+                <ul>
+                  {eventNotifications.map((event) => (
+                    <li key={`event-${event._id}`}>
+                      <strong>Event: {event.title}</strong>
+                      <span>
+                        {new Date(`${event.date}T12:00:00`).toLocaleDateString(
+                          undefined,
+                          { month: "short", day: "numeric" },
+                        )}{" "}
+                        · {event.time}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {notifications.length +
+                assignmentNotifications.length +
+                eventNotifications.length ===
+                0 && <p>No events or deadlines in the next 3 days.</p>}
+            </section>
+          )}
         </div>
         <span ref={greetingRef} className="topbar__greeting">
           Hello, {name}!

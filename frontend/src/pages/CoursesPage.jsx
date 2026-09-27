@@ -367,12 +367,13 @@ export default function CoursesPage() {
     }
   };
   const deleteCourse = async (course) => {
-    if (!window.confirm("Delete " + course.code + " — " + course.title + "?")) return;
+    if (!window.confirm("Delete " + course.code + " — " + course.title + "?"))
+      return;
     setError("");
     try {
       await request("/api/courses/" + course.id, { method: "DELETE" });
       setCourses((items) => items.filter((item) => item.id !== course.id));
-      setDetail((current) => current?.id === course.id ? null : current);
+      setDetail((current) => (current?.id === course.id ? null : current));
     } catch (err) {
       setError(err.message);
     }
@@ -408,22 +409,34 @@ export default function CoursesPage() {
               <div className="courses-grid">
                 {ownCourses.map((course) => (
                   <div className="course-card-wrap" key={course.id}>
-                    <button className="course-card" onClick={() => setDetail(course)}>
-                    <strong>{course.code}</strong>
-                    <h3>{course.title}</h3>
-                    <span>{course.credits} credits</span>
-                    <small className="course-card__type">
-                      {course.courseType
-                        ? course.courseType === "lab"
-                          ? "Lab"
-                          : "Theory"
-                        : "Course type not set"}
-                    </small>
-                    <small>
-                      {course.totalClasses} classes · {course.totalQuizzes}{" "}
-                      quizzes · {course.totalAssignments} assignments
-                    </small>
-                  </button><button type="button" className="course-card-delete" aria-label={"Delete " + course.code + " " + course.title} onClick={() => deleteCourse(course)}><Trash2 size={16} /></button></div>
+                    <button
+                      className="course-card"
+                      onClick={() => setDetail(course)}
+                    >
+                      <strong>{course.code}</strong>
+                      <h3>{course.title}</h3>
+                      <span>{course.credits} credits</span>
+                      <small className="course-card__type">
+                        {course.courseType
+                          ? course.courseType === "lab"
+                            ? "Lab"
+                            : "Theory"
+                          : "Course type not set"}
+                      </small>
+                      <small>
+                        {course.totalClasses} classes · {course.totalQuizzes}{" "}
+                        quizzes · {course.totalAssignments} assignments
+                      </small>
+                    </button>
+                    <button
+                      type="button"
+                      className="course-card-delete"
+                      aria-label={"Delete " + course.code + " " + course.title}
+                      onClick={() => deleteCourse(course)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 ))}
               </div>
             ) : (
