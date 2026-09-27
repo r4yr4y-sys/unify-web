@@ -89,8 +89,7 @@ export default function EmptyRoomsPage() {
     })
       .then(async (response) => {
         const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.message || "Unable to load room listings.");
+        if (!response.ok) throw new Error(data.message || "Unable to load room listings.");
         const addedRooms = (data.rooms || []).map((room) => ({
           room: room.room,
           type: room.type,
@@ -103,9 +102,7 @@ export default function EmptyRoomsPage() {
         if (active) setRoomsData(addedRooms);
       })
       .catch(() => {});
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   const loadGender = async () => {
@@ -201,16 +198,8 @@ function SearchResults({ result }) {
   if (!rooms.length)
     return (
       <StatusMessage
-        title={
-          roomCount
-            ? "No empty rooms right now."
-            : "No rooms have been added yet."
-        }
-        copy={
-          roomCount
-            ? `We checked all ${roomCount} listed rooms. A little escape-plan popup has your next options.`
-            : "Check back after an admin adds room availability."
-        }
+        title={roomCount ? "No empty rooms right now." : "No rooms have been added yet."}
+        copy={roomCount ? `We checked all ${roomCount} listed rooms. A little escape-plan popup has your next options.` : "Check back after an admin adds room availability."}
       />
     );
   return (

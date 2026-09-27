@@ -36,9 +36,7 @@ export default function CarbonFootprintDisplay() {
 
     let observer;
     try {
-      observer = new PerformanceObserver((list) =>
-        addEntries(list.getEntries()),
-      );
+      observer = new PerformanceObserver((list) => addEntries(list.getEntries()));
       observer.observe({ type: "resource", buffered: true });
     } catch (_error) {
       return undefined;
@@ -48,24 +46,16 @@ export default function CarbonFootprintDisplay() {
   }, []);
 
   useEffect(() => {
-    const updateBackendTotals = () =>
-      setBackendTotals(getBackendCarbonTotals());
+    const updateBackendTotals = () => setBackendTotals(getBackendCarbonTotals());
     window.addEventListener("unify-backend-carbon-update", updateBackendTotals);
     updateBackendTotals();
-    return () =>
-      window.removeEventListener(
-        "unify-backend-carbon-update",
-        updateBackendTotals,
-      );
+    return () => window.removeEventListener("unify-backend-carbon-update", updateBackendTotals);
   }, []);
 
-  const co2Grams = (bytesTransferred / 1024 ** 3) * GRAMS_CO2_PER_GB;
+  const co2Grams = (bytesTransferred / (1024 ** 3)) * GRAMS_CO2_PER_GB;
 
   return (
-    <aside
-      className="carbon-footprint"
-      aria-label="Estimated network carbon footprint"
-    >
+    <aside className="carbon-footprint" aria-label="Estimated network carbon footprint">
       <p className="carbon-footprint__eyebrow">Network carbon footprint</p>
       <p className="carbon-footprint__metric">
         <span>Browser data transferred</span>

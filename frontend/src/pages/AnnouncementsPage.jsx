@@ -11,10 +11,8 @@ import { announcements } from "./campusLifeData";
 import { postedTime } from "../utils/postedTime";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const toDateKey = (date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-const announcementDate = (item) =>
-  item.publishedOn || item.createdAt?.slice(0, 10) || "";
+const toDateKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const announcementDate = (item) => item.publishedOn || item.createdAt?.slice(0, 10) || "";
 
 export default function AnnouncementsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -31,85 +29,45 @@ export default function AnnouncementsPage() {
     const token = localStorage.getItem("authToken");
     if (!token) return undefined;
     let active = true;
-    fetch(`${apiUrl}/api/announcements`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch(`${apiUrl}/api/announcements`, { headers: { Authorization: `Bearer ${token}` } })
       .then(async (response) => {
         const result = await response.json();
-        if (!response.ok)
-          throw new Error(result.message || "Unable to load announcements.");
+        if (!response.ok) throw new Error(result.message || "Unable to load announcements.");
         if (active) setAnnouncementItems(result.announcements || []);
       })
       .catch(() => {});
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) return undefined;
     let active = true;
-    fetch(`${apiUrl}/api/announcements/bookmarks`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch(`${apiUrl}/api/announcements/bookmarks`, { headers: { Authorization: `Bearer ${token}` } })
       .then(async (response) => {
         const result = await response.json();
-        if (!response.ok)
-          throw new Error(result.message || "Unable to load bookmarks.");
+        if (!response.ok) throw new Error(result.message || "Unable to load bookmarks.");
         if (active) setSaved((result.bookmarks || []).map(String));
       })
       .catch(() => {});
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
-  const filters = [
-    "All",
-    "Bookmarked",
-    "Academic",
-    "Campus update",
-    "Opportunity",
-    "Student life",
-  ];
-  const categoryItems =
-    activeFilter === "All"
-      ? announcementItems
-      : activeFilter === "Bookmarked"
-        ? announcementItems.filter((item) =>
-            saved.includes(String(item._id || item.id)),
-          )
-        : announcementItems.filter((item) => item.category === activeFilter);
+  const filters = ["All", "Bookmarked", "Academic", "Campus update", "Opportunity", "Student life"];
+  const categoryItems = activeFilter === "All"
+    ? announcementItems
+    : activeFilter === "Bookmarked"
+      ? announcementItems.filter((item) => saved.includes(String(item._id || item.id)))
+      : announcementItems.filter((item) => item.category === activeFilter);
   const dateFiltered = selectedDate
     ? categoryItems.filter((item) => announcementDate(item) === selectedDate)
     : categoryItems;
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const visible = normalizedQuery
-    ? dateFiltered.filter((item) =>
-        [item.title, item.copy, item.source, item.category].some((value) =>
-          value?.toLocaleLowerCase().includes(normalizedQuery),
-        ),
-      )
+    ? dateFiltered.filter((item) => [item.title, item.copy, item.source, item.category].some((value) => value?.toLocaleLowerCase().includes(normalizedQuery)))
     : dateFiltered;
-  const daysInMonth = new Date(
-    calendarMonth.getFullYear(),
-    calendarMonth.getMonth() + 1,
-    0,
-  ).getDate();
-  const leadingDays =
-    (new Date(
-      calendarMonth.getFullYear(),
-      calendarMonth.getMonth(),
-      1,
-    ).getDay() +
-      6) %
-    7;
-  const calendarCells = [
-    ...Array(leadingDays).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-  ];
-  const datesWithAnnouncements = new Set(
-    announcementItems.map(announcementDate).filter(Boolean),
-  );
+  const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+  const leadingDays = (new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1).getDay() + 6) % 7;
+  const calendarCells = [...Array(leadingDays).fill(null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)];
+  const datesWithAnnouncements = new Set(announcementItems.map(announcementDate).filter(Boolean));
   const toggleSaved = async (id) => {
     const token = localStorage.getItem("authToken");
     if (!token) return;
@@ -117,16 +75,12 @@ export default function AnnouncementsPage() {
     const isSaved = saved.includes(key);
     setBookmarkError("");
     try {
-      const response = await fetch(
-        `${apiUrl}/api/announcements/${key}/bookmark`,
-        {
-          method: isSaved ? "DELETE" : "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await fetch(`${apiUrl}/api/announcements/${key}/bookmark`, {
+        method: isSaved ? "DELETE" : "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || "Unable to update bookmark.");
+      if (!response.ok) throw new Error(result.message || "Unable to update bookmark.");
       setSaved((result.bookmarks || []).map(String));
     } catch (error) {
       setBookmarkError(error.message || "Unable to update bookmark.");
@@ -152,31 +106,13 @@ export default function AnnouncementsPage() {
             </button>
           ))}
         </div>
-        {selectedDate && (
-          <button
-            className="announcement-date-clear"
-            type="button"
-            onClick={() => setSelectedDate("")}
-          >
-            Clear date filter
-          </button>
-        )}
+        {selectedDate && <button className="announcement-date-clear" type="button" onClick={() => setSelectedDate("")}>Clear date filter</button>}
       </div>
       <label className="announcement-search">
         <Search size={18} aria-hidden="true" />
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search announcements"
-          aria-label="Search announcements"
-        />
+        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search announcements" aria-label="Search announcements" />
       </label>
-      {bookmarkError && (
-        <p className="announcement-bookmark-error" role="alert">
-          {bookmarkError}
-        </p>
-      )}
+      {bookmarkError && <p className="announcement-bookmark-error" role="alert">{bookmarkError}</p>}
       <div className="announcement-layout">
         <div className="announcement-list">
           {visible.map((item) => (
@@ -202,59 +138,24 @@ export default function AnnouncementsPage() {
               >
                 <Bookmark
                   size={18}
-                  fill={
-                    saved.includes(String(item._id || item.id))
-                      ? "currentColor"
-                      : "none"
-                  }
+                  fill={saved.includes(String(item._id || item.id)) ? "currentColor" : "none"}
                 />
               </button>
             </article>
           ))}
           {!visible.length && (
             <p className="empty-state">
-              {activeFilter === "Bookmarked" && !selectedDate
-                ? "You haven’t bookmarked any announcements yet."
-                : selectedDate
-                  ? "There are no announcements for this date and filter."
-                  : "There are no announcements in this category yet."}
+              {activeFilter === "Bookmarked" && !selectedDate ? "You haven’t bookmarked any announcements yet." : selectedDate ? "There are no announcements for this date and filter." : "There are no announcements in this category yet."}
             </p>
           )}
         </div>
         <aside className="announcement-aside">
           <section className="mini-calendar">
             <div className="mini-calendar__heading">
-              <button
-                type="button"
-                aria-label="Previous month"
-                onClick={() =>
-                  setCalendarMonth(
-                    (month) =>
-                      new Date(month.getFullYear(), month.getMonth() - 1, 1),
-                  )
-                }
-              >
-                <ChevronLeft size={17} />
-              </button>
-              <h2>
-                {calendarMonth.toLocaleString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </h2>
+              <button type="button" aria-label="Previous month" onClick={() => setCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() - 1, 1))}><ChevronLeft size={17} /></button>
+              <h2>{calendarMonth.toLocaleString("en-US", { month: "long", year: "numeric" })}</h2>
               <CalendarDays size={18} />
-              <button
-                type="button"
-                aria-label="Next month"
-                onClick={() =>
-                  setCalendarMonth(
-                    (month) =>
-                      new Date(month.getFullYear(), month.getMonth() + 1, 1),
-                  )
-                }
-              >
-                <ChevronRight size={17} />
-              </button>
+              <button type="button" aria-label="Next month" onClick={() => setCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() + 1, 1))}><ChevronRight size={17} /></button>
             </div>
             <div className="calendar-week">
               {["M", "T", "W", "T", "F", "S", "S"].map((day, index) => (
@@ -263,47 +164,18 @@ export default function AnnouncementsPage() {
             </div>
             <div className="calendar-days">
               {calendarCells.map((day, index) => {
-                if (!day)
-                  return (
-                    <span
-                      className="calendar-day-blank"
-                      key={`blank-${index}`}
-                    />
-                  );
-                const date = new Date(
-                  calendarMonth.getFullYear(),
-                  calendarMonth.getMonth(),
-                  day,
-                );
+                if (!day) return <span className="calendar-day-blank" key={`blank-${index}`} />;
+                const date = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
                 const dateKey = toDateKey(date);
                 const classes = [
                   dateKey === toDateKey(new Date()) ? "is-today" : "",
                   selectedDate === dateKey ? "is-selected" : "",
-                  datesWithAnnouncements.has(dateKey)
-                    ? "has-announcements"
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ");
-                return (
-                  <button
-                    type="button"
-                    key={dateKey}
-                    className={classes}
-                    aria-pressed={selectedDate === dateKey}
-                    aria-label={`${date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}${datesWithAnnouncements.has(dateKey) ? ", announcements available" : ""}`}
-                    onClick={() => setSelectedDate(dateKey)}
-                  >
-                    {day}
-                  </button>
-                );
+                  datesWithAnnouncements.has(dateKey) ? "has-announcements" : "",
+                ].filter(Boolean).join(" ");
+                return <button type="button" key={dateKey} className={classes} aria-pressed={selectedDate === dateKey} aria-label={`${date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}${datesWithAnnouncements.has(dateKey) ? ", announcements available" : ""}`} onClick={() => setSelectedDate(dateKey)}>{day}</button>;
               })}
             </div>
-            <p className="calendar-selection-note">
-              {selectedDate
-                ? `Showing announcements for ${new Date(`${selectedDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`
-                : `${datesWithAnnouncements.size} days with announcements`}
-            </p>
+            <p className="calendar-selection-note">{selectedDate ? `Showing announcements for ${new Date(`${selectedDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : `${datesWithAnnouncements.size} days with announcements`}</p>
           </section>
         </aside>
       </div>

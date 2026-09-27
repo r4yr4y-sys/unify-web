@@ -44,19 +44,11 @@ const plannedRoutes = [
 ];
 
 const fallbackRoutes = new Set([
-  "/academic/routine",
-  "/academic/grades",
-  "/academic/exams",
-  "/academic/assignments",
-  "/study/notes",
-  "/study/timer",
-  "/study/resources",
-  "/study/plans",
-  "/study/flashcards",
-  "/campus-life/announcements",
-  "/campus-life/events",
-  "/campus-life/lost-found",
-  "/campus-life/marketplace",
+  "/academic/routine", "/academic/grades", "/academic/exams",
+  "/academic/assignments", "/study/notes", "/study/timer",
+  "/study/resources", "/study/plans", "/study/flashcards",
+  "/campus-life/announcements", "/campus-life/events",
+  "/campus-life/lost-found", "/campus-life/marketplace",
   "/campus-life/empty-rooms",
 ]);
 
@@ -141,43 +133,40 @@ function App() {
             </RequireAuth>
           }
         >
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/academic" element={<AcademicPage />} />
-          <Route path="/academic/courses" element={<CoursesPage />} />
-          <Route path="/academic/routine" element={<RoutinePage />} />
-          <Route path="/academic/routine/edit" element={<EditRoutinePage />} />
-          <Route path="/academic/grades" element={<GradesPage />} />
-          <Route path="/academic/exams" element={<ExamsPage />} />
-          <Route path="/academic/assignments" element={<AssignmentsPage />} />
-          <Route path="/study" element={<StudyPage />} />
-          <Route path="/study/timer" element={<StudyTimerPage />} />
-          <Route path="/study/notes" element={<NotesPage />} />
-          <Route path="/study/resources" element={<ResourcesPage />} />
-          <Route path="/study/plans" element={<StudyPlansPage />} />
-          <Route path="/study/flashcards" element={<FlashcardsPage />} />
-          <Route path="/campus-life" element={<CampusLifePage />} />
-          <Route
-            path="/campus-life/announcements"
-            element={<AnnouncementsPage />}
-          />
-          <Route path="/campus-life/events" element={<EventsPage />} />
-          <Route path="/campus-life/lost-found" element={<LostFoundPage />} />
-          <Route
-            path="/campus-life/marketplace"
-            element={<MarketplacePage />}
-          />
-          <Route path="/campus-life/empty-rooms" element={<EmptyRoomsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/support" element={<SupportPage />} />
-          {plannedRoutes
-            .filter(({ path }) => !fallbackRoutes.has(path))
-            .map(({ path, title }) => (
-              <Route
-                key={path}
-                path={path}
-                element={<PlaceholderPage title={title} />}
-              />
-            ))}
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/academic" element={<AcademicPage />} />
+        <Route path="/academic/courses" element={<CoursesPage />} />
+        <Route path="/academic/routine" element={<RoutinePage />} />
+        <Route path="/academic/routine/edit" element={<EditRoutinePage />} />
+        <Route path="/academic/grades" element={<GradesPage />} />
+        <Route path="/academic/exams" element={<ExamsPage />} />
+        <Route path="/academic/assignments" element={<AssignmentsPage />} />
+        <Route path="/study" element={<StudyPage />} />
+        <Route path="/study/timer" element={<StudyTimerPage />} />
+        <Route path="/study/notes" element={<NotesPage />} />
+        <Route path="/study/resources" element={<ResourcesPage />} />
+        <Route path="/study/plans" element={<StudyPlansPage />} />
+        <Route path="/study/flashcards" element={<FlashcardsPage />} />
+        <Route path="/campus-life" element={<CampusLifePage />} />
+        <Route
+          path="/campus-life/announcements"
+          element={<AnnouncementsPage />}
+        />
+        <Route path="/campus-life/events" element={<EventsPage />} />
+        <Route path="/campus-life/lost-found" element={<LostFoundPage />} />
+        <Route path="/campus-life/marketplace" element={<MarketplacePage />} />
+        <Route path="/campus-life/empty-rooms" element={<EmptyRoomsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SupportPage />} />
+        {plannedRoutes
+          .filter(({ path }) => !fallbackRoutes.has(path))
+          .map(({ path, title }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<PlaceholderPage title={title} />}
+            />
+          ))}
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

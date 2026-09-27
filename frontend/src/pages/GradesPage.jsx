@@ -436,7 +436,7 @@ export default function GradesPage() {
                     <input
                       type="number"
                       min="0.5"
-                      step="0.25"
+                       step="0.25"
                       value={estimatorNextCredits}
                       onChange={(event) =>
                         setEstimatorNextCredits(event.target.value)
@@ -661,7 +661,7 @@ export default function GradesPage() {
               <input
                 type="number"
                 min="0.5"
-                step="0.25"
+                 step="0.25"
                 value={nextCredits}
                 onChange={(event) => setNextCredits(event.target.value)}
                 placeholder="18"

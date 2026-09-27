@@ -237,36 +237,18 @@ export default function NotesPage() {
       )}
       {!loading && !visible.length && (
         <p className="study-empty">
-          {items.length === 0
-            ? "There are no notes"
-            : "No notes match that search."}
+          {items.length === 0 ? "There are no notes" : "No notes match that search."}
         </p>
       )}
       {viewingNote && viewUrl && (
-        <div
-          className="note-viewer-backdrop"
-          role="presentation"
-          onClick={closeViewer}
-        >
-          <section
-            className="note-viewer"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="note-viewer-title"
-            onClick={(event) => event.stopPropagation()}
-          >
+        <div className="note-viewer-backdrop" role="presentation" onClick={closeViewer}>
+          <section className="note-viewer" role="dialog" aria-modal="true" aria-labelledby="note-viewer-title" onClick={(event) => event.stopPropagation()}>
             <header>
               <div>
                 <p className="eyebrow">PDF preview</p>
                 <h2 id="note-viewer-title">{viewingNote.title}</h2>
               </div>
-              <button
-                type="button"
-                onClick={closeViewer}
-                aria-label="Close PDF viewer"
-              >
-                <X size={19} />
-              </button>
+              <button type="button" onClick={closeViewer} aria-label="Close PDF viewer"><X size={19} /></button>
             </header>
             <iframe title={`Preview of ${viewingNote.title}`} src={viewUrl} />
           </section>

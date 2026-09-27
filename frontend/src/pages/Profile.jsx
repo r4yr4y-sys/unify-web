@@ -79,96 +79,21 @@ export const STATUS_LIST = [
 export const STATUS_OPTIONS = STATUS_LIST.map((s) => `${s.emoji} ${s.label}`);
 
 const STATUS_STYLES = {
-  Chilling: {
-    bg: "#eaf4ff",
-    text: "#0265a7",
-    border: "#bee0ff",
-    dot: "#0ea5e9",
-  },
-  "Running on caffeine": {
-    bg: "#fdf5ea",
-    text: "#965415",
-    border: "#f8dfbe",
-    dot: "#d97706",
-  },
-  "Happy for no reason": {
-    bg: "#fefbe8",
-    text: "#854d0e",
-    border: "#fef08a",
-    dot: "#eab308",
-  },
-  "Its high noon": {
-    bg: "#fff1eb",
-    text: "#b83d12",
-    border: "#ffd5c4",
-    dot: "#f97316",
-  },
-  "Mentally buffering": {
-    bg: "#ecfeff",
-    text: "#0e7490",
-    border: "#a5f3fc",
-    dot: "#06b6d4",
-  },
-  "Barely surviving": {
-    bg: "#fef2f2",
-    text: "#991b1b",
-    border: "#fecaca",
-    dot: "#ef4444",
-  },
-  "Brain is braining": {
-    bg: "#f5f3ff",
-    text: "#5b21b6",
-    border: "#ddd6fe",
-    dot: "#8b5cf6",
-  },
-  "I need a nap": {
-    bg: "#f3f0ff",
-    text: "#581c87",
-    border: "#e9d5ff",
-    dot: "#a855f7",
-  },
-  "Locked in": {
-    bg: "#eef2ff",
-    text: "#3730a3",
-    border: "#c7d2fe",
-    dot: "#4f46e5",
-  },
-  "Just vibing": {
-    bg: "#f0fdf9",
-    text: "#0f766e",
-    border: "#ccfbf1",
-    dot: "#14b8a6",
-  },
-  "Taking it slow": {
-    bg: "#f4f8f3",
-    text: "#2f693b",
-    border: "#cfe5d3",
-    dot: "#4ade80",
-  },
-  "Somehow on fire": {
-    bg: "#fff1f2",
-    text: "#be123c",
-    border: "#fecdd3",
-    dot: "#f43f5e",
-  },
-  "Should probably be sleeping": {
-    bg: "#edf2f9",
-    text: "#233876",
-    border: "#cdd9ec",
-    dot: "#3b82f6",
-  },
-  "Made it through the day": {
-    bg: "#f0fdf4",
-    text: "#166534",
-    border: "#bbf7d0",
-    dot: "#22c55e",
-  },
-  "Running on empty": {
-    bg: "#f1f5f9",
-    text: "#475569",
-    border: "#cbd5e1",
-    dot: "#94a3b8",
-  },
+  "Chilling": { bg: "#eaf4ff", text: "#0265a7", border: "#bee0ff", dot: "#0ea5e9" },
+  "Running on caffeine": { bg: "#fdf5ea", text: "#965415", border: "#f8dfbe", dot: "#d97706" },
+  "Happy for no reason": { bg: "#fefbe8", text: "#854d0e", border: "#fef08a", dot: "#eab308" },
+  "Its high noon": { bg: "#fff1eb", text: "#b83d12", border: "#ffd5c4", dot: "#f97316" },
+  "Mentally buffering": { bg: "#ecfeff", text: "#0e7490", border: "#a5f3fc", dot: "#06b6d4" },
+  "Barely surviving": { bg: "#fef2f2", text: "#991b1b", border: "#fecaca", dot: "#ef4444" },
+  "Brain is braining": { bg: "#f5f3ff", text: "#5b21b6", border: "#ddd6fe", dot: "#8b5cf6" },
+  "I need a nap": { bg: "#f3f0ff", text: "#581c87", border: "#e9d5ff", dot: "#a855f7" },
+  "Locked in": { bg: "#eef2ff", text: "#3730a3", border: "#c7d2fe", dot: "#4f46e5" },
+  "Just vibing": { bg: "#f0fdf9", text: "#0f766e", border: "#ccfbf1", dot: "#14b8a6" },
+  "Taking it slow": { bg: "#f4f8f3", text: "#2f693b", border: "#cfe5d3", dot: "#4ade80" },
+  "Somehow on fire": { bg: "#fff1f2", text: "#be123c", border: "#fecdd3", dot: "#f43f5e" },
+  "Should probably be sleeping": { bg: "#edf2f9", text: "#233876", border: "#cdd9ec", dot: "#3b82f6" },
+  "Made it through the day": { bg: "#f0fdf4", text: "#166534", border: "#bbf7d0", dot: "#22c55e" },
+  "Running on empty": { bg: "#f1f5f9", text: "#475569", border: "#cbd5e1", dot: "#94a3b8" },
 };
 
 const getStatusInfo = (status) => {
@@ -241,17 +166,7 @@ const formatDate = (dateString) => {
 
 function GithubIcon({ size = 20, ...props }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
       <path d="M9 18c-4.51 2-5-2-7-2" />
     </svg>
@@ -260,17 +175,7 @@ function GithubIcon({ size = 20, ...props }) {
 
 function InstagramIcon({ size = 20, ...props }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
       <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
       <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -280,17 +185,7 @@ function InstagramIcon({ size = 20, ...props }) {
 
 function LinkedinIcon({ size = 20, ...props }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
       <rect width="4" height="12" x="2" y="9" />
       <circle cx="4" cy="4" r="2" />
@@ -300,17 +195,7 @@ function LinkedinIcon({ size = 20, ...props }) {
 
 function FacebookIcon({ size = 20, ...props }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
     </svg>
   );
@@ -318,13 +203,7 @@ function FacebookIcon({ size = 20, ...props }) {
 
 function XTwitterIcon({ size = 18, ...props }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      {...props}
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
@@ -332,20 +211,10 @@ function XTwitterIcon({ size = 18, ...props }) {
 
 const SOCIAL_CONFIG = [
   { key: "github", label: "GitHub", Icon: GithubIcon, color: "#24292f" },
-  {
-    key: "instagram",
-    label: "Instagram",
-    Icon: InstagramIcon,
-    color: "#e1306c",
-  },
+  { key: "instagram", label: "Instagram", Icon: InstagramIcon, color: "#e1306c" },
   { key: "linkedin", label: "LinkedIn", Icon: LinkedinIcon, color: "#0a66c2" },
   { key: "facebook", label: "Facebook", Icon: FacebookIcon, color: "#1877f2" },
-  {
-    key: "twitter",
-    label: "X / Twitter",
-    Icon: XTwitterIcon,
-    color: "#0f1419",
-  },
+  { key: "twitter", label: "X / Twitter", Icon: XTwitterIcon, color: "#0f1419" },
   { key: "x", label: "X / Twitter", Icon: XTwitterIcon, color: "#0f1419" },
 ];
 
@@ -559,19 +428,14 @@ function Editor({ initial, setup, saving, error, onSave, onCancel }) {
               Blood group
               <select {...field("bloodGroup")}>
                 <option value="">Select blood group…</option>
-                {form.bloodGroup &&
-                  !["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].includes(
-                    form.bloodGroup,
-                  ) && (
-                    <option value={form.bloodGroup}>{form.bloodGroup}</option>
-                  )}
-                {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
-                  (bg) => (
-                    <option key={bg} value={bg}>
-                      {bg}
-                    </option>
-                  ),
+                {form.bloodGroup && !["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].includes(form.bloodGroup) && (
+                  <option value={form.bloodGroup}>{form.bloodGroup}</option>
                 )}
+                {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+                  <option key={bg} value={bg}>
+                    {bg}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="wide">
@@ -1546,36 +1410,39 @@ export function ProfilePage() {
                     <span className="profile-badge profile-badge--semester">
                       {value(p.semester)}
                     </span>
-                    {p.status &&
-                      (() => {
-                        const sInfo = getStatusInfo(p.status);
-                        return (
+                    {p.status && (() => {
+                      const sInfo = getStatusInfo(p.status);
+                      return (
+                        <span
+                          className="profile-badge profile-badge--status"
+                          style={{
+                            backgroundColor: sInfo.bg,
+                            color: sInfo.text,
+                            borderColor: sInfo.border,
+                          }}
+                        >
                           <span
-                            className="profile-badge profile-badge--status"
+                            className="profile-badge__dot"
                             style={{
-                              backgroundColor: sInfo.bg,
-                              color: sInfo.text,
-                              borderColor: sInfo.border,
+                              backgroundColor: sInfo.dot,
+                              boxShadow: `0 0 0 2px ${sInfo.border}`,
                             }}
-                          >
-                            <span
-                              className="profile-badge__dot"
-                              style={{
-                                backgroundColor: sInfo.dot,
-                                boxShadow: `0 0 0 2px ${sInfo.border}`,
-                              }}
-                            />
-                            <span className="profile-badge__emoji">
-                              {sInfo.emoji}
-                            </span>
-                            <span>{sInfo.label}</span>
+                          />
+                          <span className="profile-badge__emoji">
+                            {sInfo.emoji}
                           </span>
-                        );
-                      })()}
+                          <span>{sInfo.label}</span>
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
-              {p.bio && <p className="profile-hero__bio">“{p.bio}”</p>}
+              {p.bio && (
+                <p className="profile-hero__bio">
+                  “{p.bio}”
+                </p>
+              )}
             </BentoCard>
             <BentoCard className="profile-panel profile-panel--basic">
               <div className="profile-card-heading">
@@ -1693,9 +1560,7 @@ export function ProfilePage() {
                 <div>
                   <p className="eyebrow">A little soundtrack</p>
                   <h2>Listen With Me</h2>
-                  <p className="profile-listen__desc">
-                    What I’m listening to lately
-                  </p>
+                  <p className="profile-listen__desc">What I’m listening to lately</p>
                 </div>
               </a>
             )}

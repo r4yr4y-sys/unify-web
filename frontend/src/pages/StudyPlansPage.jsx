@@ -49,9 +49,7 @@ function StudyPlanCard({ plan, onOpen, onDelete, deleting }) {
   const progress = Math.round((completed / plan.checkpoints.length) * 100);
   const deadline = deadlineLabel(plan.deadline);
   return (
-    <article
-      className={`plan-card study-plan-card ${progress === 100 ? "is-complete" : ""}`}
-    >
+    <article className={`plan-card study-plan-card ${progress === 100 ? "is-complete" : ""}`}>
       <div className="plan-card__top">
         <span>{plan.subject}</span>
         {progress === 100 && <CheckCircle2 size={17} aria-label="Completed" />}
@@ -73,22 +71,11 @@ function StudyPlanCard({ plan, onOpen, onDelete, deleting }) {
         )}
       </div>
       <footer>
-        <button
-          type="button"
-          className="study-plan-card__open"
-          onClick={onOpen}
-        >
+        <button type="button" className="study-plan-card__open" onClick={onOpen}>
           <span>{progress === 100 ? "Plan completed" : "Open plan"}</span>
           <ArrowUpRight size={16} />
         </button>
-        <button
-          type="button"
-          className="study-plan-card__delete"
-          onClick={onDelete}
-          disabled={deleting}
-          aria-label={`Delete ${plan.topic}`}
-          title="Delete plan"
-        >
+        <button type="button" className="study-plan-card__delete" onClick={onDelete} disabled={deleting} aria-label={`Delete ${plan.topic}`} title="Delete plan">
           <Trash2 size={16} />
         </button>
       </footer>
