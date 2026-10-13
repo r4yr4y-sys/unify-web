@@ -20,6 +20,11 @@ router.post('/signin', async (request, response, next) => {
         .status(401)
         .json({ message: 'Invalid email or password.' });
     }
+    if (user.emailVerified !== true)
+      return response.status(403).json({
+        message: 'Please verify your email address before signing in.',
+        code: 'EMAIL_VERIFICATION_REQUIRED',
+      });
     return response.json({
       token: createToken(user),
       user: serializeUser(user),

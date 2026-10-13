@@ -87,6 +87,12 @@ The project is being developed as a semester-long full-stack web development pro
 
 - JSON Web Tokens (JWT)
 
+### Local authentication email setup
+
+Set the backend variables documented in `backend/.env.example`. Email verification and
+password-reset links use `APP_BASE_URL` when present, otherwise `CLIENT_ORIGIN`. Configure
+`RESEND_API_KEY` and an `EMAIL_FROM` sender verified in Resend before testing delivery.
+
 ---
 
 ## 🎨 Design Philosophy

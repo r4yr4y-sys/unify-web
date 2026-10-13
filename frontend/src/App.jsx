@@ -17,6 +17,7 @@ const StudyPage = lazy(() => import("./pages/StudyPage"));
 const StudyPlansPage = lazy(() => import("./pages/StudyPlansPage"));
 const FlashcardsPage = lazy(() => import("./pages/FlashcardsPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
+const EmailActionPage = lazy(() => import("./pages/EmailActionPage"));
 const LogoutPage = lazy(() => import("./pages/LogoutPage"));
 const GradesPage = lazy(() => import("./pages/GradesPage"));
 const StudyTimerPage = lazy(() => import("./pages/StudyTimerPage"));
@@ -125,6 +126,9 @@ function App() {
       <Routes>
         <Route path="/admin/*" element={<AdminPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/verify-email" element={<EmailActionPage kind="verify" />} />
+        <Route path="/forgot-password" element={<EmailActionPage kind="forgot" />} />
+        <Route path="/reset-password" element={<EmailActionPage kind="reset" />} />
         <Route path="/logout" element={<LogoutPage />} />
         <Route
           element={

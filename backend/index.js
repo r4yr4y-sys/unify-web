@@ -4,6 +4,7 @@ import multer from 'multer';
 import './config/env.js';
 import signupRouter from './routes/signup.js';
 import signinRouter from './routes/signin.js';
+import verifyEmailRouter from './routes/verifyEmail.js';
 import adminAuthRouter from './routes/adminAuth.js';
 import announcementsRouter from './routes/announcements.js';
 import eventsRouter from './routes/events.js';
@@ -29,6 +30,7 @@ app.use(carbonFootprint);
 
 app.use('/api/auth', signupRouter);
 app.use('/api/auth', signinRouter);
+app.use('/api/auth', verifyEmailRouter);
 app.use('/api/admin/auth', adminAuthRouter);
 app.use('/api/announcements', announcementsRouter);
 app.use('/api/events', eventsRouter);

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { animate, stagger, splitText } from "animejs";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AntigravityBackground from "../components/AntigravityBackground";
 import unifyLogo from "../assets/unify official logo.png";
 
@@ -16,6 +16,7 @@ export default function LoginPage() {
     : "we missed you";
   const [hasCredentialMismatch, setHasCredentialMismatch] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [noticeMessage, setNoticeMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,8 @@ export default function LoginPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const formData = new FormData(formElement);
     const email = formData.get("email");
     const password = formData.get("password");
     const confirmPassword = formData.get("confirmPassword");
@@ -69,6 +71,11 @@ export default function LoginPage() {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.message || "Unable to continue.");
+      if (isSignUp) {
+        setNoticeMessage(result.message || "Check your email to verify your account before signing in.");
+        formElement.reset();
+        return;
+      }
       localStorage.setItem("authToken", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
       navigate("/dashboard");
@@ -104,6 +111,7 @@ export default function LoginPage() {
               onClick={() => {
                 setMode("sign-in");
                 setErrorMessage("");
+                setNoticeMessage("");
                 setHasCredentialMismatch(false);
               }}
             >
@@ -117,6 +125,7 @@ export default function LoginPage() {
               onClick={() => {
                 setMode("sign-up");
                 setErrorMessage("");
+                setNoticeMessage("");
                 setHasCredentialMismatch(false);
               }}
             >
@@ -170,7 +179,17 @@ export default function LoginPage() {
                 {errorMessage}
               </p>
             )}
+            {noticeMessage && (
+              <p className="login-form__notice" role="status">
+                {noticeMessage}
+              </p>
+            )}
           </form>
+          {!isSignUp && (
+            <p className="login-form__notice">
+              <Link to="/forgot-password">Forgot your password?</Link>
+            </p>
+          )}
           <div className="login-form__divider">
             <span>Or Continue With</span>
           </div>
