@@ -68,9 +68,9 @@ router.post("/forgot-password", async (request, response, next) => {
       try {
         await sendPasswordResetEmail({ email: user.email, token });
         console.info("Password-reset email accepted by the email provider.");
-      } catch (error) {
-        // Keep the client response non-enumerating, but do not hide delivery failures from operators.
-        console.error("Password-reset email delivery failed.", error instanceof Error ? error.message : "Unknown email-provider error.");
+      } catch (_error) {
+        // sendPasswordResetEmail logs a redacted failure category. Keep this response non-enumerating.
+        console.error("Password-reset email delivery failed; see the categorized email delivery log.");
       }
     } else if (!user) {
       console.info("Password-reset request did not match an account.");

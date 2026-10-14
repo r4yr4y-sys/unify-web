@@ -1,8 +1,11 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 const getApplicationUrl = () => {
   const value = process.env.APP_BASE_URL || process.env.CLIENT_ORIGIN;
-  if (!value) throw new Error("APP_BASE_URL or CLIENT_ORIGIN must be configured for email links.");
+  if (!value)
+    throw new Error(
+      "APP_BASE_URL or CLIENT_ORIGIN must be configured for email links.",
+    );
   const url = new URL(value);
   if (process.env.NODE_ENV === "production" && url.protocol !== "https:")
     throw new Error("APP_BASE_URL must use HTTPS in production.");
@@ -16,17 +19,50 @@ const emailLink = (path, token) => {
   return url.toString();
 };
 
-const sendEmail = async ({ to, subject, html }, resendClient) => {
-  if (!resendClient && !process.env.RESEND_API_KEY) throw new Error("RESEND_API_KEY is not configured.");
-  const resend = resendClient || new Resend(process.env.RESEND_API_KEY);
-  const result = await resend.emails.send({
-    from: process.env.EMAIL_FROM || "Unify <onboarding@resend.dev>",
-    to,
-    subject,
-    html,
-  });
-  if (result.error) throw new Error("Email provider rejected the message.");
-  return result.data;
+const emailFailureDetails = (error) => {
+  const code = error?.code;
+  if (code === "EMAIL_CONFIGURATION") return { category: "configuration", code };
+  if (code === "EAUTH") return { category: "authentication", code, smtpStatus: error.responseCode };
+  if (["ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "EDNS", "ESOCKET"].includes(code)) {
+    return { category: "connection", code };
+  }
+  if (code === "EENVELOPE") return { category: "recipient-or-envelope", code, smtpStatus: error.responseCode };
+  return { category: "smtp-delivery", code: code || "UNKNOWN", smtpStatus: error?.responseCode };
+};
+
+const logEmailFailure = (error) => {
+  // Do not log recipients, credentials, links, or tokens.
+  console.error("Email delivery failed.", emailFailureDetails(error));
+};
+
+const sendEmail = async ({ to, subject, html }) => {
+  try {
+    const user = process.env.EMAIL_USER?.trim();
+    const pass = process.env.EMAIL_APP_PASSWORD?.trim();
+
+    if (!user || !pass) {
+      const error = new Error("Gmail SMTP credentials are not configured.");
+      error.code = "EMAIL_CONFIGURATION";
+      throw error;
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+    });
+
+    return await transporter.sendMail({
+      from: `Unify <${user}>`,
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    logEmailFailure(error);
+    throw error;
+  }
 };
 
 const emailMarkup = ({ title, copy, url, action }) => `
@@ -37,7 +73,7 @@ const emailMarkup = ({ title, copy, url, action }) => `
     <p>If you did not request this, you can safely ignore this email.</p>
   </div>`;
 
-export const sendVerificationEmail = ({ email, token }, resendClient) =>
+export const sendVerificationEmail = ({ email, token }) =>
   sendEmail({
     to: email,
     subject: "Verify your Unify account",
@@ -47,9 +83,9 @@ export const sendVerificationEmail = ({ email, token }, resendClient) =>
       url: emailLink("/verify-email", token),
       action: "Verify my email",
     }),
-  }, resendClient);
+  });
 
-export const sendPasswordResetEmail = ({ email, token }, resendClient) =>
+export const sendPasswordResetEmail = ({ email, token }) =>
   sendEmail({
     to: email,
     subject: "Reset your Unify password",
@@ -59,4 +95,4 @@ export const sendPasswordResetEmail = ({ email, token }, resendClient) =>
       url: emailLink("/reset-password", token),
       action: "Reset my password",
     }),
-  }, resendClient);
+  });

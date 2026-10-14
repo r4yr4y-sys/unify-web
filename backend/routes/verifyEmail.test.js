@@ -53,7 +53,7 @@ test("forgot-password creates a hashed, expiring token for an unverified account
     assert.ok(user.passwordResetExpires.getTime() > before);
     assert.ok(user.passwordResetExpires.getTime() <= before + 60 * 60 * 1000 + 1000);
     assert.equal(errors.length, 1);
-    assert.equal(errors[0][0], "Password-reset email delivery failed.");
+    assert.equal(errors[0][0], "Password-reset email delivery failed; see the categorized email delivery log.");
   } finally {
     User.findOne = originalFindOne;
     console.error = originalError;
